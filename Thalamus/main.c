@@ -824,10 +824,6 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 // ****************************************************************************
 // *** STATE MACHINE
 // ****************************************************************************
-	
-	float pitcherror, rollerror, yawerror;
-	float pitchcorrection, rollcorrection, yawcorrection;
-	
 		
 	///////////////////////// REGULAR MODE ///////////////////////////////////
 	if (MODE_ST == 1) { 
@@ -920,6 +916,9 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 // ****************************************************************************
 // *** Attitude PID Control
 // ****************************************************************************	
+
+        float pitcherror, rollerror, yawerror;
+        float pitchcorrection, rollcorrection, yawcorrection;
 
 		// This section of code applies some throttle increase with high tilt angles
 		//It doesn't seem hugely effective and maybe completely redundant when Barometer control is implemented
