@@ -1189,7 +1189,6 @@ void ReadRXInput(void) {
 			rxLoss = 50;
 			// RC signal lost
 			// TODO: Perform RC signal loss state setting
-			// TODO: This is repeated on line 1670ish, is the repeat necessary?
 			if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
 			ilink_outputs0.channel[0] = THROTTLEOFFSET;
 			ilink_outputs0.channel[1] = THROTTLEOFFSET;
@@ -1378,6 +1377,7 @@ void Arm(void) {
 	
 	PWMInit(PWM_NESW);
 	PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+	//TODO: inline Delays cause system hang.
 	if(armed == 0) {
 		Delay(500);
 		PWMSetNESW(THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE);
@@ -1403,6 +1403,7 @@ void Arm(void) {
 void Disarm(void) {
 	if(armed) {
 		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+		//TODO: inline Delays cause system hang.
 		Delay(100);
 		
 		PWMSetN(THROTTLEOFFSET + IDLETHROTTLE);
@@ -1461,7 +1462,8 @@ void CalibrateMagneto(void) {
 			Zmax = Mag.Z.raw;
 			Zmin = Zmax;
 			
-			// Wait for Gyro to be steady or 20 seconds
+			// Calibrate for 70 seconds or until still for 2.8 seconds.
+			//TODO: filter out spikes
 			for(i=0; i<5000; i++) {
 				ReadGyroSensors();
 				
@@ -1511,6 +1513,7 @@ void CalibrateMagneto(void) {
 				Zav *= 0.95f;
 				Zav += 0.05f * (float)Gyro.Z.raw; 
 				
+				//TODO: Inline delay
 				Delay(14);
 			}
 			
@@ -1608,93 +1611,85 @@ void CalibrateGyro(void) {
 void CalibrateGyroTemp(unsigned int seconds) {
 	unsigned int i;
 	// *** Calibrate Gyro
-		unsigned int  good;
-		float Xav, Yav, Zav;
-		signed int Xtotal, Ytotal, Ztotal;
-		float distance;
+	unsigned int  good;
+	float Xav, Yav, Zav;
+	signed int Xtotal, Ytotal, Ztotal;
+	float distance;
+	
+	if(armed == 0) {
 		
-		if(armed == 0) {
-			
+		ReadGyroSensors();
+		Xtotal = 0;
+		Ytotal = 0;
+		Ztotal = 0;
+		Xav = Gyro.X.raw;
+		Yav = Gyro.Y.raw;
+		Zav = Gyro.Z.raw;
+
+		flashPLED = 1;
+		good = 0;
+		
+		// Wait for Gyro to be steady or 20 seconds
+		for(i=0; i<5000; i++) {
 			ReadGyroSensors();
-			Xtotal = 0;
-			Ytotal = 0;
-			Ztotal = 0;
-			Xav = Gyro.X.raw;
-			Yav = Gyro.Y.raw;
-			Zav = Gyro.Z.raw;
-
-			flashPLED = 1;
-			good = 0;
 			
-			// Wait for Gyro to be steady or 20 seconds
-			for(i=0; i<5000; i++) {
-				ReadGyroSensors();
-				
-				// calculate distance of data from running average
-				distance  = (Xav - (float)Gyro.X.raw)*(Xav - (float)Gyro.X.raw);
-				distance += (Yav - (float)Gyro.Y.raw)*(Yav - (float)Gyro.Y.raw);
-				distance += (Zav - (float)Gyro.Z.raw)*(Zav - (float)Gyro.Z.raw);
-				
-				if(distance < 2000) {
-					// low-movement, increment good counter and add average value.
-					good++;
-					Xtotal += Gyro.X.raw;
-					Ytotal += Gyro.Y.raw;
-					Ztotal += Gyro.Z.raw;
-					if(good >= 333) break; // if enough good readings, escape loop
-				}
-				else {
-					// high movement, zero good counter, and average values.
-					good = 0;
-					
-					Xtotal = 0;
-					Ytotal = 0;
-					Ztotal = 0;
-				}
-				
-				Xav *= 0.95f;
-				Xav += 0.05f * (float)Gyro.X.raw;
-				Yav *= 0.95f;
-				Yav += 0.05f * (float)Gyro.Y.raw;
-				Zav *= 0.95f;
-				Zav += 0.05f * (float)Gyro.Z.raw; 
-				
-				Delay(3);
+			// calculate distance of data from running average
+			distance  = (Xav - (float)Gyro.X.raw)*(Xav - (float)Gyro.X.raw);
+			distance += (Yav - (float)Gyro.Y.raw)*(Yav - (float)Gyro.Y.raw);
+			distance += (Zav - (float)Gyro.Z.raw)*(Zav - (float)Gyro.Z.raw);
+
+			// LPF for above
+			Xav *= 0.95f;
+			Xav += 0.05f * (float)Gyro.X.raw;
+			Yav *= 0.95f;
+			Yav += 0.05f * (float)Gyro.Y.raw;
+			Zav *= 0.95f;
+			Zav += 0.05f * (float)Gyro.Z.raw; 
+
+			//TODO: This distnace was never small enough on the ICRS Quad. Double check
+			if(distance < 2000) {
+				// low-movement, increment good counter and add average value.
+				good++;
+				if(good >= 333) break; // if enough good readings, escape loop
 			}
-			
-			ilink_thalstat.sensorStatus &= ~(0x7); // mask status
-			ilink_thalstat.sensorStatus |= 2; // calibrating
-
-			flashPLED=2;
-			LEDOn(PLED);
-			
-			// at this point should have at least 200 good Gyro readings, take some more
-				
-			for(i=0; i<seconds*333; i++) {
-				ReadGyroSensors();
-				
-				Xtotal += Gyro.X.raw;
-				Ytotal += Gyro.Y.raw;
-				Ztotal += Gyro.Z.raw;
-				
-				Delay(3);
+			else {
+				// high movement, zero good counter, and average values.
+				good = 0;
 			}
-
-			Gyro.X.offset = (float)Xtotal/(float)((seconds+1) * 333);
-			Gyro.Y.offset = (float)Ytotal/(float)((seconds+1) * 333);
-			Gyro.Z.offset = (float)Ztotal/(float)((seconds+1) * 333);
-			
-			flashPLED = 0;
-
-			LEDOff(PLED);
 		
-			ilink_thalstat.sensorStatus &= ~(0x7); // mask status
-			ilink_thalstat.sensorStatus |= 3; // standby
-			
-			
-	
-	
+			Delay(3);
 		}
+		
+		ilink_thalstat.sensorStatus &= ~(0x7); // mask status
+		ilink_thalstat.sensorStatus |= 2; // calibrating
+
+		flashPLED=2;
+		LEDOn(PLED);
+		
+		// at this point should have at least 200 good Gyro readings, take some more
+			
+		for(i=0; i<seconds*333; i++) {
+			ReadGyroSensors();
+			
+			Xtotal += Gyro.X.raw;
+			Ytotal += Gyro.Y.raw;
+			Ztotal += Gyro.Z.raw;
+			
+			Delay(3);
+		}
+
+		Gyro.X.offset = (float)Xtotal/(float)(seconds * 333);
+		Gyro.Y.offset = (float)Ytotal/(float)(seconds * 333);
+		Gyro.Z.offset = (float)Ztotal/(float)(seconds * 333);
+		
+		flashPLED = 0;
+
+		LEDOff(PLED);
+	
+		ilink_thalstat.sensorStatus &= ~(0x7); // mask status
+		ilink_thalstat.sensorStatus |= 3; // standby
+		
+	}
 }
 
 
