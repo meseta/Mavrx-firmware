@@ -85,13 +85,7 @@ ilink_payldctrl_t ilink_payldctrl;
 
 ///////////////////////////////////////// GLOBAL VARIABLE STRUCTURES /////////////////////
 typedef struct{
-	float demandav;
     float demand;
-	float demandtemp;
-	float demandtempold;
-	float derivativetemp;
-	float secondderivativetemp;
-	float derivativetempold;
 	float demandOld;
 	float valueOld;
 	float derivative;
@@ -108,12 +102,9 @@ typedef struct {
     float valueOld;
     float error;
     float demand;
-    float demandav;
     float derivative;
     float integral;
-	float demandincr;
 	float demandold;
-    float baroOffset;
 } altStruct;
 altStruct alt;
 
@@ -122,8 +113,6 @@ typedef struct{
     volatile float av;
     volatile float value;
     volatile float offset;
-    volatile float error;
-    volatile float verterror;
     volatile signed int total;
 	float bias;
     signed short history[GAV_LEN];
@@ -177,68 +166,27 @@ typedef struct paramStorage_struct {
 
 
 /////////////////////////////////// GLOBAL VARIABLES /////////////////////////////////
+// TODO: Why don't we just set all the variable here? Some of them are being set here, and some in the setup function.
 // Timers and counters
 unsigned int sysMS;
 unsigned long long sysUS;
 unsigned short RxWatchdog;
 unsigned short UltraWatchdog;
-unsigned short slowSoftscale;//, inputSoftscale, baroSoftscale;
+unsigned short slowSoftscale;
 
 unsigned int paramSendCount;
 unsigned int paramCount;
 unsigned char paramSendSingle;
 
-// LED stuff
+// LEDs
 unsigned char flashPLED, flashVLED, flashRLED;
-
-float gim_ptemp;
 
 // Quaternion and Rotation Matrix
 float q1, q2, q3, q4;
-float thetaAngle, phiAngle, psiAngle;
 float M1, M2, M3, M4, M5, M6, M7, M8, M9;
-
-double lat_diff;
-double lon_diff;
-double lat_diff_i;
-double lon_diff_i;
-double lat_diff_d;
-double lon_diff_d;
-double lon_diff_old;
-double lat_diff_old;
-double alt_diff_old;
-double alt_diff;
-double alt_diff_i;
-double alt_diff_d;
-double alt_throttle;
-double gpsThrottle;
-double targetY_tko;
-double targetX_tko;
-unsigned int gpsTakeoffCount;
-double Xout;
-double Yout;
-
-unsigned int gpsHoldSet;
-double gpsHoldX;
-double gpsHoldY;
-double gpsHoldZ;
-double oldZtarget;
-
-float CFDC_mag_x_zero;
-float CFDC_mag_y_zero;
-float CFDC_mag_z_zero;
-float CFDC_mag_x_error;
-float CFDC_mag_y_error;
-float CFDC_mag_z_error;
-
-float switchover_count = 0;
-
-unsigned int gpsHomeSet;
-double gpsHomeX;
-double gpsHomeY;
-double gpsHomeZ;
-
 float thetaAngle, phiAngle, psiAngle, psiAngleinit;
+float RM1, RM2, RM3, RM4, RM5, RM6, RM7, RM8, RM9;
+
 
 // Inputs
 unsigned short rcInput[7];
@@ -248,27 +196,20 @@ signed short yawtrim;
 signed short throttletrim;
 float throttle;
 float throttle_angle;
-unsigned int ultraerror = 0;
-float nonLinearThrottle(float input);
-unsigned int auxState, flapState, buttonState;
-
-float pitchcorrectionav, rollcorrectionav, yawcorrectionav;
+int throttleHoldOff;
+unsigned int auxState, flapState;
+float pitchDemandSpin = 0;
+float rollDemandSpin = 0;
+float pitchDemandSpinold = 0;
+float rollDemandSpinold = 0;
+float flpswitch = 0;
 
 // Ultrasound
 float ultra;
-float ultraav = 0;
-float baro;
-float baroav;
 unsigned int ultraLoss;
-float ultrathrottle;
-float ultraTkOffThrottle;
-unsigned int ultraTkOffInput;
-
-unsigned int airborne;
-unsigned int landing;
-unsigned int throttleHoldOff;
 
 // Outputs
+float pitchcorrectionav, rollcorrectionav, yawcorrectionav;
 float motorN, motorE, motorS, motorW;
 float motorNav, motorEav, motorSav, motorWav;
 float tempN;
@@ -276,44 +217,17 @@ float tempE;
 float tempS;
 float tempW;
 
-float pitch_dd;
-float roll_dd;
-
-float throttleold;
-
-float RM1;
-float RM2;
-float RM3;
-float RM4;
-float RM5;
-float RM6;
-float RM7;
-float RM8;
-float RM9;
-
-
-float flpswitch = 0;
-int counter;
-
 // Arm
 unsigned int armed, calib, zeroThrotCounter;
 
-
 // Battery
 float batteryVoltage;
-
-float pitchDemandSpin = 0;
-float rollDemandSpin = 0;
-float pitchDemandSpinold = 0;
-float rollDemandSpinold = 0;
 
 // Button
 unsigned int PRGBlankTimer; // Blanking time for button pushes
 unsigned int PRGTimer; // Timer for button pushes, continuously increments as the button is held
 unsigned int PRGPushTime; // Contains the time that a button was pushed for, populated after button is released
 
-unsigned int GPS_HOLD = 0;
-double targetX, targetY, targetZ;
 
 
 
@@ -330,14 +244,13 @@ struct paramStorage_struct paramStorage[] = {
 
     {"YAW_SEN",     0.00002f},     
     {"PITCH_SEN",    0.0022f},    
-    {"ROLL_SEN",     0.0022f},   
+    {"ROLL_SEN",     0.0022f},  
+	{"YAW_DZN",      0.001f},	
     #define YAW_SENS        paramStorage[3].value
     #define PITCH_SENS      paramStorage[4].value
     #define ROLL_SENS       paramStorage[5].value
-
-    {"YAW_DZN",      0.001f},
-    #define YAW_DEADZONE    paramStorage[6].value 
-
+	#define YAW_DEADZONE    paramStorage[6].value 
+    
     {"PITCH_Kp",      400.0f},     
     {"PITCH_Ki",        2.0f},    
     {"PITCH_Kd",      100.0f},     
@@ -391,7 +304,6 @@ struct paramStorage_struct paramStorage[] = {
     {"CAL_MAGM1",       0.0f},     
     {"CAL_MAGM2",        0.0f},     	
     {"CAL_MAGM3",        0.0f},  
-
     #define MAGCOR_N1       paramStorage[25].value 
     #define MAGCOR_N2       paramStorage[26].value 		
     #define MAGCOR_N3       paramStorage[27].value 		
@@ -416,7 +328,8 @@ struct paramStorage_struct paramStorage[] = {
     #define ULTRA_TKOFF     paramStorage[38].value 
     #define ULTRA_LND       paramStorage[39].value 
 
-    {"CAL_GYROX",   0.0f},
+    // TODO: I don't think these should be tunable parameters should they? Remember that the gyros are calibrated on every Arm
+	{"CAL_GYROX",   0.0f},
     {"CAL_GYROY",   0.0f},
     {"CAL_GYROZ",   0.0f},
     #define CAL_GYROX       paramStorage[40].value 
@@ -427,8 +340,7 @@ struct paramStorage_struct paramStorage[] = {
 	#define DETUNE		paramStorage[43].value
 	
 	{"LIM_RATE",			100.0f},
-	#define LIM_RATE		paramStorage[44].value
-    
+	#define LIM_RATE		paramStorage[44].value   
 	{"LIM_ULTRA",			4.0f},
 	#define LIM_ULTRA		paramStorage[45].value
     
@@ -448,95 +360,35 @@ struct paramStorage_struct paramStorage[] = {
 	
 	{"ULTRA_OVTH",		40},
 	#define ULTRA_OVTH		paramStorage[51].value
-	
-	
-	{"GPS_Kp",      0.03f}, 	
-	{"GPS_De",      1.0f}, 	
-	{"GPS_Ki",     	0.00005f}, 	
-	{"GPS_Kd",     	0.5f}, 	
-    #define GPS_Kp		paramStorage[52].value
-    #define GPS_De		paramStorage[53].value
-    #define GPS_Ki		paramStorage[54].value
-    #define GPS_Kd		paramStorage[55].value
-    
-    {"GPS_ALTKp", 10.0f},
-    {"GPS_ALTKi", 0.0001f},
-    {"GPS_ALTDe", 1.0f},
-    {"GPS_ALTKd", 20.0f},
-    #define GPS_ALTKp		paramStorage[56].value
-    #define GPS_ALTKi		paramStorage[57].value
-    #define GPS_ALTDe		paramStorage[58].value
-    #define GPS_ALTKd		paramStorage[59].value
-   
-    {"GPS_ALTHo", 20.0f},
-    #define GPS_ALTHo       paramStorage[60].value
+  
     
     {"CAL_AUTO", 1.0f},
-    #define CAL_AUTO        paramStorage[61].value    
+    #define CAL_AUTO        paramStorage[52].value    
     
-    
-     //Gimbal in the Pitch Axis	
-    {"GIM_PMID",     1500.0f},		//Mid Point 
-    {"GIM_PSCAL",    -1650.0f},		//Scaling
-    {"GIM_PLIMH",    2300.0f}, 		//Limit High
-    {"GIM_PLIML",     700.0f},		//Limit Low
-    {"GIM_PPLUS",     100.0f},		//Limit Low
-    #define GIM_PMID        paramStorage[62].value 		
-    #define GIM_PSCAL       paramStorage[63].value 
-    #define GIM_PLIMH       paramStorage[64].value 		
-    #define GIM_PLIML       paramStorage[65].value 
-    #define GIM_PPLUS       paramStorage[66].value 
-
-    //Gimbal in the Roll Axis
-    {"GIM_RMID",     1500.0f},       //Mid Point    	
-    {"GIM_RSCAL",    1650.0f},      //Scaling
-    {"GIM_RLIMH",    2300.0f},     	//Limit High
-    {"GIM_RLIML",     700.0f},		//Limit Low
-    #define GIM_RMID        paramStorage[67].value 
-    #define GIM_RSCAL       paramStorage[68].value
-    #define GIM_RLIMH       paramStorage[69].value 
-    #define GIM_RLIML       paramStorage[70].value
 	
 	{"SPR_OUT",       0.6f},  
-    #define SPR_OUT 		paramStorage[71].value
+    #define SPR_OUT 		paramStorage[53].value
     
-    {"SPR_GPSYAW",     0.66f},
-    #define SPR_GPSYAW 		paramStorage[72].value
-    
-    {"SPR_BARO",        0.999f},
-    #define SPR_BARO        paramStorage[73].value
     
     {"BAT_LOW",         11000.0f},
     {"BAT_CRIT",        10000.0f},
-    #define BATT_LOW        paramStorage[74].value
-    #define BATT_CRIT       paramStorage[75].value
-    
-    {"GPS_LNDRT",         0.1},
-    {"LIM_GPSALV",         0.1},
-    #define GPS_LNDRT        paramStorage[76].value
-    #define LIM_GPSALV        paramStorage[77].value
+    #define BATT_LOW        paramStorage[54].value
+    #define BATT_CRIT       paramStorage[55].value
 	
 	{"ULTRA_OFFSET",         350},
-    #define ULTRA_OFFSET        paramStorage[78].value
-	
-	
-	{"GPS_THRLM",         0.1},
-    #define GPS_THRLM        paramStorage[79].value
+    #define ULTRA_OFFSET        paramStorage[56].value
 	
 	{"ROLL_SPL",         0.002},
-	#define ROLL_SPL        paramStorage[80].value
+	#define ROLL_SPL        paramStorage[57].value
 	{"PITCH_SPL",         0.002},
-	#define PITCH_SPL        paramStorage[81].value
+	#define PITCH_SPL        paramStorage[58].value
 	
 	// TODO: Tune Yaw integral
 	{"YAW_Ki",         0.0},
-	#define YAW_Ki        paramStorage[82].value
+	#define YAW_Ki        paramStorage[59].value
 	{"YAW_De",         1.0},
-	#define YAW_De        paramStorage[83].value
-
-
+	#define YAW_De        paramStorage[60].value
 	};
-
 
 
 // ****************************************************************************
@@ -546,15 +398,7 @@ struct paramStorage_struct paramStorage[] = {
 // ****************************************************************************
 
 // Initialiser function: sets everything up.
-void setup() {
-
-	CFDC_mag_x_zero = 0;
-	CFDC_mag_y_zero = 0;
-	CFDC_mag_z_zero = 0;
-	CFDC_mag_x_error = 0;
-	CFDC_mag_y_error = 0;
-	CFDC_mag_z_error = 0;
-	
+void setup() {	
 	
 	throttle_angle = 0;
 	
@@ -600,8 +444,8 @@ void setup() {
         
     // *** Initialise Ultrasound
         UltraInit();
-        //UltraFast();
-		alt.demandincr =  0;
+
+
         
     // *** Battery sensor
         ADCInit(CHN7);
@@ -647,9 +491,6 @@ void setup() {
         RM7 = 0;
 		RM8 = 0;
         RM9 = 1;
-	
-		pitch_dd = 0;
-		roll_dd = 0;
         
         
     // *** Timer for AHRS
@@ -684,30 +525,15 @@ void setup() {
 		Gyro.X.bias = 0;
 		Gyro.Z.bias = 0;
 		
-		throttleold = 0;
-	
+		throttleHoldOff = 1;
         
     // *** Initialise timers and loops
         //PWMInit(PWM_NESW);
 		PWMInit(PWM_X | PWM_Y);
-		gim_ptemp = 0;
         RITInitms(1000/MESSAGE_LOOP_HZ);
         flashPLED = 0;
         LEDOff(PLED);
 		
-		lat_diff = 0;
-		lon_diff = 0;
-		lat_diff_i = 0;
-		lon_diff_i = 0;
-		lat_diff_d = 0;
-		lon_diff_d = 0;
-        
-        gpsHoldSet = 0;
-        gpsHoldX = 0;
-        gpsHoldY = 0;
-        gpsHoldZ = 0;
-		
-		airborne = 0;
 }
 
 
@@ -1236,9 +1062,6 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 			pitch.integral=0;
             roll.integral=0;
             alt.integral = 0;   
-            airborne = 0;
-            alt.demandincr =  0;
-			ultraerror = 0;
 			motorN = 0;
             motorE = 0;
             motorS = 0;
@@ -1570,9 +1393,6 @@ void Arm(void) {
 	psiAngleinit = psiAngle; 
 	yawtrim = rcInput[RX_RUDD];
 	
-	Xout = fcos(psiAngleinit)*0.000800;
-	Yout = fsin(psiAngleinit)*0.000800;	
-		
 	armed = 1;
     
     ilink_thalstat.sensorStatus &= ~(0x7); // mask status
@@ -1734,13 +1554,7 @@ void SensorZero(void) {
         Mag.Y.total = 0;
         Mag.Z.total = 0;
         
-        Gyro.X.error = 0;
-        Gyro.Y.error = 0;
-        Gyro.Z.error = 0;
 
-        Gyro.X.verterror = 0;
-        Gyro.Y.verterror = 0;
-        Gyro.Z.verterror = 0;
 
         for(i=0; (i<GAV_LEN); i++) {
             Gyro.X.history[i] = 0;
