@@ -8,19 +8,64 @@
 // *** DECLARATIONS
 // ****************************************************************************
 // ****************************************************************************
+// TODO: Needs sorting, there are unused parameters and a lack of categorisation throughout
 
 
-// *** Config stuff
+////////////////////////////////////////// CONFIGURATION PARAMETERS ////////////////////////////////
+
 #define FIRMWARE_VERSION    1           // Firmware version
 #define MESSAGE_LOOP_HZ     15          // Max frequency of messages in Hz (keep this number low, like around 15)
 #define RX_PANIC            2           // Number of seconds after missing RX before craft considered "disconnected"
 
-// *** LED stuff
-unsigned char flashPLED, flashVLED, flashRLED;
+#define FAST_RATE           400
+#define SLOW_RATE           75
 
-float gim_ptemp;
+#define ZEROTHROTMAX        1*FAST_RATE
 
-// *** ILink stuff
+#define SLOW_DIVIDER        FAST_RATE/SLOW_RATE
+
+// TODO: check ESC response at THROTTLEOFFSET, consider raising THROTTLEOFFSET to 1000
+#define THROTTLEOFFSET    900		// Corresponds to zero output PWM. Nominally 1000=1ms, but 800 works better
+#define IDLETHROTTLE    	175		// Minimum PWM output to ESC when in-flight to avoid motors turning off
+#define MAXTHROTTLE     	1200	// Maximum PWM output to ESC (PWM = THROTTLEOFFSET + MAXTHROTTLE)
+#define MAXTHROTTLEPERCENT	0.9     // Maximum percentage throttle should be (reserves some extra output for stabilisation at high throttle).
+
+#define OFFSTICK        	50
+#define MIDSTICK        	512		// Corresponds to input when stick is in middle (approx value).
+#define MAXSTICK        	850		// Corresponds to input when stick is at the top
+
+#define MAXTHRESH           (MAXSTICK+MIDSTICK)/2 - 50
+#define MINTHRESH           (MIDSTICK+OFFSTICK)/2 + 50
+
+#define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
+#define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
+#define EEPROM_VERSION	33 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+
+//  Running Average Lengths
+#define GAV_LEN 8
+#define AAV_LEN 30
+#define MAV_LEN 30
+
+
+/////////////////////////////// FUNCTIONS //////////////////////////////////////
+void SensorZero(void);
+void CalibrateGyro(void);
+void CalibrateGyroTemp(unsigned int seconds);
+void CalibrateMagneto(void);
+void Arm(void);
+void Disarm(void);
+void ReadGyroSensors(void);
+void ReadAccelSensors(void);
+void ReadMagSensors(void);
+void ReadUltrasound(void);
+void ReadBattVoltage(void);
+void ReadRXInput(void);
+void LinkInit(void);
+void EEPROMLoadAll(void);
+void EEPROMSaveAll(void);
+
+
+///////////////////////////////////////////// ILINK ///////////////////////////////////////
 ilink_identify_t ilink_identify;
 ilink_thalstat_t ilink_thalstat;
 ilink_thalctrl_t ilink_thalctrl;
@@ -37,49 +82,242 @@ ilink_iochan_t ilink_outputs0;
 ilink_position_t ilink_position;
 ilink_payldctrl_t ilink_payldctrl;
 
-void LinkInit(void);
 
-// *** Timers and counters
-unsigned int sysMS;
-unsigned long long sysUS;
-unsigned short RxWatchdog;
-unsigned short UltraWatchdog;
+///////////////////////////////////////// GLOBAL VARIABLE STRUCTURES /////////////////////
+typedef struct{
+	float demandav;
+    float demand;
+	float demandtemp;
+	float demandtempold;
+	float derivativetemp;
+	float secondderivativetemp;
+	float derivativetempold;
+	float demandOld;
+	float valueOld;
+	float derivative;
+	float integral;
+} directionStruct;
 
-// *** Functions
-void SensorZero(void);
-void CalibrateGyro(void);
-void CalibrateGyroTemp(unsigned int seconds);
-void CalibrateMagneto(void);
+directionStruct pitch;
+directionStruct roll;
+directionStruct yaw;
 
-// *** Configs
-#define FAST_RATE           400
-#define SLOW_RATE           75
+typedef struct {
+	float ultra;
+    float value;
+    float valueOld;
+    float error;
+    float demand;
+    float demandav;
+    float derivative;
+    float integral;
+	float demandincr;
+	float demandold;
+    float baroOffset;
+} altStruct;
+altStruct alt;
 
-#define ZEROTHROTMAX        1*FAST_RATE
+typedef struct{
+    volatile signed short raw;
+    volatile float av;
+    volatile float value;
+    volatile float offset;
+    volatile float error;
+    volatile float verterror;
+    volatile signed int total;
+	float bias;
+    signed short history[GAV_LEN];
+} sensorStructGyro;
 
-#define SLOW_DIVIDER        FAST_RATE/SLOW_RATE
+typedef struct{
+    sensorStructGyro X;
+    sensorStructGyro Y;
+    sensorStructGyro Z;
+    unsigned int count;
+} threeAxisSensorStructGyro;
+threeAxisSensorStructGyro Gyro;
 
-unsigned short slowSoftscale;//, inputSoftscale, baroSoftscale;
+typedef struct{
+    volatile signed short raw;
+    volatile float av;
+    volatile float value;
+    volatile signed int total;
+    signed short history[AAV_LEN];
+} sensorStructAccel;
 
-// TODO: check ESC response at THROTTLEOFFSET, consider raising THROTTLEOFFSET to 1000
-#define THROTTLEOFFSET    900		// Corresponds to zero output PWM. Nominally 1000=1ms, but 800 works better
-#define IDLETHROTTLE    	175		// Minimum PWM output to ESC when in-flight to avoid motors turning off
-#define MAXTHROTTLE     	1200	// Maximum PWM output to ESC (PWM = THROTTLEOFFSET + MAXTHROTTLE)
-#define MAXTHROTTLEPERCENT	0.9     // Maximum percentage throttle should be (reserves some extra output for stabilisation at high throttle).
-
-#define OFFSTICK        	50
-#define MIDSTICK        	512		// Corresponds to input when stick is in middle (approx value).
-#define MAXSTICK        	850		// Corresponds to input when stick is at the top
-
-#define MAXTHRESH           (MAXSTICK+MIDSTICK)/2 - 50
-#define MINTHRESH           (MIDSTICK+OFFSTICK)/2 + 50
+typedef struct{
+    sensorStructAccel X;
+    sensorStructAccel Y;
+    sensorStructAccel Z;
+    unsigned int count;
+} threeAxisSensorStructAccel;
+threeAxisSensorStructAccel Accel;
 
 
-// *** Parameters
+typedef struct{
+    volatile signed short raw;
+    volatile float av;
+    volatile float value;
+    volatile signed int total;
+    signed short history[AAV_LEN];
+} sensorStructMag;
+
+typedef struct{
+    sensorStructMag X;
+    sensorStructMag Y;
+    sensorStructMag Z;
+    unsigned int count;
+} threeAxisSensorStructMag;
+threeAxisSensorStructMag Mag;
+
 typedef struct paramStorage_struct {
     char name[16];
     float value;
 } paramStorage_t;
+
+
+/////////////////////////////////// GLOBAL VARIABLES /////////////////////////////////
+// Timers and counters
+unsigned int sysMS;
+unsigned long long sysUS;
+unsigned short RxWatchdog;
+unsigned short UltraWatchdog;
+unsigned short slowSoftscale;//, inputSoftscale, baroSoftscale;
+
+unsigned int paramSendCount;
+unsigned int paramCount;
+unsigned char paramSendSingle;
+
+// LED stuff
+unsigned char flashPLED, flashVLED, flashRLED;
+
+float gim_ptemp;
+
+// Quaternion and Rotation Matrix
+float q1, q2, q3, q4;
+float thetaAngle, phiAngle, psiAngle;
+float M1, M2, M3, M4, M5, M6, M7, M8, M9;
+
+double lat_diff;
+double lon_diff;
+double lat_diff_i;
+double lon_diff_i;
+double lat_diff_d;
+double lon_diff_d;
+double lon_diff_old;
+double lat_diff_old;
+double alt_diff_old;
+double alt_diff;
+double alt_diff_i;
+double alt_diff_d;
+double alt_throttle;
+double gpsThrottle;
+double targetY_tko;
+double targetX_tko;
+unsigned int gpsTakeoffCount;
+double Xout;
+double Yout;
+
+unsigned int gpsHoldSet;
+double gpsHoldX;
+double gpsHoldY;
+double gpsHoldZ;
+double oldZtarget;
+
+float CFDC_mag_x_zero;
+float CFDC_mag_y_zero;
+float CFDC_mag_z_zero;
+float CFDC_mag_x_error;
+float CFDC_mag_y_error;
+float CFDC_mag_z_error;
+
+float switchover_count = 0;
+
+unsigned int gpsHomeSet;
+double gpsHomeX;
+double gpsHomeY;
+double gpsHomeZ;
+
+float thetaAngle, phiAngle, psiAngle, psiAngleinit;
+
+// Inputs
+unsigned short rcInput[7];
+unsigned int rxLoss;
+unsigned int rxFirst;
+signed short yawtrim;
+signed short throttletrim;
+float throttle;
+float throttle_angle;
+unsigned int ultraerror = 0;
+float nonLinearThrottle(float input);
+unsigned int auxState, flapState, buttonState;
+
+float pitchcorrectionav, rollcorrectionav, yawcorrectionav;
+
+// Ultrasound
+float ultra;
+float ultraav = 0;
+float baro;
+float baroav;
+unsigned int ultraLoss;
+float ultrathrottle;
+float ultraTkOffThrottle;
+unsigned int ultraTkOffInput;
+
+unsigned int airborne;
+unsigned int landing;
+unsigned int throttleHoldOff;
+
+// Outputs
+float motorN, motorE, motorS, motorW;
+float motorNav, motorEav, motorSav, motorWav;
+float tempN;
+float tempE;
+float tempS;
+float tempW;
+
+float pitch_dd;
+float roll_dd;
+
+float throttleold;
+
+float RM1;
+float RM2;
+float RM3;
+float RM4;
+float RM5;
+float RM6;
+float RM7;
+float RM8;
+float RM9;
+
+
+float flpswitch = 0;
+int counter;
+
+// Arm
+unsigned int armed, calib, zeroThrotCounter;
+
+
+// Battery
+float batteryVoltage;
+
+float pitchDemandSpin = 0;
+float rollDemandSpin = 0;
+float pitchDemandSpinold = 0;
+float rollDemandSpinold = 0;
+
+// Button
+unsigned int PRGBlankTimer; // Blanking time for button pushes
+unsigned int PRGTimer; // Timer for button pushes, continuously increments as the button is held
+unsigned int PRGPushTime; // Contains the time that a button was pushed for, populated after button is released
+
+unsigned int GPS_HOLD = 0;
+double targetX, targetY, targetZ;
+
+
+
+/////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////
 
 struct paramStorage_struct paramStorage[] = {
     {"DRIFT_AKp",           0.2f},
@@ -134,7 +372,7 @@ struct paramStorage_struct paramStorage[] = {
     #define YAW_Boost       paramStorage[21].value 	
 
     // Mode
-    {"MODE_ST",       5.0f},  //0 is Acrobatic,  1 is Regular, 2 is Simplicity, 3 is Easy, 4 is GPS Hold, 5 is Auto 1, 6 is Auto 2
+    {"MODE_ST",       1.0f},  //0 is Acrobatic,  1 is Regular, 2 is Simplicity, 3 is Easy, 4 is GPS Hold, 5 is Auto 1, 6 is Auto 2
     #define MODE_ST 		paramStorage[22].value
 
     //Limits
@@ -289,243 +527,16 @@ struct paramStorage_struct paramStorage[] = {
 	#define ROLL_SPL        paramStorage[80].value
 	{"PITCH_SPL",         0.002},
 	#define PITCH_SPL        paramStorage[81].value
+	
+	// TODO: Tune Yaw integral
+	{"YAW_Ki",         0.0},
+	#define YAW_Ki        paramStorage[82].value
+	{"YAW_De",         1.0},
+	#define YAW_De        paramStorage[83].value
 
-	
-	
+
 	};
 
-unsigned int paramSendCount;
-unsigned int paramCount;
-unsigned char paramSendSingle;
-
-void EEPROMLoadAll(void);
-void EEPROMSaveAll(void);
-
-#define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
-#define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	43 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
-
-// *** quaternion storage
-float q1, q2, q3, q4;
-float thetaAngle, phiAngle, psiAngle;
-float M1, M2, M3, M4, M5, M6, M7, M8, M9;
-
-double lat_diff;
-double lon_diff;
-double lat_diff_i;
-double lon_diff_i;
-double lat_diff_d;
-double lon_diff_d;
-double lon_diff_old;
-double lat_diff_old;
-double alt_diff_old;
-double alt_diff;
-double alt_diff_i;
-double alt_diff_d;
-double alt_throttle;
-double gpsThrottle;
-double targetY_tko;
-double targetX_tko;
-unsigned int gpsTakeoffCount;
-double Xout;
-double Yout;
-
-unsigned int gpsHoldSet;
-double gpsHoldX;
-double gpsHoldY;
-double gpsHoldZ;
-double oldZtarget;
-
-float CFDC_mag_x_zero;
-float CFDC_mag_y_zero;
-float CFDC_mag_z_zero;
-float CFDC_mag_x_error;
-float CFDC_mag_y_error;
-float CFDC_mag_z_error;
-
-float switchover_count = 0;
-
-unsigned int gpsHomeSet;
-double gpsHomeX;
-double gpsHomeY;
-double gpsHomeZ;
-
-typedef struct{
-	float demandav;
-    float demand;
-	float demandtemp;
-	float demandtempold;
-	float derivativetemp;
-	float secondderivativetemp;
-	float derivativetempold;
-	float demandOld;
-	float valueOld;
-	float derivative;
-	float integral;
-} directionStruct;
-
-directionStruct pitch;
-directionStruct roll;
-directionStruct yaw;
-
-typedef struct {
-    float value;
-    float valueOld;
-    float error;
-    float demand;
-    float demandav;
-    float derivative;
-    float integral;
-	float demandincr;
-	float demandold;
-    float baroOffset;
-} altStruct;
-altStruct alt;
-
-float thetaAngle, phiAngle, psiAngle, psiAngleinit;
-
-// *** Sensor Storage
-#define GAV_LEN 8
-#define AAV_LEN 30
-#define MAV_LEN 30
-
-typedef struct{
-    volatile signed short raw;
-    volatile float av;
-    volatile float value;
-    volatile float offset;
-    volatile float error;
-    volatile float verterror;
-    volatile signed int total;
-	float bias;
-    signed short history[GAV_LEN];
-} sensorStructGyro;
-
-typedef struct{
-    sensorStructGyro X;
-    sensorStructGyro Y;
-    sensorStructGyro Z;
-    unsigned int count;
-} threeAxisSensorStructGyro;
-
-typedef struct{
-    volatile signed short raw;
-    volatile float av;
-    volatile float value;
-    volatile signed int total;
-    signed short history[AAV_LEN];
-} sensorStructAccel;
-
-typedef struct{
-    sensorStructAccel X;
-    sensorStructAccel Y;
-    sensorStructAccel Z;
-    unsigned int count;
-} threeAxisSensorStructAccel;
-
-
-
-typedef struct{
-    volatile signed short raw;
-    volatile float av;
-    volatile float value;
-    volatile signed int total;
-    signed short history[AAV_LEN];
-} sensorStructMag;
-
-typedef struct{
-    sensorStructMag X;
-    sensorStructMag Y;
-    sensorStructMag Z;
-    unsigned int count;
-} threeAxisSensorStructMag;
-
-threeAxisSensorStructGyro Gyro;
-threeAxisSensorStructAccel Accel;
-threeAxisSensorStructMag Mag;
-
-void ReadGyroSensors(void);
-void ReadAccelSensors(void);
-void ReadMagSensors(void);
-
-// *** Input stuff
-unsigned short rcInput[7];
-unsigned int rxLoss;
-unsigned int rxFirst;
-signed short yawtrim;
-signed short throttletrim;
-float throttle;
-float throttle_angle;
-unsigned int ultraerror = 0;
-float nonLinearThrottle(float input);
-unsigned int auxState, flapState, buttonState;
-
-float pitchcorrectionav, rollcorrectionav, yawcorrectionav;
-
-// *** Ultrasound
-float ultra;
-float ultraav = 0;
-float baro;
-float baroav;
-unsigned int ultraLoss;
-float ultrathrottle;
-float ultraTkOffThrottle;
-unsigned int ultraTkOffInput;
-
-unsigned int airborne;
-unsigned int landing;
-unsigned int throttleHoldOff;
-// *** Output stuff
-float motorN, motorE, motorS, motorW;
-float motorNav, motorEav, motorSav, motorWav;
-float tempN;
-float tempE;
-float tempS;
-float tempW;
-
-float pitch_dd;
-float roll_dd;
-
-float throttleold;
-
-float RM1;
-float RM2;
-float RM3;
-float RM4;
-float RM5;
-float RM6;
-float RM7;
-float RM8;
-float RM9;
-
-float DRIFT_MagKp_temp;
-
-unsigned int CFDC_count;
-
-float flpswitch = 0;
-int counter;
-
-
-// *** ARM
-unsigned int armed, calib, zeroThrotCounter;
-void Arm(void);
-void Disarm(void);
-
-// Battery
-float batteryVoltage;
-
-float pitchDemandSpin = 0;
-float rollDemandSpin = 0;
-float pitchDemandSpinold = 0;
-float rollDemandSpinold = 0;
-
-// *** Button
-unsigned int PRGBlankTimer; // Blanking time for button pushes
-unsigned int PRGTimer; // Timer for button pushes, continuously increments as the button is held
-unsigned int PRGPushTime; // Contains the time that a button was pushed for, populated after button is released
-
-unsigned int GPS_HOLD = 0;
-double targetX, targetY, targetZ;
 
 
 // ****************************************************************************
@@ -534,7 +545,7 @@ double targetX, targetY, targetZ;
 // ****************************************************************************
 // ****************************************************************************
 
-// *** Initialiser function: sets everything up.
+// Initialiser function: sets everything up.
 void setup() {
 
 	CFDC_mag_x_zero = 0;
@@ -558,8 +569,6 @@ void setup() {
         armed = 0;
         calib = 0;
         zeroThrotCounter = 0;
-		
-		CFDC_count = 0;
     
     // *** Timers and couters6
         rxLoss = 50;
@@ -568,7 +577,6 @@ void setup() {
         sysUS = 0;
         SysTickInit();  // SysTick enable (default 1ms)
 		
-		DRIFT_MagKp_temp = 0;
 
     // *** Parameters
         paramCount = sizeof(paramStorage)/20;
@@ -702,6 +710,844 @@ void setup() {
 		airborne = 0;
 }
 
+
+
+
+
+// ****************************************************************************
+// ****************************************************************************
+// LOOPS
+// ****************************************************************************
+// ****************************************************************************
+
+//Main loop, nothing much happens in here.
+void loop() {
+    //if(idleCount < IDLE_MAX) idleCount++; // this is the counter for CPU idle time
+    //Deal with button push for entering bind mode for RX
+        if(PRGBlankTimer == 0) {
+            if(PRGTimer > 3000) {
+                RXBind();
+                PRGPushTime = 0;
+                PRGTimer = 0;
+                PRGBlankTimer = 200;
+            }
+        }
+    
+    __WFI();
+}
+
+// SysTick timer: deals with general timing
+void SysTickInterrupt(void) {
+    sysMS += 1;
+    sysUS += 1000;
+    
+    //Deal with flashing LEDs
+        if(sysMS % 25 == 0) {
+            if(sysMS % 100 == 0) {
+                if(flashPLED) LEDToggle(PLED);
+                if(flashVLED) LEDToggle(VLED);
+                if(flashRLED) LEDToggle(RLED);
+            }
+            else {
+                if(flashPLED == 2) LEDToggle(PLED);
+                if(flashVLED == 2) LEDToggle(VLED);
+                if(flashRLED == 2) LEDToggle(RLED);
+            }
+        }
+    
+    // Time the button pushes
+        if(PRGPoll() == 0) PRGTimer++;
+        else {
+            PRGPushTime = PRGTimer;
+            PRGTimer = 0;
+            if(PRGBlankTimer) PRGBlankTimer--;
+        }
+}
+
+// RIT interrupt, deal with timed iLink messages.
+void RITInterrupt(void) {
+    
+    // Deal with iLink parameter transmission
+        unsigned int i;
+        if(paramSendCount < paramCount) {
+            unsigned short thisParam = paramSendCount; // store this to avoid race hazard since paramSendCount can change outside this interrupt
+            ilink_thalparam_tx.paramID = thisParam;
+            ilink_thalparam_tx.paramValue = paramStorage[thisParam].value;
+            ilink_thalparam_tx.paramCount = paramCount;
+            for(i=0; i<16; i++) {
+                ilink_thalparam_tx.paramName[i] = paramStorage[thisParam].name[i];
+                if(paramStorage[thisParam].name[i] == '\0') break;
+            }
+            if(ILinkSendMessage(ID_ILINK_THALPARAM, (unsigned short *) & ilink_thalparam_tx, sizeof(ilink_thalparam_tx)/2 -1)) {
+                if(paramSendSingle) {
+                    paramSendSingle = 0;
+                    paramSendCount = paramCount;
+                }
+                else {
+                    paramSendCount = thisParam+1;
+                }
+            }
+        }
+}
+
+
+
+void Timer0Interrupt0() { // Runs at about 400Hz
+
+// ****************************************************************************
+// *** COLLECT INPUT DATA
+// ****************************************************************************
+
+	// We collect some data at a slower rate
+    if(++slowSoftscale >= SLOW_DIVIDER) {
+        slowSoftscale = 0;
+
+        ReadMagSensors();
+		ReadRXInput();
+		ReadUltrasound();
+		ReadBattVoltage();
+            
+    }
+
+	ReadAccelSensors();
+	ReadGyroSensors();
+    
+    
+// ****************************************************************************
+// *** ATTITUDE HEADING REFERENCE SYSTEM
+// ****************************************************************************
+	
+	// CREATE THE MEASURED ROTATION MATRIX //
+	//Normalise
+	float sumsqu = finvSqrt(Mag.X.value*Mag.X.value + Mag.Y.value*Mag.Y.value+ Mag.Z.value*Mag.Z.value); // Magnetoerometr data is normalised so no need to convert units.
+        Mag.X.value = Mag.X.value * sumsqu;
+        Mag.Y.value = Mag.Y.value * sumsqu;
+        Mag.Z.value = Mag.Z.value * sumsqu;
+		
+	sumsqu = finvSqrt((float)Accel.X.value*(float)Accel.X.value + (float)Accel.Y.value*(float)Accel.Y.value + (float)Accel.Z.value*(float)Accel.Z.value); // Accelerometr data is normalised so no need to convert units.
+        Accel.X.value = (float)Accel.X.value * sumsqu;
+        Accel.Y.value = (float)Accel.Y.value * sumsqu;
+        Accel.Z.value = (float)Accel.Z.value * sumsqu;
+	
+	// Compose the Measured Rotation Matrix from Accelerometer and Magnetometer Vectors
+	//  Global Z axis in Local Frame/ RM Third Row - Accelerometer (already normalised)
+	
+	RM7 = Accel.X.value;
+	RM8 = Accel.Y.value;
+	RM9 = Accel.Z.value;
+	
+	// Global Y axis in local frame/ RM Second Row - Acclerometer cross Magnetometer
+	RM4 = Accel.Y.value*(Mag.Z.value) - (Accel.Z.value)*Mag.Y.value;
+	RM5 = (Accel.Z.value)*Mag.X.value - Accel.X.value*(Mag.Z.value);
+	RM6 = Accel.X.value*Mag.Y.value - Accel.Y.value*Mag.X.value;
+	// Normalise
+	float temp = sqrt(RM4*RM4 + RM5*RM5 + RM6*RM6);
+	RM4 = RM4/temp;
+	RM5 = RM5/temp;
+	RM6 = RM6/temp;
+	
+	//  Global X axis in Local Frame/ RM First Row - Y axis cross Z axis
+	RM1 = RM5*RM9 - RM6*RM8;
+	RM2 = RM6*RM7 - RM4*RM9;
+	RM3 = RM4*RM8 - RM5*RM7;
+	// Normalise
+	temp = sqrt(RM1*RM1 + RM2*RM2 + RM3*RM3);
+	RM1 = RM1/temp;
+	RM2= RM2/temp;
+	RM3 = RM3/temp;
+	
+
+	// CREATE THE ESTIMATED ROTATION MATRIX //
+	// The measured quaternion updates the estimated quaternion via the Gyro.*.bias terms applied to the gyros
+	float g1 = (Gyro.X.value - Gyro.X.bias*DRIFT_AccelKp)/(float)FAST_RATE;
+    float g2 = (Gyro.Y.value - Gyro.Y.bias*DRIFT_AccelKp)/(float)FAST_RATE;
+    float g3 = (Gyro.Z.value - Gyro.Z.bias*DRIFT_MagKp)/(float)FAST_RATE;
+	
+	// Increment the Estimated Rotation Matrix by the Gyro Rate
+	//First row is M1, M2, M3 - World X axis in local frame
+	M1 = M1 + g3*M2 - g2*M3;
+	M2 = M2 - g3*M1 + g1*M3;
+	M3 = M3 + g2*M1 - g1*M2;
+	
+	//Second row is M4, M5, M6 - World Y axis in local frame
+	M4 = M4 + g3*M5 - g2*M6;
+	M5 = M5 - g3*M4 + g1*M6;
+	M6 = M6 + g2*M4 - g1*M5;
+	
+	// We use the dot product and both X and Y axes to adjust any lack of orthogonality between the two.
+	float MX_dot_MY = M1*M4 + M2*M5 + M3*M6;
+	M1 = M1 - M4*(MX_dot_MY/2);
+	M2 = M2 - M5*(MX_dot_MY/2);
+	M3 = M3 - M6*(MX_dot_MY/2);
+	
+	sumsqu = finvSqrt(M1*M1 + M2*M2 + M3*M3);
+	M1 = M1*sumsqu;
+	M2 = M2*sumsqu;
+	M3 = M3*sumsqu;
+	
+	M4 = M4 - M1*(MX_dot_MY/2);
+	M5 = M5 - M2*(MX_dot_MY/2);
+	M6 = M6 - M3*(MX_dot_MY/2);
+	
+	sumsqu = finvSqrt(M4*M4 + M5*M5 + M6*M6);
+	M4 = M4*sumsqu;
+	M5 = M5*sumsqu;
+	M6 = M6*sumsqu;
+	
+	//We find the Z axis by calculating the cross product of X and Y
+	M7 = M2*M6 - M3*M5;
+	M8 = M3*M4 - M1*M6;
+	M9 = M1*M5 - M2*M4;
+	
+	sumsqu = finvSqrt(M7*M7 + M8*M8 + M9*M9);
+	M7 = M7*sumsqu;
+	M8 = M8*sumsqu;
+	M9 = M9*sumsqu;
+	
+	// CALCULATE GYRO BIAS //
+	// The gyro biases adjust the estimated matrix towards the measured rotation matrix.
+	// Use x and y components of the Cross Product between the z vector from each Rotation Matrix for Gyro Biases
+	Gyro.X.bias = RM9*M8 - RM8*M9;
+	Gyro.Y.bias = RM7*M9 - RM9*M7;
+	
+	// Use z component of the cross product between the x vector from each rotation matrix to create the Z gyro bias
+	Gyro.Z.bias = RM2*M1 - RM1*M2;
+
+
+	// CALCULATE THE ESTIMATED QUATERNION //
+	float trace = M1 + M5 + M9;
+	if( trace > 0 ) {
+		float s = 0.5f / sqrt(trace + 1.0f);
+		q1 = 0.25f / s;
+		q2 = ( M6 - M8 ) * s;
+		q3 = ( M7 - M3 ) * s;
+		q4 = ( M2 - M4 ) * s;
+	} 
+	else {
+		if ( M1 > M5 && M1 > M9 ) {
+			float s = 2.0f * sqrt( 1.0f + M1 - M5 - M9);
+			q1 = (M6 - M8 ) / s;
+			q2 = 0.25f * s;
+			q3 = (M4 + M2 ) / s;
+			q4 = (M7 + M3 ) / s;
+		} 
+		else if (M5 > M9) {
+			float s = 2.0f * sqrt( 1.0f + M5 - M1 - M9);
+			q1 = (M7 - M3 ) / s;
+			q2 = (M4 + M2 ) / s;
+			q3 = 0.25f * s;
+			q4 = (M8 + M6 ) / s;
+		} 
+		else {
+			 float s = 2.0f * sqrt( 1.0f + M9 - M1 - M5 );
+			q1 = (M2 - M4 ) / s;
+			q2 = (M7 + M3 ) / s;
+			q3 = (M8 + M6 ) / s;
+			q4 = 0.25f * s;
+		}
+	}	
+	q1 = q1;
+	q2 = -q2;
+	q3 = -q3;
+	q4 = -q4;
+
+    // renormalise using fast inverse sq12re root
+    sumsqu = finvSqrt(q1*q1 + q2*q2 + q3*q3 + q4*q4);
+    q1 *= sumsqu;
+    q2 *= sumsqu;
+    q3 *= sumsqu;
+    q4 *= sumsqu;
+		
+	
+	// CALCULATE THE EULER ANGLES //
+    // precalculated values for optimisation
+    float q12 = q1 * q2;
+    float q13 = q1 * q3;
+    float q22 = q2 * q2;
+    float q23 = q2 * q4;
+    float q33 = q3 * q3;
+    float q34 = q3 * q4;
+    float q44 = q4 * q4;
+    float q22Pq33 = q22 + q33;
+    float Tq13Mq23 = 2 * (q13 - q23);
+    float Tq34Pq12 = 2 * (q34 + q12);
+    // avoid gimbal lock at singularity points
+    if (Tq13Mq23 == 1) {
+        psiAngle = 2 * fatan2(q2, q1);
+        thetaAngle = M_PI_2;
+        phiAngle = 0;
+    }
+    else if (Tq13Mq23 == -1) {
+        psiAngle = -2 * fatan2(q2, q1);
+        thetaAngle = - M_PI_2;
+        phiAngle = 0;
+    }
+    else {
+        thetaAngle = fasin(Tq13Mq23);    
+        phiAngle = fatan2(Tq34Pq12, (1 - 2*q22Pq33));  
+        psiAngle = fatan2((2*(q1 * q4 + q2 * q3)), (1 - 2*(q33 + q44)));  
+    }
+    // Output angles over telemetry
+	ilink_attitude.roll = phiAngle;
+    ilink_attitude.pitch = thetaAngle;
+    ilink_attitude.yaw = psiAngle;
+	
+	
+	
+	
+// ****************************************************************************
+// *** STATE MACHINE
+// ****************************************************************************
+	
+	float pitcherror, rollerror, yawerror;
+	float pitchcorrection, rollcorrection, yawcorrection;
+	
+		
+	///////////////////////// REGULAR MODE ///////////////////////////////////
+	if (MODE_ST == 1) { 
+	
+	
+		// Arm, Disarm and Calibrate
+		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rxFirst != 0) {
+            if(rxLoss < 50) {
+                if(rcInput[RX_AILE] < MAXTHRESH && rcInput[RX_AILE] > MINTHRESH) {
+                    if(rcInput[RX_ELEV] > MAXTHRESH) {
+                        // Arm
+                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
+                            zeroThrotCounter = 0;
+
+                            Arm();
+                        }
+                    }
+                    else if(rcInput[RX_ELEV] < MINTHRESH) {
+                        // Disarm
+                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
+                            zeroThrotCounter = 0;
+                            Disarm();
+                        }
+                    }
+                    else {
+                        zeroThrotCounter = 0;
+                    }
+                }
+                else if(rcInput[RX_ELEV] < MAXTHRESH && rcInput[RX_ELEV] > MINTHRESH) {
+                    if(rcInput[RX_AILE] > MAXTHRESH) {
+                        // Request gyro calibration
+						// TODO: This needs to be swapped for orientation calibration
+                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
+                            zeroThrotCounter = 0;
+                            CalibrateGyro();
+                        }
+                    }
+                    else if(rcInput[RX_AILE] < MINTHRESH) {
+                        // Request magneto calibration
+                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
+                            zeroThrotCounter = 0;
+                            CalibrateMagneto();
+                        }
+                    }
+                }
+                
+            }
+            else {
+                zeroThrotCounter = 0;
+            }
+  
+        }
+		
+		// General Flight Demands
+        else {	
+			// In manual mode, set pitch and roll demands based on the user commands collected from the rx unit
+			pitch.demand = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
+            roll.demand = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
+			float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 						
+			throttle = rcInput[RX_THRO] - throttletrim;
+			if (throttle < 0) throttle = 0;
+			
+			// Pitch and roll demands can be remapped to different variables if the orientation of the 
+			// board in the craft is non standard or if the pitch and roll demands need to vary with position
+			pitchDemandSpin = pitch.demand;
+			rollDemandSpin = roll.demand;
+			
+			// A yaw rate is demanded by the rudder input, not an absolute angle.
+			// This code increments the demanded angle at a rate proportional to the rudder input
+			if(fabsf(tempf) > YAW_DEADZONE) {
+				yaw.demand += tempf;
+				if(yaw.demand > M_PI) {
+					yaw.demand -= M_TWOPI;
+					yaw.demandOld -= M_TWOPI;
+				}
+				else if(yaw.demand < -M_PI) {
+					yaw.demand += M_TWOPI;
+					yaw.demandOld += M_TWOPI;
+				}
+			} 
+		}
+		
+	
+	}
+	
+
+	
+ 
+	
+// ****************************************************************************
+// *** Attitude PID Control
+// ****************************************************************************	
+
+		// This section of code applies some throttle increase with high tilt angles
+		//It doesn't seem hugely effective and maybe completely redundant when Barometer control is implemented
+		// TODO: Reassess whether it is useful or not
+		float M9temp;
+		if (M9 > 0) M9temp = M9;
+		else M9temp = -M9;
+		throttle_angle = ((throttle / M9temp) - throttle); 
+		if (throttle_angle < 0) throttle_angle = 0;
+		
+		// This section of code limits the rate at which the craft is allowed to track angle demand changes
+		if ((pitchDemandSpin - pitchDemandSpinold) > PITCH_SPL) pitchDemandSpin = pitchDemandSpinold + PITCH_SPL;
+		if ((pitchDemandSpin - pitchDemandSpinold) < -PITCH_SPL) pitchDemandSpin = pitchDemandSpinold - PITCH_SPL;
+		pitchDemandSpinold = pitchDemandSpin;		
+		if ((rollDemandSpin - rollDemandSpinold) > ROLL_SPL) rollDemandSpin = rollDemandSpinold + ROLL_SPL;
+		if ((rollDemandSpin - rollDemandSpinold) < -ROLL_SPL) rollDemandSpin = rollDemandSpinold - ROLL_SPL;
+		rollDemandSpinold = rollDemandSpin;
+				
+				
+		// This part of the code sets the maximum angle the quadrotor can go to in the pitch and roll axes
+		if(pitchDemandSpin > LIM_ANGLE) pitchDemandSpin = LIM_ANGLE;	
+		if(pitchDemandSpin < -LIM_ANGLE) pitchDemandSpin = -LIM_ANGLE;
+		if(rollDemandSpin > LIM_ANGLE) rollDemandSpin = LIM_ANGLE;
+		if(rollDemandSpin < -LIM_ANGLE) rollDemandSpin = -LIM_ANGLE;
+ 
+		// Create the demand derivative (demand and external rotations are split) term for the attitude motor control
+        pitch.derivative = (pitchDemandSpin - pitch.demandOld);    
+        roll.derivative = (rollDemandSpin - roll.demandOld);
+        yaw.derivative = (yaw.demand - yaw.demandOld);       
+        pitch.demandOld = pitchDemandSpin;
+        roll.demandOld = rollDemandSpin;
+        yaw.demandOld = yaw.demand;
+        
+		// Use the Current and demanded angles to create the error for the proportional part of the PID loop
+		// TODO: it might be more mathematically elegant (but harder to understand) 
+		//to express the demand as a quaternion, but this is not a high priority
+        pitcherror = pitchDemandSpin + thetaAngle;
+        rollerror = rollDemandSpin - phiAngle;
+        yawerror = yaw.demand + psiAngle; 
+        
+		// This section ensures that on swapping between -PI and PI, 
+		// the craft always takes the shortest route to the desired angle
+        if(pitcherror > M_PI) pitcherror -= M_TWOPI;
+        else if(pitcherror < -M_PI) pitcherror += M_TWOPI;
+        if(rollerror > M_PI) rollerror -= M_TWOPI;
+        else if(rollerror < -M_PI) rollerror += M_TWOPI;  
+        if(yawerror > M_PI) yawerror -= M_TWOPI;
+        else if(yawerror < -M_PI) yawerror += M_TWOPI;
+        
+        // Creating the integral for the motor PID
+		// TODO: Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates)
+		//TODO: Check to see if added Yaw integral solves yaw offsets in autonomous flight
+		pitch.integral += pitcherror;
+		roll.integral += rollerror;
+		yaw.integral += yawerror;
+        pitch.integral *= PITCH_De;
+        roll.integral *= ROLL_De;
+		yaw.integral *= YAW_De;
+        
+        // Detune at high throttle - We turn the tunings down at high throttle to prevent oscillations
+		// happening on account of the higher energy input to the system
+        float throttlefactor = throttle/MAXSTICK;
+        if(throttlefactor > 1) throttlefactor = 1;       
+        float detunefactor = 1-(throttlefactor * DETUNE);
+        float thisPITCH_Kd = PITCH_Kd;
+        float thisPITCH_Kdd = PITCH_Kdd * detunefactor;
+        float thisROLL_Kd = ROLL_Kd;
+        float thisROLL_Kdd = ROLL_Kdd * detunefactor;
+        float thisPITCH_Ki = PITCH_Ki;
+        float thisROLL_Ki = ROLL_Ki;
+		
+                
+        // Attitude control PID Assembly - We use a proportional, derivative, and integral on pitch roll and yaw
+		// we add a double derivative term for pitch and roll.
+        pitchcorrection = -((float)Gyro.Y.value - PITCH_Boost*pitch.derivative) * thisPITCH_Kd;
+        pitchcorrection += -thisPITCH_Kdd*((float)Gyro.Y.value - pitch.valueOld);
+        pitchcorrection += -PITCH_Kp*pitcherror;
+        pitchcorrection += -thisPITCH_Ki*pitch.integral;
+
+        rollcorrection = -((float)Gyro.X.value - ROLL_Boost*roll.derivative) * thisROLL_Kd;
+        rollcorrection += -thisROLL_Kdd*((float)Gyro.X.value - roll.valueOld);
+        rollcorrection += ROLL_Kp*rollerror;
+        rollcorrection += thisROLL_Ki*roll.integral;
+
+        yawcorrection = -((float)Gyro.Z.value + YAW_Boost*yaw.derivative) * YAW_Kd; 
+        yawcorrection += -YAW_Kp*yawerror;
+		// TODO: Check direction of yaw integral
+		yawcorrection += -YAW_Ki*yaw.integral;
+		
+		// If the craft is upsidedown, turn off pitch and yaw control until roll control brings it back upright.
+		// TODO: Test this code
+		if ((phiAngle > M_PI_2) || (phiAngle < -M_PI_2)) {
+			yawcorrection = 0;
+			pitchcorrection = 0;
+		}
+        
+        pitch.valueOld = (float)Gyro.Y.value;
+        roll.valueOld = (float)Gyro.X.value;
+       
+        //Assigning the PID results to the correct motors
+		// TODO: add support for multiple orientations here
+        motorN = pitchcorrection + rollcorrection;
+        motorE = pitchcorrection - rollcorrection;
+        motorS = -pitchcorrection - rollcorrection;
+        motorW = -pitchcorrection + rollcorrection;
+        motorN -= yawcorrection;
+        motorE += yawcorrection;
+        motorS -= yawcorrection;
+        motorW += yawcorrection;
+		
+        // We run an SPR filter on the outputs to ensure they aren't too noisey and don't demand changes too quickly
+		// This seems to reduce power consumption a little and ESC heating a little also
+        motorNav *= SPR_OUT;
+        motorNav += (1-SPR_OUT) * motorN;		
+		motorEav *= SPR_OUT;
+        motorEav += (1-SPR_OUT) * motorE;		
+		motorSav *= SPR_OUT;
+        motorSav += (1-SPR_OUT) * motorS;		
+		motorWav *= SPR_OUT;
+        motorWav += (1-SPR_OUT) * motorW;
+		       
+			   
+// ****************************************************************************
+// *** THROTTLE STATE MACHINE
+// ****************************************************************************	
+        
+		// Combine attitude stabilisation demands from PID loop with throttle demands
+		tempN = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
+        tempE = (signed short)motorEav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
+        tempS = (signed short)motorSav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
+        tempW = (signed short)motorWav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
+
+		// TODO: Add Auto Land on rxLoss!
+        if (rcInput[RX_THRO] - throttletrim <  OFFSTICK || throttleHoldOff > 0 || rxLoss > 25) {
+            
+			// Set throttle off
+			throttle = 0;
+						
+			// Reset Important variables
+			pitch.integral=0;
+            roll.integral=0;
+            alt.integral = 0;   
+            airborne = 0;
+            alt.demandincr =  0;
+			ultraerror = 0;
+			motorN = 0;
+            motorE = 0;
+            motorS = 0;
+            motorW = 0;
+			motorNav = 0;
+            motorEav = 0;
+            motorSav = 0;
+            motorWav = 0;
+			// Reseting the yaw demand to the actual yaw angle continuously helps stop yawing happening on takeoff
+            yaw.demand = -psiAngle;
+            yaw.demandOld = -psiAngle;
+
+
+            
+            // Reset the throttle hold variable, this prevents reactivation of the throttle until 
+			// the input is dropped and re-applied
+            if(rcInput[RX_THRO] - throttletrim <  OFFSTICK) throttleHoldOff = 0;
+            
+			// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
+            if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+            
+			// Output the motor PWM demand on the telemetry link
+            ilink_outputs0.channel[0] = THROTTLEOFFSET;
+            ilink_outputs0.channel[1] = THROTTLEOFFSET;
+            ilink_outputs0.channel[2] = THROTTLEOFFSET;
+            ilink_outputs0.channel[3] = THROTTLEOFFSET;
+            
+
+        }
+        else if(armed) {
+            
+			float temp;
+            
+			// Limit the maximum throttle output to a percentage of the highest throttle available 
+			// to allow additional throttle for manouevering
+			if(throttle > MAXTHROTTLE*MAXTHROTTLEPERCENT) throttle = MAXTHROTTLE*MAXTHROTTLEPERCENT;
+            
+			// Set the PWM channels. Maximum of MAXTHROTTLE + THROTTLEOFFSET, MINMUM OF IDLETHROTTLE + THROTTLE OFFSET
+			// Throttle offset offsets the throttle readings (which start at 0) to the PWM values (in ms?) which need to start at around 1000
+            temp = tempN;
+            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+            PWMSetN(temp);
+            ilink_outputs0.channel[0] = temp;
+            
+            temp = tempE;
+            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+            PWMSetE(temp);
+            ilink_outputs0.channel[1] = temp;
+            
+            temp = tempS;
+            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+            PWMSetS(temp);
+            ilink_outputs0.channel[2] = temp;
+            
+            temp = tempW;
+            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+            PWMSetW(temp);
+            ilink_outputs0.channel[3] = temp;
+            ilink_outputs0.isNew = 1;
+
+        }
+               
+}
+
+
+// ****************************************************************************
+// ****************************************************************************
+// *** FUNCTIONS
+// ****************************************************************************
+// ****************************************************************************
+// TODO: Simplify the calibration routines, there seems to be a lot of overlap and unnecessary/ unused code
+
+void ReadRXInput(void) {			
+
+	if(RXGetData(rcInput)) {
+		if(rxLoss > 10) rxLoss -= 10;
+		ilink_inputs0.channel[0] = rcInput[RX_THRO];
+		ilink_inputs0.channel[1] = rcInput[RX_AILE];
+		ilink_inputs0.channel[2] = rcInput[RX_ELEV];
+		ilink_inputs0.channel[3] = rcInput[RX_RUDD];
+		ilink_inputs0.channel[4] = rcInput[RX_AUX1];
+		ilink_inputs0.channel[5] = rcInput[RX_FLAP];
+		ilink_inputs0.isNew = 1;
+		
+		if(rxFirst < 25) {
+			throttletrim = rcInput[RX_THRO];
+			rxFirst++;
+		}
+		
+		// Controller's aux or gear switch (Can be switched permanently either way)
+		if(rcInput[RX_AUX1] > MIDSTICK) {
+			auxState = 0;
+		}
+		else {								
+			auxState = 1;
+		}
+		
+		
+		// Controller's flap switch/ button (mechanically sprung return)
+		if(rcInput[RX_FLAP] > MIDSTICK) {
+			if((flapState == 0) && (flpswitch == 0)) {
+				flapState = 1;
+				flpswitch = 1;
+			}
+			if((flapState == 1) && (flpswitch == 0)) {
+				flapState = 0;
+				flpswitch = 1;
+			}
+			
+		}
+		else {
+			flpswitch = 0;
+		}
+			
+			
+		flashVLED = 0;
+		LEDOff(VLED);
+	}
+	else {
+		rxLoss ++;
+		if(rxLoss > 50) {
+			rxLoss = 50;
+			// RC signal lost
+			// TODO: Perform RC signal loss state setting
+			// TODO: This is repeated on line 1670ish, is the repeat necessary?
+			if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+			ilink_outputs0.channel[0] = THROTTLEOFFSET;
+			ilink_outputs0.channel[1] = THROTTLEOFFSET;
+			ilink_outputs0.channel[2] = THROTTLEOFFSET;
+			ilink_outputs0.channel[3] = THROTTLEOFFSET;
+			flashVLED = 2;
+		}
+	}			
+			
+}
+
+			
+void ReadUltrasound(void) {			
+	// Get ultrasound data and scale to mm??
+	// TODO: Scale to m (everywhere should use SI units)
+	ultra = (UltraGetNewRawData()) * 0.17;
+	
+	
+	if(ultra > 0)  {
+		ultraLoss = 0;
+		
+		// We run an SPR filter on the ultrasound readings
+		alt.ultra *= SPR_ULTRA;
+		alt.ultra += (1-SPR_ULTRA) * ultra;
+		
+		// Output the ultrasound altitude
+		ilink_altitude.relAlt = alt.ultra;
+	
+		
+	}
+	// if ultra = 0 then there isn't valid data
+	// TODO: Improve ultrasound confidence estimator
+	else {
+		ultraLoss++;
+		if(ultraLoss > ULTRA_OVTH) ultraLoss = ULTRA_OVTH;
+	}
+			
+}			
+        
+void ReadBattVoltage(void) {
+	// Because the factor is 6325/1024, we can do this in integer maths by right-shifting 10 bits instead of dividing by 1024.
+	unsigned short battV = (ADCGet() * 6325) >> 10; 
+	// battVoltage in milivolts
+	batteryVoltage *= 0.99f;
+	batteryVoltage += 0.01f * (float)battV;
+	ilink_thalstat.battVoltage = battV;
+	ADCTrigger(CHN7);
+
+}
+			
+			
+			
+void ReadGyroSensors(void) {
+    signed short data[4];
+    if(GetGyro(data)) {
+		// Read raw Gyro data
+        Gyro.X.raw = data[0];
+        Gyro.Y.raw = data[2];
+        Gyro.Z.raw = -data[1];
+		// Output raw data over telemetry
+        ilink_rawimu.xGyro = Gyro.X.raw;
+        ilink_rawimu.yGyro = Gyro.Y.raw;
+        ilink_rawimu.zGyro = Gyro.Z.raw;
+		// Perform running average
+        Gyro.X.total -= Gyro.X.history[Gyro.count];
+        Gyro.Y.total -= Gyro.Y.history[Gyro.count];
+        Gyro.Z.total -= Gyro.Z.history[Gyro.count];
+        Gyro.X.total += Gyro.X.raw;
+        Gyro.Y.total += Gyro.Y.raw;
+        Gyro.Z.total += Gyro.Z.raw;
+        Gyro.X.history[Gyro.count] = Gyro.X.raw;
+        Gyro.Y.history[Gyro.count] = Gyro.Y.raw;
+        Gyro.Z.history[Gyro.count] = Gyro.Z.raw;
+        Gyro.X.av = (float)Gyro.X.total/(float)GAV_LEN;
+        Gyro.Y.av = (float)Gyro.Y.total/(float)GAV_LEN;
+        Gyro.Z.av = (float)Gyro.Z.total/(float)GAV_LEN;
+        if(++Gyro.count >= GAV_LEN) Gyro.count = 0;
+        // Add the offset calculated on calibration (to set no rotational movement to 0 corresponding output)
+		// and scale to radians/s
+        Gyro.X.value = (Gyro.X.av - Gyro.X.offset)/818.51113590117601252569f;
+        Gyro.Y.value = (Gyro.Y.av - Gyro.Y.offset)/818.51113590117601252569f;
+        Gyro.Z.value = (Gyro.Z.av - Gyro.Z.offset)/818.51113590117601252569f;
+		// Send processed values over telemetry
+        ilink_scaledimu.xGyro = Gyro.X.value * 1000;
+        ilink_scaledimu.yGyro = Gyro.Y.value * 1000;
+        ilink_scaledimu.zGyro = Gyro.Z.value * 1000;
+    }
+}
+
+void ReadAccelSensors(void) {
+    float sumsqu;
+    signed short data[4];
+    if(GetAccel(data)) {
+		// Get raw Accelerometer data
+        Accel.X.raw = data[0];
+        Accel.Y.raw = data[2];
+        Accel.Z.raw = -data[1];
+		// Output raw data over telemetry
+        ilink_rawimu.xAcc = Accel.X.raw;
+        ilink_rawimu.yAcc = Accel.Y.raw;
+        ilink_rawimu.zAcc = Accel.Z.raw;
+		// Perform Running Average
+        Accel.X.total -= Accel.X.history[Accel.count];
+        Accel.Y.total -= Accel.Y.history[Accel.count];
+        Accel.Z.total -= Accel.Z.history[Accel.count];
+        Accel.X.total += Accel.X.raw;
+        Accel.Y.total += Accel.Y.raw;
+        Accel.Z.total += Accel.Z.raw;
+        Accel.X.history[Accel.count] = Accel.X.raw;
+        Accel.Y.history[Accel.count] = Accel.Y.raw;
+        Accel.Z.history[Accel.count] = Accel.Z.raw;
+        Accel.X.av = (float)Accel.X.total/(float)AAV_LEN;
+        Accel.Y.av = (float)Accel.Y.total/(float)AAV_LEN;
+        Accel.Z.av = (float)Accel.Z.total/(float)AAV_LEN;
+        if(++Accel.count >= AAV_LEN) Accel.count = 0;
+        // Normalise accelerometer so it is a unit vector
+        sumsqu = finvSqrt((float)Accel.X.av*(float)Accel.X.av + (float)Accel.Y.av*(float)Accel.Y.av + (float)Accel.Z.av*(float)Accel.Z.av); // Accelerometr data is normalised so no need to convert units.
+        Accel.X.value = (float)Accel.X.av * sumsqu;
+        Accel.Y.value = (float)Accel.Y.av * sumsqu;
+        Accel.Z.value = (float)Accel.Z.av * sumsqu;
+		//Output processed values over telemetry
+        ilink_scaledimu.xAcc = Accel.X.value * 1000;
+        ilink_scaledimu.yAcc = Accel.Y.value * 1000;
+        ilink_scaledimu.zAcc = Accel.Z.value * 1000;
+    }
+}
+
+void ReadMagSensors(void) {
+    float sumsqu, temp1, temp2, temp3;
+    signed short data[4];
+    if(GetMagneto(data)) {
+		// Get raw magnetometer data
+        Mag.X.raw = data[0];
+        Mag.Y.raw = data[2];
+        Mag.Z.raw = -data[1];
+		// Output raw data over telemetry
+		ilink_rawimu.xMag = Mag.X.raw;
+        ilink_rawimu.yMag = Mag.Y.raw;
+        ilink_rawimu.zMag = Mag.Z.raw;
+		// Perform running average
+        Mag.X.total -= Mag.X.history[Mag.count];
+        Mag.Y.total -= Mag.Y.history[Mag.count];
+        Mag.Z.total -= Mag.Z.history[Mag.count];
+        Mag.X.total += Mag.X.raw;
+        Mag.Y.total += Mag.Y.raw;
+        Mag.Z.total += Mag.Z.raw;
+        Mag.X.history[Mag.count] = Mag.X.raw;
+        Mag.Y.history[Mag.count] = Mag.Y.raw;
+        Mag.Z.history[Mag.count] = Mag.Z.raw;
+        Mag.X.av = (float)Mag.X.total/(float)MAV_LEN;
+        Mag.Y.av = (float)Mag.Y.total/(float)MAV_LEN;
+        Mag.Z.av = (float)Mag.Z.total/(float)MAV_LEN;
+		if(++Mag.count >= MAV_LEN) Mag.count = 0;
+		
+        // Correcting Elipsoid Centre Point (These values are found during Magneto Calibration)
+        temp1 = Mag.X.av - MAGCOR_M1;
+        temp2 = Mag.Y.av - MAGCOR_M2;
+        temp3 = Mag.Z.av - MAGCOR_M3;
+
+        // Reshaping Elipsoid to Sphere (These values are set the same for all Thalamus Units)
+        temp1 = MAGCOR_N1 * temp1 + MAGCOR_N2 * temp2 + MAGCOR_N3 * temp3;
+        temp2 = MAGCOR_N5 * temp2 + MAGCOR_N6 * temp3;
+        temp3 = MAGCOR_N9 * temp3;				
+
+        // Normalize magneto into unit vector
+        sumsqu = finvSqrt((float)temp1*(float)temp1 + (float)temp2*(float)temp2 + (float)temp3*(float)temp3); // Magnetoerometr data is normalised so no need to convert units.
+        Mag.X.value = (float)temp1 * sumsqu;
+        Mag.Y.value = (float)temp2 * sumsqu;
+        Mag.Z.value = (float)temp3 * sumsqu;
+        
+		// Output processed data over telemetry
+        ilink_scaledimu.xMag = Mag.X.value * 1000;
+        ilink_scaledimu.yMag = Mag.Y.value * 1000;
+        ilink_scaledimu.zMag = Mag.Z.value * 1000;
+	
+    }    
+}
+
+
+
 void Arm(void) {
 
     if(CAL_AUTO > 0) {
@@ -733,6 +1579,8 @@ void Arm(void) {
     ilink_thalstat.sensorStatus |= 4; // active/armed
 }
 
+
+
 void Disarm(void) {
     if(armed) {
         PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
@@ -761,6 +1609,8 @@ void Disarm(void) {
     ilink_thalstat.sensorStatus &= ~(0x7); // mask status
     ilink_thalstat.sensorStatus |= 3; // standby
 }
+
+
 
 void CalibrateMagneto(void) {
         unsigned int i;
@@ -858,7 +1708,8 @@ void CalibrateMagneto(void) {
     }
 }
 
-// *** Calibrates all the sensors
+
+
 void SensorZero(void) {
     unsigned int i;
     signed short data[4];
@@ -929,6 +1780,8 @@ void SensorZero(void) {
         ilink_thalstat.sensorStatus |= (0xf << 3);
 }
 
+
+
 void CalibrateGyro(void) {
     CalibrateGyroTemp(6);
     CAL_GYROX = Gyro.X.offset;
@@ -936,6 +1789,8 @@ void CalibrateGyro(void) {
     CAL_GYROZ = Gyro.Z.offset;
     EEPROMSaveAll();
 }
+
+
 
 void CalibrateGyroTemp(unsigned int seconds) {
     unsigned int i;
@@ -1030,2298 +1885,6 @@ void CalibrateGyroTemp(unsigned int seconds) {
 }
 
 
-
-// ****************************************************************************
-// ****************************************************************************
-// LOOPS
-// ****************************************************************************
-// ****************************************************************************
-// *** Main loop, nothing much happens in here.
-void loop() {
-    //if(idleCount < IDLE_MAX) idleCount++; // this is the counter for CPU idle time
-    // *** Deal with button push
-        if(PRGBlankTimer == 0) {
-            if(PRGTimer > 3000) {
-                RXBind();
-                PRGPushTime = 0;
-                PRGTimer = 0;
-                PRGBlankTimer = 200;
-            }
-        }
-    
-    __WFI();
-}
-
-// *** SysTick timer: deals with general timing
-void SysTickInterrupt(void) {
-    sysMS += 1;
-    sysUS += 1000;
-    
-    // *** deal with flashing LEDs
-        if(sysMS % 25 == 0) {
-            if(sysMS % 100 == 0) {
-                if(flashPLED) LEDToggle(PLED);
-                if(flashVLED) LEDToggle(VLED);
-                if(flashRLED) LEDToggle(RLED);
-            }
-            else {
-                if(flashPLED == 2) LEDToggle(PLED);
-                if(flashVLED == 2) LEDToggle(VLED);
-                if(flashRLED == 2) LEDToggle(RLED);
-            }
-        }
-    
-    // *** time the button pushes
-        if(PRGPoll() == 0) PRGTimer++;
-        else {
-            PRGPushTime = PRGTimer;
-            PRGTimer = 0;
-            if(PRGBlankTimer) PRGBlankTimer--;
-        }
-}
-
-// *** RIT interrupt, deal with timed iLink messages.
-void RITInterrupt(void) {
-    
-    // *** deal with iLink parameter transmission
-        unsigned int i;
-        if(paramSendCount < paramCount) {
-            unsigned short thisParam = paramSendCount; // store this to avoid race hazard since paramSendCount can change outside this interrupt
-            ilink_thalparam_tx.paramID = thisParam;
-            ilink_thalparam_tx.paramValue = paramStorage[thisParam].value;
-            ilink_thalparam_tx.paramCount = paramCount;
-            for(i=0; i<16; i++) {
-                ilink_thalparam_tx.paramName[i] = paramStorage[thisParam].name[i];
-                if(paramStorage[thisParam].name[i] == '\0') break;
-            }
-            if(ILinkSendMessage(ID_ILINK_THALPARAM, (unsigned short *) & ilink_thalparam_tx, sizeof(ilink_thalparam_tx)/2 -1)) {
-                if(paramSendSingle) {
-                    paramSendSingle = 0;
-                    paramSendCount = paramCount;
-                }
-                else {
-                    paramSendCount = thisParam+1;
-                }
-            }
-        }
-}
-
-
-
-void Timer0Interrupt0() {
-    if(++slowSoftscale >= SLOW_DIVIDER) {
-        slowSoftscale = 0;
-        
-
-// ****************************************************************************
-// *** COLLECT INPUT DATA
-// ****************************************************************************
-
-        ReadMagSensors();
-
-
-        // READ RC RX INPUT //
-		if(RXGetData(rcInput)) {
-			if(rxLoss > 10) rxLoss -= 10;
-			ilink_inputs0.channel[0] = rcInput[RX_THRO];
-			ilink_inputs0.channel[1] = rcInput[RX_AILE];
-			ilink_inputs0.channel[2] = rcInput[RX_ELEV];
-			ilink_inputs0.channel[3] = rcInput[RX_RUDD];
-			ilink_inputs0.channel[4] = rcInput[RX_AUX1];
-			ilink_inputs0.channel[5] = rcInput[RX_FLAP];
-			ilink_inputs0.isNew = 1;
-			
-			if(rxFirst < 25) {
-				throttletrim = rcInput[RX_THRO];
-				rxFirst++;
-			}
-			
-			// Controller's aux or gear switch (Can be switched permanently either way)
-			if(rcInput[RX_AUX1] > MIDSTICK) {
-				auxState = 0;
-			}
-			else {								
-				auxState = 1;
-			}
-			
-			
-			// Controller's flap switch (mechanically sprung return)
-			if(rcInput[RX_FLAP] > MIDSTICK) {
-				if((flapState == 0) && (flpswitch == 0)) {
-					flapState = 1;
-					flpswitch = 1;
-				}
-				if((flapState == 1) && (flpswitch == 0)) {
-					flapState = 0;
-					flpswitch = 1;
-				}
-				
-			}
-			else {
-				flpswitch = 0;
-			}
-				
-				
-			flashVLED = 0;
-			LEDOff(VLED);
-		}
-		else {
-			rxLoss ++;
-			if(rxLoss > 50) {
-				rxLoss = 50;
-				// RC signal lost
-				// *** TODO: Perform RC signal loss state setting
-				if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-				ilink_outputs0.channel[0] = THROTTLEOFFSET;
-				ilink_outputs0.channel[1] = THROTTLEOFFSET;
-				ilink_outputs0.channel[2] = THROTTLEOFFSET;
-				ilink_outputs0.channel[3] = THROTTLEOFFSET;
-				flashVLED = 2;
-			}
-		}
-        
-		
-		
-            
-        // READ ULTRASOUND //
-            ultra = (UltraGetNewRawData()) * 0.17;
-			
-            if(ultra > 0)  {
-                ultraLoss = 0;
-				
-				//if(ultra - ultraav > LIM_ULTRA/SLOW_DIVIDER) ultra = ultraav + LIM_ULTRA/SLOW_DIVIDER;
-				//if(ultraav - ultra > LIM_ULTRA/SLOW_DIVIDER) ultra = ultraav - LIM_ULTRA/SLOW_DIVIDER;
-				
-                ultraav *= SPR_ULTRA;
-                ultraav += (1-SPR_ULTRA) * ultra;
-                
-                ilink_altitude.relAlt = ultraav;
-                
-                alt.valueOld = alt.value;
-                alt.value = ultraav;
-                
-                alt.baroOffset = baroav - ultraav;
-			}
-            else {
-                ultraLoss++;
-				if(ultraLoss > ULTRA_OVTH) ultraLoss = ULTRA_OVTH;
-            }
-			
-			
-			
-			
-			
-        // READ BATTERY VOLTAGE //
-            unsigned short battV = (ADCGet() * 6325) >> 10; // Because the factor is 6325/1024, we can do this in integer maths by right-shifting 10 bits instead of dividing by 1024.
-            // battVoltage in milivolts
-            batteryVoltage *= 0.99f;
-            batteryVoltage += 0.01f * (float)battV;
-            ilink_thalstat.battVoltage = battV;
-            ADCTrigger(CHN7);
-            
-    }
-
-	
-	ReadAccelSensors();
-	ReadGyroSensors();
-    
-    
-// ****************************************************************************
-// *** ATTITUDE HEADING REFERENCE SYSTEM
-// ****************************************************************************
-	
-	// CREATE THE MEASURED ROTATION MATRIX //
-	//Normalise
-	float sumsqu = finvSqrt(Mag.X.value*Mag.X.value + Mag.Y.value*Mag.Y.value+ Mag.Z.value*Mag.Z.value); // Magnetoerometr data is normalised so no need to convert units.
-        Mag.X.value = Mag.X.value * sumsqu;
-        Mag.Y.value = Mag.Y.value * sumsqu;
-        Mag.Z.value = Mag.Z.value * sumsqu;
-		
-	sumsqu = finvSqrt((float)Accel.X.value*(float)Accel.X.value + (float)Accel.Y.value*(float)Accel.Y.value + (float)Accel.Z.value*(float)Accel.Z.value); // Accelerometr data is normalised so no need to convert units.
-        Accel.X.value = (float)Accel.X.value * sumsqu;
-        Accel.Y.value = (float)Accel.Y.value * sumsqu;
-        Accel.Z.value = (float)Accel.Z.value * sumsqu;
-	
-	// Compose the Measured Rotation Matrix from Accelerometer and Magnetometer Vectors
-	//  Global Z axis in Local Frame/ RM Third Row - Accelerometer (already normalised)
-	
-	RM7 = Accel.X.value;
-	RM8 = Accel.Y.value;
-	RM9 = Accel.Z.value;
-	
-	// Global Y axis in local frame/ RM Second Row - Acclerometer cross Magnetometer
-	RM4 = Accel.Y.value*(Mag.Z.value) - (Accel.Z.value)*Mag.Y.value;
-	RM5 = (Accel.Z.value)*Mag.X.value - Accel.X.value*(Mag.Z.value);
-	RM6 = Accel.X.value*Mag.Y.value - Accel.Y.value*Mag.X.value;
-	// Normalise
-	float temp = sqrt(RM4*RM4 + RM5*RM5 + RM6*RM6);
-	RM4 = RM4/temp;
-	RM5 = RM5/temp;
-	RM6 = RM6/temp;
-	
-	//  Global X axis in Local Frame/ RM First Row - Y axis cross Z axis
-	RM1 = RM5*RM9 - RM6*RM8;
-	RM2 = RM6*RM7 - RM4*RM9;
-	RM3 = RM4*RM8 - RM5*RM7;
-	// Normalise
-	temp = sqrt(RM1*RM1 + RM2*RM2 + RM3*RM3);
-	RM1 = RM1/temp;
-	RM2= RM2/temp;
-	RM3 = RM3/temp;
-	
-	
-	
-	
-
-	// CREATE THE ESTIMATED ROTATION MATRIX //
-	float g1 = (Gyro.X.value - Gyro.X.bias*DRIFT_AccelKp)/(float)FAST_RATE;
-    float g2 = (Gyro.Y.value - Gyro.Y.bias*DRIFT_AccelKp)/(float)FAST_RATE;
-    float g3 = (Gyro.Z.value - Gyro.Z.bias*DRIFT_MagKp_temp)/(float)FAST_RATE;
-	
-	// Increment the Estimated Rotation Matrix by the Gyro Rate
-	//First row is M1, M2, M3 - World X axis in local frame
-	M1 = M1 + g3*M2 - g2*M3;
-	M2 = M2 - g3*M1 + g1*M3;
-	M3 = M3 + g2*M1 - g1*M2;
-	
-	//Second row is M4, M5, M6 - World Y axis in local frame
-	M4 = M4 + g3*M5 - g2*M6;
-	M5 = M5 - g3*M4 + g1*M6;
-	M6 = M6 + g2*M4 - g1*M5;
-	
-	// We use the dot product and both X and Y axes to adjust any lack of orthogonality between the two.
-	float MX_dot_MY = M1*M4 + M2*M5 + M3*M6;
-	M1 = M1 - M4*(MX_dot_MY/2);
-	M2 = M2 - M5*(MX_dot_MY/2);
-	M3 = M3 - M6*(MX_dot_MY/2);
-	
-	sumsqu = finvSqrt(M1*M1 + M2*M2 + M3*M3);
-	M1 = M1*sumsqu;
-	M2 = M2*sumsqu;
-	M3 = M3*sumsqu;
-	
-	M4 = M4 - M1*(MX_dot_MY/2);
-	M5 = M5 - M2*(MX_dot_MY/2);
-	M6 = M6 - M3*(MX_dot_MY/2);
-	
-	sumsqu = finvSqrt(M4*M4 + M5*M5 + M6*M6);
-	M4 = M4*sumsqu;
-	M5 = M5*sumsqu;
-	M6 = M6*sumsqu;
-	
-	//We find the Z axis by calculating the cross product of X and Y
-	M7 = M2*M6 - M3*M5;
-	M8 = M3*M4 - M1*M6;
-	M9 = M1*M5 - M2*M4;
-	
-	sumsqu = finvSqrt(M7*M7 + M8*M8 + M9*M9);
-	M7 = M7*sumsqu;
-	M8 = M8*sumsqu;
-	M9 = M9*sumsqu;
-	
-	// CALCULATE GYRO BIAS //
-	// The gyro biases adjust the estimated matrix towards the measured rotation matrix.
-	// Use x and y components of the Cross Product between the z vector from each Rotation Matrix for Gyro Biases
-	Gyro.X.bias = RM9*M8 - RM8*M9;
-	Gyro.Y.bias = RM7*M9 - RM9*M7;
-	
-	// Use z component of the cross product between the x vector from each rotation matrix to create the Z gyro bias
-	Gyro.Z.bias = RM2*M1 - RM1*M2;
-
-	
-	
-	
-	// CALCULATE THE ESTIMATED QUATERNION //
-	float trace = M1 + M5 + M9;
-	if( trace > 0 ) {
-		float s = 0.5f / sqrt(trace + 1.0f);
-		q1 = 0.25f / s;
-		q2 = ( M6 - M8 ) * s;
-		q3 = ( M7 - M3 ) * s;
-		q4 = ( M2 - M4 ) * s;
-	} 
-	else {
-		if ( M1 > M5 && M1 > M9 ) {
-			float s = 2.0f * sqrt( 1.0f + M1 - M5 - M9);
-			q1 = (M6 - M8 ) / s;
-			q2 = 0.25f * s;
-			q3 = (M4 + M2 ) / s;
-			q4 = (M7 + M3 ) / s;
-		} 
-		else if (M5 > M9) {
-			float s = 2.0f * sqrt( 1.0f + M5 - M1 - M9);
-			q1 = (M7 - M3 ) / s;
-			q2 = (M4 + M2 ) / s;
-			q3 = 0.25f * s;
-			q4 = (M8 + M6 ) / s;
-		} 
-		else {
-			 float s = 2.0f * sqrt( 1.0f + M9 - M1 - M5 );
-			q1 = (M2 - M4 ) / s;
-			q2 = (M7 + M3 ) / s;
-			q3 = (M8 + M6 ) / s;
-			q4 = 0.25f * s;
-		}
-	}	
-	q1 = q1;
-	q2 = -q2;
-	q3 = -q3;
-	q4 = -q4;
-
-    // renormalise using fast inverse sq12re root
-    sumsqu = finvSqrt(q1*q1 + q2*q2 + q3*q3 + q4*q4);
-    q1 *= sumsqu;
-    q2 *= sumsqu;
-    q3 *= sumsqu;
-    q4 *= sumsqu;
-		
-	
-	// CALCULATE THE EULER ANGLES //
-    // precalculated values for optimisation
-    float q12 = q1 * q2;
-    float q13 = q1 * q3;
-    float q22 = q2 * q2;
-    float q23 = q2 * q4;
-    float q33 = q3 * q3;
-    float q34 = q3 * q4;
-    float q44 = q4 * q4;
-    float q22Pq33 = q22 + q33;
-    float Tq13Mq23 = 2 * (q13 - q23);
-    float Tq34Pq12 = 2 * (q34 + q12);
-    // avoid gimbal lock at singularity points
-    if (Tq13Mq23 == 1) {
-        psiAngle = 2 * fatan2(q2, q1);
-        thetaAngle = M_PI_2;
-        phiAngle = 0;
-    }
-    else if (Tq13Mq23 == -1) {
-        psiAngle = -2 * fatan2(q2, q1);
-        thetaAngle = - M_PI_2;
-        phiAngle = 0;
-    }
-    else {
-        thetaAngle = fasin(Tq13Mq23);    
-        phiAngle = fatan2(Tq34Pq12, (1 - 2*q22Pq33));  
-        psiAngle = fatan2((2*(q1 * q4 + q2 * q3)), (1 - 2*(q33 + q44)));  
-    }
-    // ilink_attitude.roll = phiAngle;  // temporary
-    // ilink_attitude.pitch = thetaAngle;
-    // ilink_attitude.yaw = psiAngle;
-	
-	
-	
-	
-// ****************************************************************************
-// *** STATE MACHINE
-// ****************************************************************************
-	
-	float pitcherror, rollerror, yawerror;
-	float pitchcorrection, rollcorrection, yawcorrection;
-	
-	///////////////////// ACROBATIC MODE ///////////////////////////////////
-	if (MODE_ST == 0) {
-
-	}
-		
-	///////////////////////// REGULAR MODE ///////////////////////////////////
-	if (MODE_ST == 1) { 
-	
-		DRIFT_MagKp_temp = 0; // We don't use Magnetometer feedback in regular mode
-
-	
-		// Arm, Disarm and Calibrate
-		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rxFirst != 0) {
-            if(rxLoss < 50) {
-                if(rcInput[RX_AILE] < MAXTHRESH && rcInput[RX_AILE] > MINTHRESH) {
-                    if(rcInput[RX_ELEV] > MAXTHRESH) {
-                        // arm
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-
-                            Arm();
-                        }
-                    }
-                    else if(rcInput[RX_ELEV] < MINTHRESH) {
-                        // disarm
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-                            Disarm();
-                        }
-                    }
-                    else {
-                        zeroThrotCounter = 0;
-                    }
-                }
-                else if(rcInput[RX_ELEV] < MAXTHRESH && rcInput[RX_ELEV] > MINTHRESH) {
-                    if(rcInput[RX_AILE] > MAXTHRESH) {
-                        // calib gyro    
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-                            CalibrateGyro();
-                        }
-                    }
-                    else if(rcInput[RX_AILE] < MINTHRESH) {
-                        // calib magneto
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-                            CalibrateMagneto();
-                        }
-                    }
-                }
-                
-            }
-            else {
-                zeroThrotCounter = 0;
-            }
-  
-        }
-		
-		// General Flight Demands
-        else {		
-			pitch.demandtemp = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-            roll.demandtemp = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-			float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 
-			
-			float limiter;
-			
-			limiter = LIM_RATE/(float)FAST_RATE;
-            
-            
-            if(pitch.demandtemp > pitch.demand) {
-                if(pitch.demandtemp - pitch.demand > limiter && pitch.demand > 0) pitch.demand = pitch.demand + limiter;
-                else pitch.demand = pitch.demandtemp;
-            }
-            else {
-                if(pitch.demand - pitch.demandtemp > limiter && pitch.demand < 0) pitch.demand = pitch.demand - limiter;
-                else pitch.demand = pitch.demandtemp;
-            }
-            
-            if(roll.demandtemp > roll.demand) {
-                if(roll.demandtemp - roll.demand > limiter && roll.demand > 0) roll.demand = roll.demand + limiter;
-                else roll.demand = roll.demandtemp;
-            }
-            else {
-                if(roll.demand - roll.demandtemp > limiter && roll.demand < 0) roll.demand = roll.demand - limiter;
-                else roll.demand = roll.demandtemp;
-            }
-			
-			throttle = rcInput[RX_THRO] - throttletrim;
-			if (throttle < 0) throttle = 0;
-			
-			pitchDemandSpin = fsin(0.78539816339744830962+M_PI_2)*pitch.demand - fsin(0.78539816339744830962)*roll.demand;
-			rollDemandSpin =  fsin(0.78539816339744830962)*pitch.demand + fsin(0.78539816339744830962+M_PI_2)*roll.demand;
-			  
-			
-			if(fabsf(tempf) > YAW_DEADZONE) {
-				yaw.demand += tempf;
-				if(yaw.demand > M_PI) {
-					yaw.demand -= M_TWOPI;
-					yaw.demandOld -= M_TWOPI;
-				}
-				else if(yaw.demand < -M_PI) {
-					yaw.demand += M_TWOPI;
-					yaw.demandOld += M_TWOPI;
-				}
-			} 
-		}
-		
-	
-	}
-	
-	
-	//////////////////////////////// SIMPLICITY MODE //////////////////////////////////////////
-	if (MODE_ST == 2) { 
-	
-		DRIFT_MagKp_temp = DRIFT_MagKp;
-			
-			
-		// Arm, Disarm and Calibrate
-		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rxFirst != 0) {
-			if(rxLoss < 50) {
-				if(rcInput[RX_AILE] < MAXTHRESH && rcInput[RX_AILE] > MINTHRESH) {
-					if(rcInput[RX_ELEV] > MAXTHRESH) {
-						// arm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-
-							Arm();
-						}
-					}
-					else if(rcInput[RX_ELEV] < MINTHRESH) {
-						// disarm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							Disarm();
-						}
-					}
-					else {
-						zeroThrotCounter = 0;
-					}
-				}
-				else if(rcInput[RX_ELEV] < MAXTHRESH && rcInput[RX_ELEV] > MINTHRESH) {
-					if(rcInput[RX_AILE] > MAXTHRESH) {
-						// calib gyro    
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateGyro();
-						}
-					}
-					else if(rcInput[RX_AILE] < MINTHRESH) {
-						// calib magneto
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateMagneto();
-						}
-					}
-				}
-				
-			}
-			else {
-				zeroThrotCounter = 0;
-			}
-  
-		}
-		
-		// General Flight Demands
-		else {	
-
-			// This section of code applies some throttle increase with high tilt angles
-			float M9temp;
-			if (M9 > 0) M9temp = M9;
-			else M9temp = -M9;
-			throttle_angle = ((throttle / M9temp) - throttle); 
-			if (throttle_angle < 0) throttle_angle = 0;
-			
-			pitch.demandtemp = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-			roll.demandtemp = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-			float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 
-			
-			if (CFDC_count == 0) {
-				pitch.demandtemp = 0; 
-				roll.demandtemp = 0;
-				float tempf = 0.0; 
-			}
-			
-			float limiter;
-			
-			limiter = LIM_RATE/(float)FAST_RATE;
-			
-			
-			if(pitch.demandtemp > pitch.demand) {
-				if(pitch.demandtemp - pitch.demand > limiter && pitch.demand > 0) pitch.demand = pitch.demand + limiter;
-				else pitch.demand = pitch.demandtemp;
-			}
-			else {
-				if(pitch.demand - pitch.demandtemp > limiter && pitch.demand < 0) pitch.demand = pitch.demand - limiter;
-				else pitch.demand = pitch.demandtemp;
-			}
-			
-			if(roll.demandtemp > roll.demand) {
-				if(roll.demandtemp - roll.demand > limiter && roll.demand > 0) roll.demand = roll.demand + limiter;
-				else roll.demand = roll.demandtemp;
-			}
-			else {
-				if(roll.demand - roll.demandtemp > limiter && roll.demand < 0) roll.demand = roll.demand - limiter;
-				else roll.demand = roll.demandtemp;
-			}
-			
-			throttle = rcInput[RX_THRO] - throttletrim;
-			if (throttle < 0) throttle = 0;
-					
-			// SIMPLICITY MODE //	
-			pitchDemandSpin = fsin(-psiAngle+psiAngleinit+M_PI_2)*pitch.demand - fsin(-psiAngle+psiAngleinit)*roll.demand;
-			rollDemandSpin = fsin(-psiAngle+psiAngleinit)*pitch.demand + fsin(-psiAngle+psiAngleinit+M_PI_2)*roll.demand;
-			
-			
-
-
-			if(fabsf(tempf) > YAW_DEADZONE) {
-				yaw.demand += tempf;
-				if(yaw.demand > M_PI) {
-					yaw.demand -= M_TWOPI;
-					yaw.demandOld -= M_TWOPI;
-				}
-				else if(yaw.demand < -M_PI) {
-					yaw.demand += M_TWOPI;
-					yaw.demandOld += M_TWOPI;
-				}
-			} 
-		}
-		
-	}	
-		
-	
-
-	
- 
- 
- 
-	//////////////////////////////// EASY MODE //////////////////////////////////////////
-	if (MODE_ST == 3) { 
-	
-
-		DRIFT_MagKp_temp = DRIFT_MagKp;
-										
-		// Arm, Disarm and Calibrate
-		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rxFirst != 0) {
-            if(rxLoss < 50) {
-                if(rcInput[RX_AILE] < MAXTHRESH && rcInput[RX_AILE] > MINTHRESH) {
-                    if(rcInput[RX_ELEV] > MAXTHRESH) {
-                        // arm
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-
-                            Arm();
-                        }
-                    }
-                    else if(rcInput[RX_ELEV] < MINTHRESH) {
-                        // disarm
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-                            Disarm();
-                        }
-                    }
-                    else {
-                        zeroThrotCounter = 0;
-                    }
-                }
-                else if(rcInput[RX_ELEV] < MAXTHRESH && rcInput[RX_ELEV] > MINTHRESH) {
-                    if(rcInput[RX_AILE] > MAXTHRESH) {
-                        // calib gyro    
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-                            CalibrateGyro();
-                        }
-                    }
-                    else if(rcInput[RX_AILE] < MINTHRESH) {
-                        // calib magneto
-                        if(zeroThrotCounter++ > ZEROTHROTMAX) {
-                            zeroThrotCounter = 0;
-                            CalibrateMagneto();
-                        }
-                    }
-                }
-                
-            }
-            else {
-                zeroThrotCounter = 0;
-            }
-  
-        }
-		
-		
-		
-		// General Flight Demands
-        else {		
-		
-			// This section of code applies some throttle increase with high tilt angles
-			float M9temp;
-			if (M9 > 0) M9temp = M9;
-			else M9temp = -M9;
-			throttle_angle = ((throttle / M9temp) - throttle); 
-			if (throttle_angle < 0) throttle_angle = 0;
-			
-			
-			pitch.demandtemp = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-            roll.demandtemp = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-			float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS;
-			
-			if (CFDC_count == 0) {
-					pitch.demandtemp = 0; 
-					roll.demandtemp = 0;
-					float tempf = 0.0; 
-			}
-			
-			float limiter;
-			
-			limiter = LIM_RATE/(float)FAST_RATE;
-            
-            
-            if(pitch.demandtemp > pitch.demand) {
-                if(pitch.demandtemp - pitch.demand > limiter && pitch.demand > 0) pitch.demand = pitch.demand + limiter;
-                else pitch.demand = pitch.demandtemp;
-            }
-            else {
-                if(pitch.demand - pitch.demandtemp > limiter && pitch.demand < 0) pitch.demand = pitch.demand - limiter;
-                else pitch.demand = pitch.demandtemp;
-            }
-            
-            if(roll.demandtemp > roll.demand) {
-                if(roll.demandtemp - roll.demand > limiter && roll.demand > 0) roll.demand = roll.demand + limiter;
-                else roll.demand = roll.demandtemp;
-            }
-            else {
-                if(roll.demand - roll.demandtemp > limiter && roll.demand < 0) roll.demand = roll.demand - limiter;
-                else roll.demand = roll.demandtemp;
-            }
-			
-			// SIMPLICITY MODE //	
-			pitchDemandSpin = fsin(-psiAngle+psiAngleinit+M_PI_2)*pitch.demand - fsin(-psiAngle+psiAngleinit)*roll.demand;
-			rollDemandSpin = fsin(-psiAngle+psiAngleinit)*pitch.demand + fsin(-psiAngle+psiAngleinit+M_PI_2)*roll.demand;
-			
-			
-			// ULTRASOUND ALTITUDE HOLD//
-			if(airborne == 0) { // If craft is not airbourne
-		
-				//if (((rcInput[RX_THRO] - throttletrim - MIDSTICK) < 50) && ((rcInput[RX_THRO] - throttletrim - MIDSTICK) > -50)) { // and the throttle stick is in the middle
-				if (((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420)) {
-					if (flapState == 1) { // Auto take off when the button is pressed
-						if(throttle < 380) {
-							throttle += 0.9;
-						}
-						throttle += 0.1;
-					}
-
-					alt.demandincr =  0;	
-				}
-										
-			}
-			else {
-				if((flapState == 0) && (airborne == 1)) { // If the button is pressed while airborne
-					alt.demandincr -= 1; // land
-				}
-			}
-			
-			if((alt.value > ULTRA_TKOFF) && (airborne == 0)) { 
-				// just taken off, set airborne to 1 and remember takeoff throttle
-				airborne = 1;
-				alt.demandincr = 0;				
-				ultraTkOffThrottle = throttle;
-				ultraTkOffInput = ((float)rcInput[RX_THRO] - (float) throttletrim);
-			}
-		
-			if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) {
-				// If valid ultrasound reading and reading is less than landing threshold and we are airborne
-				// then increase landing counter
-				landing++;
-				
-				//If the above is satisfied consecutively more than ULTRA_DTCT times then shut down the motors
-				if(landing > ULTRA_DTCT) { 
-					airborne = 0;
-					throttleHoldOff = 1;
-					throttle = 0;
-					alt.demandincr =  0;
-					ultraerror = 0;
-					
-				}
-				
-			}	
-			// If consecutive run of readings is broken, reset the landing counter.
-			else {
-				landing = 0;
-			}			
-			
-			// Create a deadzone around throttle at lift off, if new stick position is higher than this deadzone then increase altitude demand and vice versa		
-			if (((((float)rcInput[RX_THRO] - (float) throttletrim) - ultraTkOffInput) > ULTRA_DEAD) || ((((float)rcInput[RX_THRO] - (float) throttletrim) - ultraTkOffInput) < -ULTRA_DEAD)) {
-				// if  ((((float)rcInput[RX_THRO] - (float) throttletrim) - ultraTkOffInput)*(ULTRA_DRMP/FAST_RATE) > LIM_ULTRA ) alt.demandincr =  alt.demandincr + LIM_ULTRA;
-				// else if  ((((float)rcInput[RX_THRO] - (float) throttletrim) - ultraTkOffInput)*(ULTRA_DRMP/FAST_RATE) < (-LIM_ULTRA/2) ) alt.demandincr =  alt.demandincr - LIM_ULTRA/2;
-				//else alt.demandincr =  alt.demandincr + (((float)rcInput[RX_THRO] - (float) throttletrim) - ultraTkOffInput)*(ULTRA_DRMP/FAST_RATE);
-			 	alt.demandincr =  alt.demandincr + (((float)rcInput[RX_THRO] - (float) throttletrim) - ultraTkOffInput)*(ULTRA_DRMP/FAST_RATE);
-			}
-		
-			
-			if(alt.demandincr < -LIM_ALT) alt.demandincr = -LIM_ALT;
-			if(alt.demandincr > LIM_ALT) alt.demandincr = LIM_ALT; 
-			
-			alt.demand = ULTRA_TKOFF + ULTRA_OFFSET + alt.demandincr;    
-			alt.error = alt.demand - alt.value;
-			alt.derivative = alt.value - alt.valueOld;
-			
-			
-			
-			alt.integral *= ULTRA_De;
-			if(airborne == 1) {
-					alt.integral += alt.error;
-			}
-			
-			if (((ultraLoss >= ULTRA_OVTH)) && (ultraerror == 0)) {   // when consecutive ultrasound altitude data losses rise above ULTRA_OVTH, throttle level is reduced
-
-				
-				ultrathrottle -= 10;
-				ultraerror = 1;			
-			}
-			
-			else if (ultraerror == 1) {
-				if (throttle > 380)  ultrathrottle -= ULTRA_OVDEC;  //Decays throttle to ensure craft returns to ground level	
-
-
-			}
-			else {
-			ultrathrottle = alt.derivative * -ULTRA_Kd;
-			ultrathrottle += ULTRA_Kp*alt.error;
-			ultrathrottle += ULTRA_Ki*alt.integral;
-			}
-			
-			if (airborne == 1){
-				throttle = ultraTkOffThrottle + ultrathrottle;
-			}
-			
-			if(fabsf(tempf) > YAW_DEADZONE) {
-				yaw.demand += tempf;
-				if(yaw.demand > M_PI) {
-					yaw.demand -= M_TWOPI;
-					yaw.demandOld -= M_TWOPI;
-				}
-				else if(yaw.demand < -M_PI) {
-					yaw.demand += M_TWOPI;
-					yaw.demandOld += M_TWOPI;
-				}
-			} 
-		
-		
-		
-		}
-		
-
-	} 
-	
-	
-	
-	
-	//////////////////////////////// GPS HOLD MODE //////////////////////////////////////////
-	if (MODE_ST == 4) { 
-	
-		
-		
-		DRIFT_MagKp_temp = DRIFT_MagKp;
-		
-		
-					
-			
-		// Arm, Disarm and Calibrate
-		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rxFirst != 0) {
-			if(rxLoss < 50) {
-				if(rcInput[RX_AILE] < MAXTHRESH && rcInput[RX_AILE] > MINTHRESH) {
-					if(rcInput[RX_ELEV] > MAXTHRESH) {
-						// arm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-
-							Arm();
-						}
-					}
-					else if(rcInput[RX_ELEV] < MINTHRESH) {
-						// disarm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							Disarm();
-						}
-					}
-					else {
-						zeroThrotCounter = 0;
-					}
-				}
-				else if(rcInput[RX_ELEV] < MAXTHRESH && rcInput[RX_ELEV] > MINTHRESH) {
-					if(rcInput[RX_AILE] > MAXTHRESH) {
-						// calib gyro    
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateGyro();
-						}
-					}
-					else if(rcInput[RX_AILE] < MINTHRESH) {
-						// calib magneto
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateMagneto();
-						}
-					}
-				}
-				
-			}
-			else {
-				zeroThrotCounter = 0;
-			}
-			
-			alt_diff = 0;
-			alt_diff_i = 0;	
-			alt_diff_d = 0;
-			
-			lat_diff = 0;
-			lat_diff_i = 0;	
-			lat_diff_d = 0;
-			
-			lon_diff = 0;
-			lon_diff_i = 0;	
-			lon_diff_d = 0;
-			
-		}
-		
-		
-		// Flight Demands
-		else {						
-			
-			if (auxState == 0) {
-			
-				// This section of code applies some throttle increase with high tilt angles
-				float M9temp;
-				if (M9 > 0) M9temp = M9;
-				else M9temp = -M9;
-				throttle_angle = ((throttle / M9temp) - throttle); 
-				if (throttle_angle < 0) throttle_angle = 0;
-				
-				pitch.demandtemp = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-				roll.demandtemp = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-				float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 
-				
-				if (CFDC_count == 0) {
-					pitch.demandtemp = 0; 
-					roll.demandtemp = 0;
-					float tempf = 0.0; 
-				}
-				
-				float limiter;
-				
-				limiter = LIM_RATE/(float)FAST_RATE;
-				
-				
-				if(pitch.demandtemp > pitch.demand) {
-					if(pitch.demandtemp - pitch.demand > limiter && pitch.demand > 0) pitch.demand = pitch.demand + limiter;
-					else pitch.demand = pitch.demandtemp;
-				}
-				else {
-					if(pitch.demand - pitch.demandtemp > limiter && pitch.demand < 0) pitch.demand = pitch.demand - limiter;
-					else pitch.demand = pitch.demandtemp;
-				}
-				
-				if(roll.demandtemp > roll.demand) {
-					if(roll.demandtemp - roll.demand > limiter && roll.demand > 0) roll.demand = roll.demand + limiter;
-					else roll.demand = roll.demandtemp;
-				}
-				else {
-					if(roll.demand - roll.demandtemp > limiter && roll.demand < 0) roll.demand = roll.demand - limiter;
-					else roll.demand = roll.demandtemp;
-				}
-				
-				throttle = rcInput[RX_THRO] - throttletrim;
-				if (throttle < 0) throttle = 0;
-						
-				// SIMPLICITY MODE //	
-				pitchDemandSpin = fsin(-psiAngle+psiAngleinit+M_PI_2)*pitch.demand - fsin(-psiAngle+psiAngleinit)*roll.demand;
-				rollDemandSpin = fsin(-psiAngle+psiAngleinit)*pitch.demand + fsin(-psiAngle+psiAngleinit+M_PI_2)*roll.demand;
-			
-
-				if(fabsf(tempf) > YAW_DEADZONE) {
-					yaw.demand += tempf;
-					if(yaw.demand > M_PI) {
-						yaw.demand -= M_TWOPI;
-						yaw.demandOld -= M_TWOPI;
-					}
-					else if(yaw.demand < -M_PI) {
-						yaw.demand += M_TWOPI;
-						yaw.demandOld += M_TWOPI;
-					}
-				}
-
-						
-				GPS_HOLD = 0;
-				
-			}
-			
-			if (auxState == 1) {
-			
-					// This section of code applies some throttle increase with high tilt angles
-					float M9temp;
-					if (M9 > 0) M9temp = M9;
-					else M9temp = -M9;
-					throttle_angle = ((throttle / M9temp) - throttle); 
-					if (throttle_angle < 0) throttle_angle = 0;
-				
-				
-					if(ilink_position.isNew) {
-                    ilink_position.isNew = 0;
-					
-					if (GPS_HOLD == 0) {
-						alt_throttle = throttle;
-						targetX = ((ilink_position.craftX / 10000000.0) + 51.0);
-						targetY = ilink_position.craftY;
-						targetZ = ilink_position.craftZ;
-						GPS_HOLD = 1;
-					}
-					
-			
-				
-					
-					
-					
-		  
-					lat_diff = (double)(targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth in metres and deg-rad conversion: 6371000*PI()/180
-					lon_diff = (double)(targetY - ilink_position.craftY) * (double)111194.92664455873734580834 * fcos((((ilink_position.craftX / 10000000.0) + 51.0) * (double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
-
-					
-					
-					lat_diff_d = lat_diff - lat_diff_old;
-					lon_diff_d = lon_diff - lon_diff_old;
-					
-					
-					
-					lat_diff_old = lat_diff;
-					lon_diff_old = lon_diff;
-					
-				
-				
-				
-					// if(targetZ - oldZtarget > LIM_GPSALV) oldZtarget += LIM_GPSALV;
-					// else if(targetZ - oldZtarget < -LIM_GPSALV) oldZtarget -= LIM_GPSALV;
-					// else oldZtarget = targetZ;
-					
-					alt_diff = (double)(targetZ - ilink_position.craftZ);
-				
-				
-					alt_diff_d = alt_diff - alt_diff_old;
-					alt_diff_old = alt_diff;
-							
-							
-					lat_diff_i += lat_diff;
-					lon_diff_i += lon_diff;
-					lat_diff_i *= GPS_De;
-					lon_diff_i *= GPS_De;
-						
-				}
-
-				
-				
-				
-			
-				
-				
-				pitch.demand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*lat_diff_d;
-				roll.demand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd*lon_diff_d;
-					
-				pitchDemandSpin = fsin(-psiAngle+M_PI_2)*pitch.demand - fsin(-psiAngle)*roll.demand;
-				rollDemandSpin = fsin(-psiAngle)*pitch.demand + fsin(-psiAngle+M_PI_2)*roll.demand;
-					
-				alt_diff_i += alt_diff;
-				alt_diff_i *= GPS_ALTDe;                    
-
-				gpsThrottle = GPS_ALTKp * alt_diff + GPS_ALTKi * alt_diff_i + GPS_ALTKd * alt_diff_d + alt_throttle;
-				throttle = gpsThrottle;		
-				
-				if ((throttle - throttleold) > GPS_THRLM) throttle = throttle + GPS_THRLM;
-				if ((throttle - throttleold) < -GPS_THRLM) throttle = throttle - GPS_THRLM;
-				
-				if (throttle < 380) throttle = 380;
-			
-				throttleold = throttle;
-				
-				if ((pitchDemandSpin - pitchDemandSpinold) > PITCH_SPL) pitchDemandSpin = pitchDemandSpinold + PITCH_SPL;
-				if ((pitchDemandSpin - pitchDemandSpinold) < -PITCH_SPL) pitchDemandSpin = pitchDemandSpinold - PITCH_SPL;
-				
-				pitchDemandSpinold = pitchDemandSpin;
-				
-				if ((rollDemandSpin - rollDemandSpinold) > ROLL_SPL) rollDemandSpin = rollDemandSpinold + ROLL_SPL;
-				if ((rollDemandSpin - rollDemandSpinold) < -ROLL_SPL) rollDemandSpin = rollDemandSpinold - ROLL_SPL;
-				
-				rollDemandSpinold = rollDemandSpin;
-				
-			}
-		 
-		}
-
-	}	
-
-	
-	/////////////////////////////// AUTONOMOUS MODE 1 (Up and Down) /////////////////////////////////////
-	if (MODE_ST == 5) { 
-	
-
-		DRIFT_MagKp_temp = DRIFT_MagKp;
-
-			
-		// Arm, Disarm and Calibrate
-		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rxFirst != 0) {
-			if(rxLoss < 50) {
-				if(rcInput[RX_AILE] < MAXTHRESH && rcInput[RX_AILE] > MINTHRESH) {
-					if(rcInput[RX_ELEV] > MAXTHRESH) {
-						// arm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-
-							Arm();
-						}
-					}
-					else if(rcInput[RX_ELEV] < MINTHRESH) {
-						// disarm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							Disarm();
-						}
-					}
-					else {
-						zeroThrotCounter = 0;
-					}
-				}
-				else if(rcInput[RX_ELEV] < MAXTHRESH && rcInput[RX_ELEV] > MINTHRESH) {
-					if(rcInput[RX_AILE] > MAXTHRESH) {
-						// calib gyro    
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateGyro();
-						}
-					}
-					else if(rcInput[RX_AILE] < MINTHRESH) {
-						// calib magneto
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateMagneto();
-						}
-					}
-				}
-				
-			}
-			else {
-				zeroThrotCounter = 0;
-			}
-			
-			alt_diff = 0;
-			alt_diff_i = 0;	
-			alt_diff_d = 0;
-			
-			lat_diff = 0;
-			lat_diff_i = 0;	
-			lat_diff_d = 0;
-			
-			lon_diff = 0;
-			lon_diff_i = 0;	
-			lon_diff_d = 0;
-			
-			flapState = 0;
-			targetX = 0;
-			targetY = 0;
-			targetZ = 0;
-			switchover_count = 0;
-
-
-		}
-		
-		
-		// Flight Demands
-		else {						
-			
-			if (auxState == 0) {
-			
-				// This section of code applies some throttle increase with high tilt angles
-				float M9temp;
-				if (M9 > 0) M9temp = M9;
-				else M9temp = -M9;
-				throttle_angle = ((throttle / M9temp) - throttle); 
-				if (throttle_angle < 0) throttle_angle = 0;
-			
-				pitch.demandtemp = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-				roll.demandtemp = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-				float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 
-				
-				if (CFDC_count == 0) {
-					pitch.demandtemp = 0; 
-					roll.demandtemp = 0;
-					float tempf = 0.0; 
-				}
-				
-				float limiter;
-				
-				limiter = LIM_RATE/(float)FAST_RATE;
-				
-				
-				if(pitch.demandtemp > pitch.demand) {
-					if(pitch.demandtemp - pitch.demand > limiter && pitch.demand > 0) pitch.demand = pitch.demand + limiter;
-					else pitch.demand = pitch.demandtemp;
-				}
-				else {
-					if(pitch.demand - pitch.demandtemp > limiter && pitch.demand < 0) pitch.demand = pitch.demand - limiter;
-					else pitch.demand = pitch.demandtemp;
-				}
-				
-				if(roll.demandtemp > roll.demand) {
-					if(roll.demandtemp - roll.demand > limiter && roll.demand > 0) roll.demand = roll.demand + limiter;
-					else roll.demand = roll.demandtemp;
-				}
-				else {
-					if(roll.demand - roll.demandtemp > limiter && roll.demand < 0) roll.demand = roll.demand - limiter;
-					else roll.demand = roll.demandtemp;
-				}
-				
-				throttle = rcInput[RX_THRO] - throttletrim;
-				if (throttle < 0) throttle = 0;
-						
-				// SIMPLICITY MODE //	
-				pitchDemandSpin = fsin(-psiAngle+psiAngleinit+M_PI_2)*pitch.demand - fsin(-psiAngle+psiAngleinit)*roll.demand;
-				rollDemandSpin = fsin(-psiAngle+psiAngleinit)*pitch.demand + fsin(-psiAngle+psiAngleinit+M_PI_2)*roll.demand;
-			
-
-				if(fabsf(tempf) > YAW_DEADZONE) {
-					yaw.demand += tempf;
-					if(yaw.demand > M_PI) {
-						yaw.demand -= M_TWOPI;
-						yaw.demandOld -= M_TWOPI;
-					}
-					else if(yaw.demand < -M_PI) {
-						yaw.demand += M_TWOPI;
-						yaw.demandOld += M_TWOPI;
-					}
-				}
-
-				flapState = 0;
-				targetX = 0;
-				targetY = 0;
-				targetZ = 0;
-				switchover_count = 0;
-				
-			}
-			
-			if (auxState == 1) {
-			
-				// This section of code applies some throttle increase with high angles
-				float M9temp;
-				if (M9 > 0) M9temp = M9;
-				else M9temp = -M9;
-				throttle_angle = ((throttle / M9temp) - throttle); 
-				if (throttle_angle < 0) throttle_angle = 0;
-				
-
-				// ULTRASOUND ALTITUDE HOLD//
-				if(airborne == 0) { // If craft is not airbourne
-			
-					switchover_count = 0;
-			
-					//if (((rcInput[RX_THRO] - throttletrim - MIDSTICK) < 50) && ((rcInput[RX_THRO] - throttletrim - MIDSTICK) > -50)) { // and the throttle stick is in the middle
-					if (((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420)) {
-						ilink_attitude.roll = flapState;  // temporary
-						
-						if (flapState == 1) { // Auto take off when the button is pressed
-							if(throttle < 380) {
-								throttle += 0.9;
-							}
-							throttle += 0.1;
-						}
-
-						alt.demandincr =  0;	
-					}
-				}						
-			
-			
-			
-				if((alt.value > ULTRA_TKOFF) && (airborne == 0)) { 
-					// just taken off, set airborne to 1 and remember takeoff throttle
-					airborne = 1;
-					alt.demandincr = 0;
-					ultraTkOffThrottle = throttle;
-					ultraTkOffInput = ((float)rcInput[RX_THRO] - (float) throttletrim);				
-					targetX = ((ilink_position.craftX / 10000000.0) + 51.0);
-					targetY = ilink_position.craftY;
-				}
-			
-				if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) {
-					// If valid ultrasound reading and reading is less than landing threshold and we are airborne
-					// then increase landing counter
-					landing++;
-					
-					//If the above is satisfied consecutively more than ULTRA_DTCT times then shut down the motors
-					if(landing > ULTRA_DTCT) { 
-						airborne = 0;
-						throttleHoldOff = 1;
-						throttle = 0;
-						alt.demandincr =  0;
-						ultraerror = 0;
-						
-					}
-					
-				}	
-				// If consecutive run of readings is broken, reset the landing counter.
-				else {
-					landing = 0;
-				}			
-				
-				if (switchover_count < 40) {
-					alt.demand = ULTRA_TKOFF + ULTRA_OFFSET + alt.demandincr;    
-					alt.error = alt.demand - alt.value;
-					alt.derivative = alt.value - alt.valueOld;
-					
-					
-					
-					alt.integral *= ULTRA_De;
-					if(airborne == 1) {
-							alt.integral += alt.error;
-					}
-					
-					if (((ultraLoss >= ULTRA_OVTH)) && (ultraerror == 0)) {   // when consecutive ultrasound altitude data losses rise above ULTRA_OVTH, throttle level is reduced	
-						ultrathrottle -= 10;
-						ultraerror = 1;			
-					}
-					
-					else if (ultraerror == 1) {
-						if (throttle > 380)  ultrathrottle -= ULTRA_OVDEC;  //Decays throttle to ensure craft returns to ground level	
-					}
-					else {
-						ultrathrottle = alt.derivative * -ULTRA_Kd;
-						ultrathrottle += ULTRA_Kp*alt.error;
-						ultrathrottle += ULTRA_Ki*alt.integral;
-					}
-					
-					if (airborne == 1) {
-						throttle = ultraTkOffThrottle + ultrathrottle;
-						switchover_count++;
-					}
-				}
-					
-				if (switchover_count == 39) {
-					alt_throttle = throttle;
-					targetZ = ilink_position.craftZ;
-					gpsHoldZ = ilink_position.craftZ;
-					switchover_count = 40;
-						
-				}
-				
-				if (airborne == 1) {
-				
-					if(ilink_position.isNew) {
-						ilink_position.isNew = 0;
-						
-						lat_diff = (double)(targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth in metres and deg-rad conversion: 6371000*PI()/180
-						lon_diff = (double)(targetY - ilink_position.craftY) * (double)111194.92664455873734580834 * fcos(((ilink_position.craftX / 10000000.0) + 51.0) *(double)0.01745329251994329577); // 0.01745329251994329577f is deg-rad conversion PI()/180
-
-						
-						
-						ilink_attitude.pitch = targetY; //temporary
-						ilink_attitude.yaw =  ilink_position.craftY;
-						
-						if (switchover_count >= 40) {
-							alt_diff = (double)(targetZ - ilink_position.craftZ);
-						}
-						
-						if (switchover_count == 40) targetZ += 0.2;
-							
-							
-						
-						if ( (switchover_count == 40 ) && (((gpsHoldZ + 20) - ilink_position.craftZ) > -3) && (((gpsHoldZ + 20) - ilink_position.craftZ) < 3)) {
-							switchover_count = 43;
-							
-						}
-						
-						
-						if (switchover_count == 43) targetZ -= 0.05;
-
-						
-							
-						
-						lat_diff_d = lat_diff - lat_diff_old;
-						lon_diff_d = lon_diff - lon_diff_old;
-											
-						
-						lat_diff_old = lat_diff;
-						lon_diff_old = lon_diff;
-						
-						
-						// if(targetZ - oldZtarget > LIM_GPSALV) oldZtarget += LIM_GPSALV;
-						// else if(targetZ - oldZtarget < -LIM_GPSALV) oldZtarget -= LIM_GPSALV;
-						// else oldZtarget = targetZ;
-
-						
-						alt_diff_d = alt_diff - alt_diff_old;
-						alt_diff_old = alt_diff;
-								
-								
-						lat_diff_i += lat_diff;
-						lon_diff_i += lon_diff;
-						lat_diff_i *= GPS_De;
-						lon_diff_i *= GPS_De;
-							
-					}
-
-					if ((switchover_count == 43) && (ultraLoss == 0) && (alt.value < 1000)) {
-							switchover_count = 44;
-							alt.integral = 0;
-							ultraTkOffThrottle = throttle;
-							alt.demand = alt.value;
-					}
-					
-					if (switchover_count == 44) {
-						alt.demand -= 0.2;    
-						alt.error = alt.demand - alt.value;
-						alt.derivative = alt.value - alt.valueOld;
-						
-						
-						
-						alt.integral *= ULTRA_De;
-						if(airborne == 1) {
-								alt.integral += alt.error;
-						}
-						
-						if (((ultraLoss >= ULTRA_OVTH)) && (ultraerror == 0)) {   // when consecutive ultrasound altitude data losses rise above ULTRA_OVTH, throttle level is reduced	
-							ultrathrottle -= 1;
-							ultraerror = 1;			
-						}
-						
-						else if (ultraerror == 1) {
-							if (throttle > 380)  ultrathrottle -= ULTRA_OVDEC;  //Decays throttle to ensure craft returns to ground level	
-						}
-						else {
-							ultrathrottle = alt.derivative * -ULTRA_Kd;
-							ultrathrottle += ULTRA_Kp*alt.error;
-							ultrathrottle += ULTRA_Ki*alt.integral;
-						}
-						
-						
-						throttle = ultraTkOffThrottle + ultrathrottle;
-						
-					}
-					
-					// if ((lat_diff_d * GPS_Kd) > 0.2) lat_diff_d = (0.2 / GPS_Kd);
-					// if ((lat_diff_d * GPS_Kd) < -0.2) lat_diff_d = (-0.2 / GPS_Kd);
-					// if ((lon_diff_d * GPS_Kd) > 0.2) lon_diff_d = (0.2 / GPS_Kd);
-					// if ((lon_diff_d * GPS_Kd) < -0.2) lon_diff_d = (-0.2 / GPS_Kd);
-					
-					pitch.demand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*lat_diff_d;
-					roll.demand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd*lon_diff_d;
-						
-					pitchDemandSpin = fsin(-psiAngle+M_PI_2)*pitch.demand - fsin(-psiAngle)*roll.demand;
-					rollDemandSpin = fsin(-psiAngle)*pitch.demand + fsin(-psiAngle+M_PI_2)*roll.demand;
-						
-					alt_diff_i += alt_diff;
-					alt_diff_i *= GPS_ALTDe;                    
-					
-					if ((switchover_count >= 40) && (switchover_count < 44)) {
-					gpsThrottle = GPS_ALTKp * alt_diff + GPS_ALTKi * alt_diff_i + GPS_ALTKd * alt_diff_d + alt_throttle;
-					throttle = gpsThrottle;	
-					}				
-					
-					if ((throttle - throttleold) > GPS_THRLM) throttle = throttle + GPS_THRLM;
-					if ((throttle - throttleold) < -GPS_THRLM) throttle = throttle - GPS_THRLM;
-					
-					if (throttle < 380) throttle = 380;
-				
-					throttleold = throttle;
-													
-					
-					if ((pitchDemandSpin - pitchDemandSpinold) > PITCH_SPL) pitchDemandSpin = pitchDemandSpinold + PITCH_SPL;
-					if ((pitchDemandSpin - pitchDemandSpinold) < -PITCH_SPL) pitchDemandSpin = pitchDemandSpinold - PITCH_SPL;
-					
-					pitchDemandSpinold = pitchDemandSpin;
-					
-					if ((rollDemandSpin - rollDemandSpinold) > ROLL_SPL) rollDemandSpin = rollDemandSpinold + ROLL_SPL;
-					if ((rollDemandSpin - rollDemandSpinold) < -ROLL_SPL) rollDemandSpin = rollDemandSpinold - ROLL_SPL;
-					
-					rollDemandSpinold = rollDemandSpin;
-					
-				}
-			 
-			}
-
-			
-
-			
-		}
-		
-
-	} 
-	
-	
-	
-/////////////////////////////// AUTONOMOUS MODE 2 (Up and Out to One Waypoint, back and land.) /////////////////////////////////////
-	if (MODE_ST == 6) { 
-	
-		
-		DRIFT_MagKp_temp = DRIFT_MagKp;
-		throttle_angle = 0;
-
-		lat_diff = (double)(51.592882 - ((ilink_position.craftX/10000000.0)+51.0)) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth in metres and deg-rad conversion: 6371000*PI()/180
-		lon_diff = (double)(-1.118982 - ilink_position.craftY) * (double)111194.92664455873734580834 * fcos(((ilink_position.craftX/10000000.0)+51.0) *(double)0.01745329251994329577); // 0.01745329251994329577f is deg-rad conversion PI()/180
-
-		ilink_attitude.roll = lat_diff; // temporary
-		ilink_attitude.pitch = lon_diff; // temporary
-		ilink_attitude.yaw = psiAngle; // temporary
-		
-			
-		// Arm, Disarm and Calibrate
-		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rxFirst != 0) {
-			if(rxLoss < 50) {
-				if(rcInput[RX_AILE] < MAXTHRESH && rcInput[RX_AILE] > MINTHRESH) {
-					if(rcInput[RX_ELEV] > MAXTHRESH) {
-						// arm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-
-							Arm();
-						}
-					}
-					else if(rcInput[RX_ELEV] < MINTHRESH) {
-						// disarm
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							Disarm();
-						}
-					}
-					else {
-						zeroThrotCounter = 0;
-					}
-				}
-				else if(rcInput[RX_ELEV] < MAXTHRESH && rcInput[RX_ELEV] > MINTHRESH) {
-					if(rcInput[RX_AILE] > MAXTHRESH) {
-						// calib gyro    
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateGyro();
-						}
-					}
-					else if(rcInput[RX_AILE] < MINTHRESH) {
-						// calib magneto
-						if(zeroThrotCounter++ > ZEROTHROTMAX) {
-							zeroThrotCounter = 0;
-							CalibrateMagneto();
-						}
-					}
-				}
-				
-			}
-			else {
-				zeroThrotCounter = 0;
-			}
-			
-			alt_diff = 0;
-			alt_diff_i = 0;	
-			alt_diff_d = 0;
-			
-			lat_diff = 0;
-			lat_diff_i = 0;	
-			lat_diff_d = 0;
-			
-			lon_diff = 0;
-			lon_diff_i = 0;	
-			lon_diff_d = 0;
-			
-			flapState = 0;
-			targetX = 0;
-			targetY = 0;
-			targetZ = 0;
-			targetX_tko = 0;
-			targetY_tko = 0;
-			switchover_count = 0;
-		}
-		
-		
-		// Flight Demands
-		else {						
-			
-			if (auxState == 0) {
-			
-				// This section of code applies some throttle increase with high angles
-				float M9temp;
-				if (M9 > 0) M9temp = M9;
-				else M9temp = -M9;
-				throttle_angle = ((throttle / M9temp) - throttle); 
-				if (throttle_angle < 0) throttle_angle = 0;
-				
-			
-				pitch.demandtemp = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-				roll.demandtemp = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-				float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 
-				
-				if (CFDC_count == 0) {
-					pitch.demandtemp = 0; 
-					roll.demandtemp = 0;
-					float tempf = 0.0; 
-				}
-				
-				float limiter;
-				
-				limiter = LIM_RATE/(float)FAST_RATE;
-				
-				
-				if(pitch.demandtemp > pitch.demand) {
-					if(pitch.demandtemp - pitch.demand > limiter && pitch.demand > 0) pitch.demand = pitch.demand + limiter;
-					else pitch.demand = pitch.demandtemp;
-				}
-				else {
-					if(pitch.demand - pitch.demandtemp > limiter && pitch.demand < 0) pitch.demand = pitch.demand - limiter;
-					else pitch.demand = pitch.demandtemp;
-				}
-				
-				if(roll.demandtemp > roll.demand) {
-					if(roll.demandtemp - roll.demand > limiter && roll.demand > 0) roll.demand = roll.demand + limiter;
-					else roll.demand = roll.demandtemp;
-				}
-				else {
-					if(roll.demand - roll.demandtemp > limiter && roll.demand < 0) roll.demand = roll.demand - limiter;
-					else roll.demand = roll.demandtemp;
-				}
-				
-				throttle = rcInput[RX_THRO] - throttletrim;
-				if (throttle < 0) throttle = 0;
-						
-				// SIMPLICITY MODE //	
-				pitchDemandSpin = fsin(-psiAngle+psiAngleinit+M_PI_2)*pitch.demand - fsin(-psiAngle+psiAngleinit)*roll.demand;
-				rollDemandSpin = fsin(-psiAngle+psiAngleinit)*pitch.demand + fsin(-psiAngle+psiAngleinit+M_PI_2)*roll.demand;
-			
-
-				if(fabsf(tempf) > YAW_DEADZONE) {
-					yaw.demand += tempf;
-					if(yaw.demand > M_PI) {
-						yaw.demand -= M_TWOPI;
-						yaw.demandOld -= M_TWOPI;
-					}
-					else if(yaw.demand < -M_PI) {
-						yaw.demand += M_TWOPI;
-						yaw.demandOld += M_TWOPI;
-					}
-				}
-
-					
-				flapState = 0;
-				targetX = 0;
-				targetY = 0;
-				targetZ = 0;
-				switchover_count = 0;
-				targetX_tko = 0;
-				targetY_tko = 0;
-			
-			}
-			
-			if (auxState == 1) {
-				
-				// This section of code applies some throttle increase with high tilt angles
-				float M9temp;
-				if (M9 > 0) M9temp = M9;
-				else M9temp = -M9;
-				throttle_angle = ((throttle / M9temp) - throttle); 
-				if (throttle_angle < 0) throttle_angle = 0; 
-				
-				// ULTRASOUND ALTITUDE HOLD//
-				if(airborne == 0) { // If craft is not airbourne
-			
-					switchover_count = 0;
-					pitch.demand = 0;
-					roll.demand = 0;
-			
-					//if (((rcInput[RX_THRO] - throttletrim - MIDSTICK) < 50) && ((rcInput[RX_THRO] - throttletrim - MIDSTICK) > -50)) { // and the throttle stick is in the middle
-					if (((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420)) {
-						if (flapState == 1) { // Auto take off when the button is pressed
-							if(throttle < 380) {
-								throttle += 1.2;
-							}
-							throttle += 0.2;
-						}
-
-						alt.demandincr =  0;	
-					}
-				}						
-			
-			
-			
-				if((alt.value > ULTRA_TKOFF) && (airborne == 0)) { 
-					// just taken off, set airborne to 1 and remember takeoff throttle
-					airborne = 1;
-					alt.demandincr = 0;
-					lat_diff_i = 0;
-					lon_diff_i = 0;
-					ultraTkOffThrottle = throttle;
-					ultraTkOffInput = ((float)rcInput[RX_THRO] - (float) throttletrim);										
-					targetX_tko = ((ilink_position.craftX / 10000000.0) + 51.0);
-					targetY_tko = ilink_position.craftY;
-					targetX = targetX_tko;
-					targetY = targetY_tko;	
-				}
-			
-				if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) {
-					// If valid ultrasound reading and reading is less than landing threshold and we are airborne
-					// then increase landing counter
-					landing++;
-					
-					//If the above is satisfied consecutively more than ULTRA_DTCT times then shut down the motors
-					if(landing > ULTRA_DTCT) { 
-						airborne = 0;
-						throttleHoldOff = 1;
-						throttle = 0;
-						alt.demandincr =  0;
-						ultraerror = 0;
-						
-					}
-					
-				}	
-				// If consecutive run of readings is broken, reset the landing counter.
-				else {
-					landing = 0;
-				}			
-				
-				if (switchover_count < 40) {
-					alt.demand = ULTRA_TKOFF + ULTRA_OFFSET + alt.demandincr;    
-					alt.error = alt.demand - alt.value;
-					alt.derivative = alt.value - alt.valueOld;
-					
-					
-					
-					alt.integral *= ULTRA_De;
-					if(airborne == 1) {
-							alt.integral += alt.error;
-					}
-					
-					if (((ultraLoss >= ULTRA_OVTH)) && (ultraerror == 0)) {   // when consecutive ultrasound altitude data losses rise above ULTRA_OVTH, throttle level is reduced	
-						ultrathrottle -= 10;
-						ultraerror = 1;			
-					}
-					
-					else if (ultraerror == 1) {
-						if (throttle > 380)  ultrathrottle -= ULTRA_OVDEC;  //Decays throttle to ensure craft returns to ground level	
-					}
-					else {
-						ultrathrottle = alt.derivative * -ULTRA_Kd;
-						ultrathrottle += ULTRA_Kp*alt.error;
-						ultrathrottle += ULTRA_Ki*alt.integral;
-					}
-					
-					if (airborne == 1) {
-						throttle = ultraTkOffThrottle + ultrathrottle;
-						switchover_count++;
-					}
-				}
-					
-				if (switchover_count == 39) {
-					alt_throttle = throttle;
-					targetZ = ilink_position.craftZ;
-					gpsHoldZ = ilink_position.craftZ;
-					switchover_count = 40;
-						
-				}
-				
-				if (airborne == 1) {
-				
-					if(ilink_position.isNew) {
-						ilink_position.isNew = 0;
-						
-						lat_diff = (double)(targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth in metres and deg-rad conversion: 6371000*PI()/180
-						lon_diff = (double)(targetY - ilink_position.craftY) * (double)111194.92664455873734580834 * fcos(((ilink_position.craftX / 10000000.0) + 51.0) *(double)0.01745329251994329577); // 0.01745329251994329577f is deg-rad conversion PI()/180
-
-						
-						
-						if (switchover_count >= 40) {
-							alt_diff = (double)(targetZ - ilink_position.craftZ);
-						}
-						
-						if (switchover_count == 40) targetZ += 0.4;
-							
-							
-						
-						if ( (switchover_count == 40 ) && (((gpsHoldZ + 30) - ilink_position.craftZ) > -3) && (((gpsHoldZ + 30) - ilink_position.craftZ) < 3)) {
-							switchover_count = 41;
-							
-							targetX = targetX_tko + Xout;
-							targetY = targetY_tko + Yout;	
-						}
-						
-						if ( (switchover_count == 41 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 42;
-						
-							targetX += 0.000200;
-							targetY += 0.000200;
-								
-						}
-						
-						if ( (switchover_count == 42 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 43;
-							
-							targetX -= 0.000400;
-						}	
-								
-						if ( (switchover_count == 43 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 44;
-							
-							targetY -= 0.0001;
-						}		
-								
-						if ( (switchover_count == 44 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 45;
-							
-							targetX += 0.000400;
-						}	
-								
-						if ( (switchover_count == 45 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 46;
-							
-							targetY -= 0.0001;
-						}		
-						
-						if ( (switchover_count == 46 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 47;
-							
-							targetX -= 0.000400;
-						}	
-								
-						if ( (switchover_count == 47 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 48;
-							
-							targetY -= 0.0001;
-						}		
-								
-						if ( (switchover_count == 48 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 49;
-							
-							targetX += 0.000400;
-						}	
-								
-						if ( (switchover_count == 49 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 50;
-							
-							targetY -= 0.0001;
-						}
-						
-						if ( (switchover_count == 50 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 51;
-							
-							targetX -= 0.000400;
-						}	
-						
-						if ( (switchover_count == 51 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005)  &&  ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 52;
-							
-							targetX = targetX_tko;
-							targetY = targetY_tko;
-						}
-						
-							
-							
-						if ( (switchover_count == 52 ) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) > - 0.00005) && ((targetX - ((ilink_position.craftX / 10000000.0) + 51.0)) < 0.00005) && ((targetY - ilink_position.craftY) > - 0.00005) && ((targetY - ilink_position.craftY) < 0.00005)) {
-							switchover_count = 53;
-							
-						}
-						
-						if (switchover_count == 53) targetZ -= 0.08;
-
-						
-							
-						
-						lat_diff_d = lat_diff - lat_diff_old;
-						lon_diff_d = lon_diff - lon_diff_old;
-											
-						
-						lat_diff_old = lat_diff;
-						lon_diff_old = lon_diff;
-						
-						
-						// if(targetZ - oldZtarget > LIM_GPSALV) oldZtarget += LIM_GPSALV;
-						// else if(targetZ - oldZtarget < -LIM_GPSALV) oldZtarget -= LIM_GPSALV;
-						// else oldZtarget = targetZ;
-
-						
-						alt_diff_d = alt_diff - alt_diff_old;
-						alt_diff_old = alt_diff;
-								
-								
-						lat_diff_i += lat_diff;
-						lon_diff_i += lon_diff;
-						lat_diff_i *= GPS_De;
-						lon_diff_i *= GPS_De;
-							
-					}
-
-					if ((switchover_count == 53) && (ultraLoss == 0) && (alt.value < 1000)) {
-							switchover_count = 54;
-							alt.integral = 0;
-							ultraTkOffThrottle = throttle;
-							alt.demand = alt.value ;
-					}
-					
-					if (switchover_count == 54) {
-						alt.demand -= 0.2;    
-						alt.error = alt.demand - alt.value;
-						alt.derivative = alt.value - alt.valueOld;
-						
-						
-						
-						alt.integral *= ULTRA_De;
-						if(airborne == 1) {
-								alt.integral += alt.error;
-						}
-						
-						if (((ultraLoss >= ULTRA_OVTH)) && (ultraerror == 0)) {   // when consecutive ultrasound altitude data losses rise above ULTRA_OVTH, throttle level is reduced	
-							ultrathrottle -= 10;
-							ultraerror = 1;			
-						}
-						
-						else if (ultraerror == 1) {
-							if (throttle > 380)  ultrathrottle -= ULTRA_OVDEC;  //Decays throttle to ensure craft returns to ground level	
-						}
-						else {
-							ultrathrottle = alt.derivative * -ULTRA_Kd;
-							ultrathrottle += ULTRA_Kp*alt.error;
-							ultrathrottle += ULTRA_Ki*alt.integral;
-						}
-						
-						
-						throttle = ultraTkOffThrottle + ultrathrottle;
-						
-					}
-					
-					// if ((lat_diff_d * GPS_Kd) > 0.2) lat_diff_d = (0.2 / GPS_Kd);
-					// if ((lat_diff_d * GPS_Kd) < -0.2) lat_diff_d = (-0.2 / GPS_Kd);
-					// if ((lon_diff_d * GPS_Kd) > 0.2) lon_diff_d = (0.2 / GPS_Kd);
-					// if ((lon_diff_d * GPS_Kd) < -0.2) lon_diff_d = (-0.2 / GPS_Kd);
-					
-					pitch.demand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*lat_diff_d;
-					roll.demand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd*lon_diff_d;
-						
-					pitchDemandSpin = fsin(-psiAngle+M_PI_2)*pitch.demand - fsin(-psiAngle)*roll.demand;
-					rollDemandSpin = fsin(-psiAngle)*pitch.demand + fsin(-psiAngle+M_PI_2)*roll.demand;
-						
-					alt_diff_i += alt_diff;
-					alt_diff_i *= GPS_ALTDe;                    
-					
-					if ((switchover_count >= 40) && (switchover_count < 54)) {
-					gpsThrottle = GPS_ALTKp * alt_diff + GPS_ALTKi * alt_diff_i + GPS_ALTKd * alt_diff_d + alt_throttle;
-					throttle = gpsThrottle;	
-					}				
-					
-					if ((throttle - throttleold) > GPS_THRLM) throttle = throttle + GPS_THRLM;
-					if ((throttle - throttleold) < -GPS_THRLM) throttle = throttle - GPS_THRLM;
-					
-					if (throttle < 380) throttle = 380;
-				
-					throttleold = throttle;
-							
-					
-					if ((pitchDemandSpin - pitchDemandSpinold) > PITCH_SPL) pitchDemandSpin = pitchDemandSpinold + PITCH_SPL;
-					if ((pitchDemandSpin - pitchDemandSpinold) < -PITCH_SPL) pitchDemandSpin = pitchDemandSpinold - PITCH_SPL;
-					
-					pitchDemandSpinold = pitchDemandSpin;
-					
-					if ((rollDemandSpin - rollDemandSpinold) > ROLL_SPL) rollDemandSpin = rollDemandSpinold + ROLL_SPL;
-					if ((rollDemandSpin - rollDemandSpinold) < -ROLL_SPL) rollDemandSpin = rollDemandSpinold - ROLL_SPL;
-					
-					rollDemandSpinold = rollDemandSpin;
-					
-				}
-			 
-			}
-
-			
-
-			
-		}
-		
-
-	} 
-	
- 
-	
-// ****************************************************************************
-// *** Motor PID Control
-// ****************************************************************************		
-		
-		if(pitchDemandSpin > LIM_ANGLE) pitchDemandSpin = LIM_ANGLE;	
-		if(pitchDemandSpin < -LIM_ANGLE) pitchDemandSpin = -LIM_ANGLE;
-		if(rollDemandSpin > LIM_ANGLE) rollDemandSpin = LIM_ANGLE;
-		if(rollDemandSpin < -LIM_ANGLE) rollDemandSpin = -LIM_ANGLE;
- 
-        pitch.derivative = (pitchDemandSpin - pitch.demandOld);    
-        roll.derivative = (rollDemandSpin - roll.demandOld);
-        yaw.derivative = (yaw.demand - yaw.demandOld);
-        
-        pitch.demandOld = pitchDemandSpin;
-        roll.demandOld = rollDemandSpin;
-        yaw.demandOld = yaw.demand;
-        
-        pitcherror = pitchDemandSpin + thetaAngle;
-        rollerror = rollDemandSpin - phiAngle;
-        yawerror = yaw.demand + psiAngle; 
-        
-        if(pitcherror > M_PI) pitcherror -= M_TWOPI;
-        else if(pitcherror < -M_PI) pitcherror += M_TWOPI;
-        
-        if(rollerror > M_PI) rollerror -= M_TWOPI;
-        else if(rollerror < -M_PI) rollerror += M_TWOPI;
-        
-        if(yawerror > M_PI) yawerror -= M_TWOPI;
-        else if(yawerror < -M_PI) yawerror += M_TWOPI;
-        
-        
-        if(throttle > 380) {
-            pitch.integral += pitcherror;
-            roll.integral += rollerror;
-        }
-        else {
-            pitch.integral += pitcherror/5.0f;
-            roll.integral += rollerror/5.0f;
-        }
-        
-        pitch.integral *= PITCH_De;
-        roll.integral *= ROLL_De;
-        
-        
-        // Detune at high throttle
-        float throttlefactor = throttle/MAXSTICK;
-        if(throttlefactor > 1) throttlefactor = 1;
-        
-        float detunefactor = 1-(throttlefactor * DETUNE);
-        float thisPITCH_Kd = PITCH_Kd;
-        float thisPITCH_Kdd = PITCH_Kdd * detunefactor;
-        float thisROLL_Kd = ROLL_Kd;
-        float thisROLL_Kdd = ROLL_Kdd * detunefactor;
-        float thisPITCH_Ki = PITCH_Ki;
-        float thisROLL_Ki = ROLL_Ki;
-                
-        // Attitude control PID loops
-        
-        pitchcorrection = -((float)Gyro.Y.value - PITCH_Boost*pitch.derivative) * thisPITCH_Kd;
-        pitchcorrection += -thisPITCH_Kdd*((float)Gyro.Y.value - pitch.valueOld);
-        pitchcorrection += -PITCH_Kp*pitcherror;
-        pitchcorrection += -thisPITCH_Ki*pitch.integral;
-
-        rollcorrection = -((float)Gyro.X.value - ROLL_Boost*roll.derivative) * thisROLL_Kd;
-        rollcorrection += -thisROLL_Kdd*((float)Gyro.X.value - roll.valueOld);
-        rollcorrection += ROLL_Kp*rollerror;
-        rollcorrection += thisROLL_Ki*roll.integral;
-
-        yawcorrection = -((float)Gyro.Z.value + YAW_Boost*yaw.derivative) * YAW_Kd; 
-        yawcorrection += -YAW_Kp*yawerror;
-        
-        pitch.valueOld = (float)Gyro.Y.value;
-        roll.valueOld = (float)Gyro.X.value;
-        yaw.valueOld = (float)Gyro.Z.value;
-        
-        motorN = pitchcorrection + rollcorrection;
-        motorE = pitchcorrection - rollcorrection;
-        motorS = -pitchcorrection - rollcorrection;
-        motorW = -pitchcorrection + rollcorrection;
-        
-        motorN -= yawcorrection;
-        motorE += yawcorrection;
-        motorS -= yawcorrection;
-        motorW += yawcorrection;
-        
-        motorNav *= SPR_OUT;
-        motorNav += (1-SPR_OUT) * motorN;
-		
-		motorEav *= SPR_OUT;
-        motorEav += (1-SPR_OUT) * motorE;
-		
-		motorSav *= SPR_OUT;
-        motorSav += (1-SPR_OUT) * motorS;
-		
-		motorWav *= SPR_OUT;
-        motorWav += (1-SPR_OUT) * motorW;
-		       
-        tempN = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-        tempE = (signed short)motorEav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-        tempS = (signed short)motorSav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-        tempW = (signed short)motorWav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-        
-        if (rcInput[RX_THRO] - throttletrim <  OFFSTICK || throttleHoldOff > 0 || rxLoss > 25) {
-            pitch.integral=0;
-            roll.integral=0;
-            alt.integral = 0;
-            
-            throttle = 0;
-            airborne = 0;
-            alt.demandincr =  0;
-			ultraerror = 0;
-            
-            
-            if(rcInput[RX_THRO] - throttletrim <  OFFSTICK) throttleHoldOff = 0;
-            
-            yaw.demand = -psiAngle;
-            yaw.demandOld = -psiAngle;
-            
-            if(armed) {
-                PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-            }
-            ilink_outputs0.channel[0] = THROTTLEOFFSET;
-            ilink_outputs0.channel[1] = THROTTLEOFFSET;
-            ilink_outputs0.channel[2] = THROTTLEOFFSET;
-            ilink_outputs0.channel[3] = THROTTLEOFFSET;
-            
-            motorN = 0;
-            motorE = 0;
-            motorS = 0;
-            motorW = 0;
-			
-			motorNav = 0;
-            motorEav = 0;
-            motorSav = 0;
-            motorWav = 0;
-        }
-        else if(armed) {
-            float temp;
-            
-            if(throttle > MAXTHROTTLE*MAXTHROTTLEPERCENT) throttle = MAXTHROTTLE*MAXTHROTTLEPERCENT;
-            
-            temp = tempN;
-            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-            PWMSetN(temp);
-            ilink_outputs0.channel[0] = temp;
-            
-            temp = tempE;
-            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-            PWMSetE(temp);
-            ilink_outputs0.channel[1] = temp;
-            
-            temp = tempS;
-            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-            PWMSetS(temp);
-            ilink_outputs0.channel[2] = temp;
-            
-            temp = tempW;
-            if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-            else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-            PWMSetW(temp);
-            ilink_outputs0.channel[3] = temp;
-            ilink_outputs0.isNew = 1;
-
-        }
-               
-}
-
-
-// ****************************************************************************
-// ****************************************************************************
-// *** FUNCTIONS
-// ****************************************************************************
-// ****************************************************************************
-
-
-void ReadGyroSensors(void) { // 400Hz -ish
-    signed short data[4];
-    if(GetGyro(data)) {
-        Gyro.X.raw = data[0];
-        Gyro.Y.raw = data[2];
-        Gyro.Z.raw = -data[1];
-        ilink_rawimu.xGyro = Gyro.X.raw;
-        ilink_rawimu.yGyro = Gyro.Y.raw;
-        ilink_rawimu.zGyro = Gyro.Z.raw;
-        Gyro.X.total -= Gyro.X.history[Gyro.count];
-        Gyro.Y.total -= Gyro.Y.history[Gyro.count];
-        Gyro.Z.total -= Gyro.Z.history[Gyro.count];
-        Gyro.X.total += Gyro.X.raw;
-        Gyro.Y.total += Gyro.Y.raw;
-        Gyro.Z.total += Gyro.Z.raw;
-        Gyro.X.history[Gyro.count] = Gyro.X.raw;
-        Gyro.Y.history[Gyro.count] = Gyro.Y.raw;
-        Gyro.Z.history[Gyro.count] = Gyro.Z.raw;
-        Gyro.X.av = (float)Gyro.X.total/(float)GAV_LEN;
-        Gyro.Y.av = (float)Gyro.Y.total/(float)GAV_LEN;
-        Gyro.Z.av = (float)Gyro.Z.total/(float)GAV_LEN;
-        if(++Gyro.count >= GAV_LEN) Gyro.count = 0;
-        
-
-        // Gyroscale factors: 2000dps: 818.51113590117601252569
-        // 500dps: 3274.04454360470405010275
-        // 250dps: 6548.0890872094081002055
-        Gyro.X.value = (Gyro.X.av - Gyro.X.offset)/818.51113590117601252569f;
-        Gyro.Y.value = (Gyro.Y.av - Gyro.Y.offset)/818.51113590117601252569f;
-        Gyro.Z.value = (Gyro.Z.av - Gyro.Z.offset)/818.51113590117601252569f;
-        ilink_scaledimu.xGyro = Gyro.X.value * 1000;
-        ilink_scaledimu.yGyro = Gyro.Y.value * 1000;
-        ilink_scaledimu.zGyro = Gyro.Z.value * 1000;
-    }
-}
-
-void ReadAccelSensors(void) {
-    float sumsqu;
-    signed short data[4];
-    if(GetAccel(data)) {
-        Accel.X.raw = data[0];
-        Accel.Y.raw = data[2];
-        Accel.Z.raw = -data[1];
-        ilink_rawimu.xAcc = Accel.X.raw;
-        ilink_rawimu.yAcc = Accel.Y.raw;
-        ilink_rawimu.zAcc = Accel.Z.raw;
-        Accel.X.total -= Accel.X.history[Accel.count];
-        Accel.Y.total -= Accel.Y.history[Accel.count];
-        Accel.Z.total -= Accel.Z.history[Accel.count];
-        Accel.X.total += Accel.X.raw;
-        Accel.Y.total += Accel.Y.raw;
-        Accel.Z.total += Accel.Z.raw;
-        Accel.X.history[Accel.count] = Accel.X.raw;
-        Accel.Y.history[Accel.count] = Accel.Y.raw;
-        Accel.Z.history[Accel.count] = Accel.Z.raw;
-        Accel.X.av = (float)Accel.X.total/(float)AAV_LEN;
-        Accel.Y.av = (float)Accel.Y.total/(float)AAV_LEN;
-        Accel.Z.av = (float)Accel.Z.total/(float)AAV_LEN;
-        if(++Accel.count >= AAV_LEN) Accel.count = 0;
-        
-        // Normalise accelerometer
-        sumsqu = finvSqrt((float)Accel.X.av*(float)Accel.X.av + (float)Accel.Y.av*(float)Accel.Y.av + (float)Accel.Z.av*(float)Accel.Z.av); // Accelerometr data is normalised so no need to convert units.
-        Accel.X.value = (float)Accel.X.av * sumsqu;
-        Accel.Y.value = (float)Accel.Y.av * sumsqu;
-        Accel.Z.value = (float)Accel.Z.av * sumsqu;
-        ilink_scaledimu.xAcc = Accel.X.value * 1000;
-        ilink_scaledimu.yAcc = Accel.Y.value * 1000;
-        ilink_scaledimu.zAcc = Accel.Z.value * 1000;
-    }
-}
-
-void ReadMagSensors(void) { // 50Hz-ish
-    float sumsqu, temp1, temp2, temp3;
-    signed short data[4];
-    if(GetMagneto(data)) {
-        Mag.X.raw = data[0];
-        Mag.Y.raw = data[2];
-        Mag.Z.raw = -data[1];
-		ilink_rawimu.xMag = Mag.X.raw;
-        ilink_rawimu.yMag = Mag.Y.raw;
-        ilink_rawimu.zMag = Mag.Z.raw;
-        Mag.X.total -= Mag.X.history[Mag.count];
-        Mag.Y.total -= Mag.Y.history[Mag.count];
-        Mag.Z.total -= Mag.Z.history[Mag.count];
-        Mag.X.total += Mag.X.raw;
-        Mag.Y.total += Mag.Y.raw;
-        Mag.Z.total += Mag.Z.raw;
-        Mag.X.history[Mag.count] = Mag.X.raw;
-        Mag.Y.history[Mag.count] = Mag.Y.raw;
-        Mag.Z.history[Mag.count] = Mag.Z.raw;
-        Mag.X.av = (float)Mag.X.total/(float)MAV_LEN;
-        Mag.Y.av = (float)Mag.Y.total/(float)MAV_LEN;
-        Mag.Z.av = (float)Mag.Z.total/(float)MAV_LEN;
-		if(++Mag.count >= MAV_LEN) Mag.count = 0;
-	
-		if (CFDC_count == 1) {
-			Mag.X.av += CFDC_mag_x_error;
-			Mag.Y.av += CFDC_mag_y_error;
-			Mag.Z.av += CFDC_mag_z_error;
-		}
-		
-        // Correcting Elipsoid Centre Point
-        temp1 = Mag.X.av - MAGCOR_M1;
-        temp2 = Mag.Y.av - MAGCOR_M2;
-        temp3 = Mag.Z.av - MAGCOR_M3;
-
-        // Reshaping Elipsoid to Sphere
-        temp1 = MAGCOR_N1 * temp1 + MAGCOR_N2 * temp2 + MAGCOR_N3 * temp3;
-        temp2 = MAGCOR_N5 * temp2 + MAGCOR_N6 * temp3;
-        temp3 = MAGCOR_N9 * temp3;
-		/////////////Current Field Distortion Compensation (CFDC)
-		
-		if (throttle == 0) {
-			CFDC_mag_x_zero = Mag.X.av;
-			CFDC_mag_y_zero = Mag.Y.av;
-			CFDC_mag_z_zero = Mag.Z.av;
-			CFDC_count = 0;			
-		}
-		
-		
-		if ((throttle > 380) && (CFDC_count == 0)) {
-			CFDC_mag_x_error = CFDC_mag_x_zero - Mag.X.av;
-			CFDC_mag_y_error = CFDC_mag_y_zero - Mag.Y.av;
-			CFDC_mag_z_error = CFDC_mag_z_zero - Mag.Z.av;
-			CFDC_count = 1;	
-			
-		}
-		
-		
-
-        // Normalize magneto
-        sumsqu = finvSqrt((float)temp1*(float)temp1 + (float)temp2*(float)temp2 + (float)temp3*(float)temp3); // Magnetoerometr data is normalised so no need to convert units.
-        Mag.X.value = (float)temp1 * sumsqu;
-        Mag.Y.value = (float)temp2 * sumsqu;
-        Mag.Z.value = (float)temp3 * sumsqu;
-        
-        ilink_scaledimu.xMag = Mag.X.value * 1000;
-        ilink_scaledimu.yMag = Mag.Y.value * 1000;
-        ilink_scaledimu.zMag = Mag.Z.value * 1000;
-	
-    }
-    
-
-}
 
 // ****************************************************************************
 // *** EEPROM Functions
@@ -3499,57 +2062,7 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
                 }
             break;
         
-		/*
-        case ID_ILINK_THALCTRL:
-            switch(ilink_thalctrl.command) {
-                case MAVLINK_MSG_ID_COMMAND_LONG:
-                    switch(ilink_thalctrl.data) {
-                        case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN:
-                            // KILL UAS
-                            Disarm();
-                            ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl, sizeof(ilink_thalctrl)/2 - 1);
-                            break;
-                        
-                        case MAV_CMD_NAV_LAND:
-                            if(MODE_GPS >= 2) {
-                                MODE_GPS = 4;
-                            }
-                            break;
-                        
-                        case MAV_CMD_NAV_TAKEOFF:
-                            if(MODE_GPS == 1) { // 1 is idle
-                                MODE_GPS = 2; // 2 is GPS takeoff
-                            }
-                    }
-                    break;
-                case MAVLINK_MSG_ID_SET_MODE:
-                    if(ilink_thalctrl.data & MAV_MODE_FLAG_SAFETY_ARMED) {
-                        Arm();
-                    }
-                    else {
-                        Disarm();
-                    }
-                    
-                    if(ilink_thalctrl.data & MAV_MODE_FLAG_GUIDED_ENABLED) {
-                        if(MODE_GPS == 0) {
-                            MODE_GPS = 1;
-                        }
-                        ilink_thalstat.flightMode |= (0x1 << 4);
-                    }
-                    else {
-                        if(MODE_GPS == 1) { // 1 is GPS idle       
-                            MODE_GPS = 0;
-                        }
-                        else {
-                            MODE_GPS = 5; // 5 is GPS land and switch off GPS;
-                        }
-                        ilink_thalstat.flightMode &= ~(0x1 << 4);
-                    }
-                    
-                    break;
-            }
-            break;
-		*/	
+		
 			
         case ID_ILINK_THALPARAM:
             // match up received parameter with stored parameter.

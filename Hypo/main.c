@@ -400,10 +400,7 @@ void RITInterrupt(void) {
             posupdate = 0;
 			
 			
-			
-			// double bleh = (gps_nav_posllh.lat - (51.0*10000000.0f));
-            // ilink_position.craftX = bleh;
-			ilink_position.craftX = (gps_nav_posllh.lat - (51.0*10000000.0f));
+			ilink_position.craftX = gps_nav_posllh.lat / 10000000.0f;
             ilink_position.craftY = gps_nav_posllh.lon / 10000000.0f;
             ilink_position.craftZ = (float)gps_nav_posllh.hMSL/ 1000.0f;
             
