@@ -114,7 +114,7 @@ typedef struct{
 	volatile float value;
 	volatile float offset;
 	volatile signed int total;
-	float bias;
+	float error;
 	signed short history[GAV_LEN];
 } sensorStructGyro;
 
@@ -239,8 +239,8 @@ struct paramStorage_struct paramStorage[] = {
 	#define DRIFT_AccelKp   paramStorage[0].value	
 	#define DRIFT_MagKp	 paramStorage[1].value  
   
-	{"SPR_ULTRA",	   0.95f},  
-	#define SPR_ULTRA 		paramStorage[2].value
+	{"LPF_ULTRA",	   0.95f},  
+	#define LPF_ULTRA 		paramStorage[2].value
 
 	{"YAW_SEN",	 0.00002f},	 
 	{"PITCH_SEN",	0.0022f},	
@@ -366,8 +366,8 @@ struct paramStorage_struct paramStorage[] = {
 	#define CAL_AUTO		paramStorage[52].value	
 	
 	
-	{"SPR_OUT",	   0.6f},  
-	#define SPR_OUT 		paramStorage[53].value
+	{"LPF_OUT",	   0.6f},  
+	#define LPF_OUT 		paramStorage[53].value
 	
 	
 	{"BAT_LOW",		 11000.0f},
@@ -521,9 +521,9 @@ void setup() {
 		motorSav = 0;
 		motorWav = 0;
 		
-		Gyro.Y.bias = 0;
-		Gyro.X.bias = 0;
-		Gyro.Z.bias = 0;
+		Gyro.Y.error = 0;
+		Gyro.X.error = 0;
+		Gyro.Z.error = 0;
 		
 		throttleHoldOff = 1;
 		
@@ -676,10 +676,10 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 	
 
 	// CREATE THE ESTIMATED ROTATION MATRIX //
-	// The measured quaternion updates the estimated quaternion via the Gyro.*.bias terms applied to the gyros
-	float g1 = (Gyro.X.value - Gyro.X.bias*DRIFT_AccelKp)/(float)FAST_RATE;
-	float g2 = (Gyro.Y.value - Gyro.Y.bias*DRIFT_AccelKp)/(float)FAST_RATE;
-	float g3 = (Gyro.Z.value - Gyro.Z.bias*DRIFT_MagKp)/(float)FAST_RATE;
+	// The measured quaternion updates the estimated quaternion via the Gyro.*.error terms applied to the gyros
+	float g1 = (Gyro.X.value - Gyro.X.error*DRIFT_AccelKp)/(float)FAST_RATE;
+	float g2 = (Gyro.Y.value - Gyro.Y.error*DRIFT_AccelKp)/(float)FAST_RATE;
+	float g3 = (Gyro.Z.value - Gyro.Z.error*DRIFT_MagKp)/(float)FAST_RATE;
 	
 	// Increment the Estimated Rotation Matrix by the Gyro Rate
 	//First row is M1, M2, M3 - World X axis in local frame
@@ -723,13 +723,13 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 	M9 = M9*sumsqu;
 	
 	// CALCULATE GYRO BIAS //
-	// The gyro biases adjust the estimated matrix towards the measured rotation matrix.
+	// The gyro errores adjust the estimated matrix towards the measured rotation matrix.
 	// Use x and y components of the Cross Product between the z vector from each Rotation Matrix for Gyro Biases
-	Gyro.X.bias = RM9*M8 - RM8*M9;
-	Gyro.Y.bias = RM7*M9 - RM9*M7;
+	Gyro.X.error = RM9*M8 - RM8*M9;
+	Gyro.Y.error = RM7*M9 - RM9*M7;
 	
-	// Use z component of the cross product between the x vector from each rotation matrix to create the Z gyro bias
-	Gyro.Z.bias = RM2*M1 - RM1*M2;
+	// Use z component of the cross product between the x vector from each rotation matrix to create the Z gyro error
+	Gyro.Z.error = RM2*M1 - RM1*M2;
 
 
 	// CALCULATE THE ESTIMATED QUATERNION //
@@ -814,7 +814,7 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 	
 	
 // ****************************************************************************
-// *** STATE MACHINE
+// *** Arm, Disarm and Calibrate
 // ****************************************************************************
 		
 	///////////////////////// REGULAR MODE ///////////////////////////////////
@@ -1021,20 +1021,20 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 		motorS -= yawcorrection;
 		motorW += yawcorrection;
 		
-		// We run an SPR filter on the outputs to ensure they aren't too noisey and don't demand changes too quickly
+		// We run an LPF filter on the outputs to ensure they aren't too noisey and don't demand changes too quickly
 		// This seems to reduce power consumption a little and ESC heating a little also
-		motorNav *= SPR_OUT;
-		motorNav += (1-SPR_OUT) * motorN;		
-		motorEav *= SPR_OUT;
-		motorEav += (1-SPR_OUT) * motorE;		
-		motorSav *= SPR_OUT;
-		motorSav += (1-SPR_OUT) * motorS;		
-		motorWav *= SPR_OUT;
-		motorWav += (1-SPR_OUT) * motorW;
+		motorNav *= LPF_OUT;
+		motorNav += (1-LPF_OUT) * motorN;		
+		motorEav *= LPF_OUT;
+		motorEav += (1-LPF_OUT) * motorE;		
+		motorSav *= LPF_OUT;
+		motorSav += (1-LPF_OUT) * motorS;		
+		motorWav *= LPF_OUT;
+		motorWav += (1-LPF_OUT) * motorW;
 			   
 			   
 // ****************************************************************************
-// *** THROTTLE STATE MACHINE
+// *** Handle throttle and motor outputs
 // ****************************************************************************	
 		
 		// Combine attitude stabilisation demands from PID loop with throttle demands
@@ -1202,9 +1202,9 @@ void ReadUltrasound(void) {
 	if(ultra > 0)  {
 		ultraLoss = 0;
 		
-		// We run an SPR filter on the ultrasound readings
-		alt.ultra *= SPR_ULTRA;
-		alt.ultra += (1-SPR_ULTRA) * ultra;
+		// We run an LPF filter on the ultrasound readings
+		alt.ultra *= LPF_ULTRA;
+		alt.ultra += (1-LPF_ULTRA) * ultra;
 		
 		// Output the ultrasound altitude
 		ilink_altitude.relAlt = alt.ultra;
