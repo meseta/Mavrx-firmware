@@ -497,8 +497,8 @@ void setup() {
 		// Set high confidence in accelerometer/magneto to rotate AHRS to initial heading
 		float tempAccelKp = DRIFT_AccelKp;
 		float tempMagKp = DRIFT_MagKp;
-		DRIFT_MagKp *= 100;
-		DRIFT_AccelKp *= 100;
+		DRIFT_MagKp = 1;
+		DRIFT_AccelKp = 1;
 		
 		Timer0Init(59);
 		Timer0Match0(1200000/FAST_RATE, INTERRUPT | RESET);
