@@ -644,16 +644,8 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 // ****************************************************************************
 	
 	// CREATE THE MEASURED ROTATION MATRIX //
-	//Normalise
-	float sumsqu = finvSqrt(Mag.X.value*Mag.X.value + Mag.Y.value*Mag.Y.value+ Mag.Z.value*Mag.Z.value); // Magnetoerometr data is normalised so no need to convert units.
-		Mag.X.value = Mag.X.value * sumsqu;
-		Mag.Y.value = Mag.Y.value * sumsqu;
-		Mag.Z.value = Mag.Z.value * sumsqu;
-		
-	sumsqu = finvSqrt((float)Accel.X.value*(float)Accel.X.value + (float)Accel.Y.value*(float)Accel.Y.value + (float)Accel.Z.value*(float)Accel.Z.value); // Accelerometr data is normalised so no need to convert units.
-		Accel.X.value = (float)Accel.X.value * sumsqu;
-		Accel.Y.value = (float)Accel.Y.value * sumsqu;
-		Accel.Z.value = (float)Accel.Z.value * sumsqu;
+	
+	//Both mag and acc are normalized in their Read functions
 	
 	// Compose the Measured Rotation Matrix from Accelerometer and Magnetometer Vectors
 	//  Global Z axis in Local Frame/ RM Third Row - Accelerometer (already normalised)
