@@ -485,6 +485,7 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 
 		ReadMagSensors();
 		ReadRXInput();
+		read_sticks();
 		ReadUltrasound();
 		ReadBattVoltage();
 			
@@ -494,7 +495,6 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 	ReadGyroSensors();
 	AHRS();
 
-	read_sticks();
 	control_attitude();
 	control_motors();
 
