@@ -2,6 +2,12 @@
 #include "mavlink.h"
 #include <math.h>
 
+//TODO: Diagnose loss of control experienced at full throttle
+//I ascended at full throttle while probably applying some pitch and roll demands and suddenly the craft just seemed to loose stability.
+//It rolled/ pitched upside down a few times, luckily it recovered and I was able to bring it  back safely. 
+//However, have heard that a backer had a similar problem. 
+//Possible causes are Yuan's Max throttle stuff, my roll angle prioritisation (less likely as wasn't in the backers code), ROLL/ PITCH SPL (spin limit). Or other!
+
 
 // ****************************************************************************
 // ****************************************************************************
@@ -39,7 +45,7 @@
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	33 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	32 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
@@ -234,7 +240,7 @@ unsigned int PRGPushTime; // Contains the time that a button was pushed for, pop
 /////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////
 
 struct paramStorage_struct paramStorage[] = {
-	{"DRIFT_AKp",		   0.2f},
+	{"DRIFT_AKp",		   0.4f},
 	{"DRIFT_MKp",	  		0.2f},   
 	#define DRIFT_AccelKp   paramStorage[0].value	
 	#define DRIFT_MagKp	 paramStorage[1].value  
@@ -242,7 +248,7 @@ struct paramStorage_struct paramStorage[] = {
 	{"LPF_ULTRA",	   0.95f},  
 	#define LPF_ULTRA 		paramStorage[2].value
 
-	{"YAW_SEN",	 0.00002f},	 
+	{"YAW_SEN",	 0.0001f},	 
 	{"PITCH_SEN",	0.0022f},	
 	{"ROLL_SEN",	 0.0022f},  
 	{"YAW_DZN",	  0.001f},	
@@ -378,9 +384,9 @@ struct paramStorage_struct paramStorage[] = {
 	{"ULTRA_OFFSET",		 350},
 	#define ULTRA_OFFSET		paramStorage[56].value
 	
-	{"ROLL_SPL",		 0.002},
+	{"ROLL_SPL",		 0.04},
 	#define ROLL_SPL		paramStorage[57].value
-	{"PITCH_SPL",		 0.002},
+	{"PITCH_SPL",		 0.04},
 	#define PITCH_SPL		paramStorage[58].value
 	
 	// TODO: Tune Yaw integral
