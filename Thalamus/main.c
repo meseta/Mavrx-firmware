@@ -2,11 +2,31 @@
 #include "mavlink.h"
 #include <math.h>
 
-//TODO: Diagnose loss of control experienced at full throttle
+// GENERAL TODO list in order of priority
+// Specific TODO's are listed next to the relevant bit of code.
+
+//TODO: (HENRY DOES THIS, NEEDS LOTS OF SPACE AND SPARE PARTS!)
+//Diagnose loss of control experienced at full throttle
 //I ascended at full throttle while probably applying some pitch and roll demands and suddenly the craft just seemed to loose stability.
 //It rolled/ pitched upside down a few times, luckily it recovered and I was able to bring it  back safely. 
 //However, have heard that a backer had a similar problem. 
 //Possible causes are Yuan's Max throttle stuff, my roll angle prioritisation (less likely as wasn't in the backers code), ROLL/ PITCH SPL (spin limit). Or other!
+
+// TODO: Assess and Improve leveling on take off and leveling in flight
+// Key areas to investigate are integral gain on takeoff
+// Accelerometer feedback gain
+// Accelerometer feedback method - additional filtering needed?
+
+// Switch to using vectors rather than angles for motor control. 
+// Angles will only be used for telemetry readout, could be calculated on Hypo.
+
+// TODO: Reinsert Modes, build the State machines out to deal with changes in throttle functionality 
+// Add barometer, GPS and Ultrasound merging.
+
+// TODO: Write code for Orientation calibration 
+// When disarmed, right stick all the way left should enter this mode.  
+// The craft should be position flat and level for at least 3 seconds. (45 degree tolerance)
+// The craft should be tilted in the forward direction greater than 45 degrees and for at least 3 seconds. (snap to nearest 45 degree angle)
 
 
 // ****************************************************************************
