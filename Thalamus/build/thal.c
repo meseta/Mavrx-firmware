@@ -3786,15 +3786,17 @@ unsigned char PRGPoll(void) {
         I2CBuffer[2] = 0x80 | ((ACCEL_RANGE & 0x3) << 4) | (((~ACCEL_LOW_POWER) & 0x1) << 3);
         I2CMaster(I2CBuffer, 3, 0, 0);
         
-        // I2CBuffer[0] = ACCEL_ADDR;
-        // I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_A
-        // I2CBuffer[2] = 0x40; // FIFO enable
-        // I2CMaster(I2CBuffer, 3, 0, 0);
-        
-        // I2CBuffer[0] = ACCEL_ADDR;
-        // I2CBuffer[1] = 0x2e + 0x80; // Control Register FIFO_CTRL_REG_A
-        // I2CBuffer[2] = 0x40; // FIFO mode
-        // I2CMaster(I2CBuffer, 3, 0, 0);
+		#if ACCEL_FIFO_EN
+			I2CBuffer[0] = ACCEL_ADDR;
+			I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_A
+			I2CBuffer[2] = 0x40; // FIFO enable
+			I2CMaster(I2CBuffer, 3, 0, 0);
+			
+			I2CBuffer[0] = ACCEL_ADDR;
+			I2CBuffer[1] = 0x2e + 0x80; // Control Register FIFO_CTRL_REG_A
+			I2CBuffer[2] = 0x40; // FIFO mode
+			I2CMaster(I2CBuffer, 3, 0, 0);
+		#endif
         
         // *** Gyroscope
         I2CBuffer[0] = GYRO_ADDR;
@@ -3858,7 +3860,6 @@ unsigned char PRGPoll(void) {
             data[0] = -data[0];
 			data[1] = -data[1];
 			
-            
             return 1;
         }
         else return 0;

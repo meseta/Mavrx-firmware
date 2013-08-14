@@ -222,8 +222,9 @@
     // ****************************************************************************
 
     #define ACCEL_RANGE         1           // Set the dynamic range: 0=+/- 2g, 1= +/- 4g, 2=+/-8g, 3=+/-16g
-    #define ACCEL_RATE          7           // Set the data rate: 0=off, 1=1Hz, 2=10Hz, 3=25Hz, 4=50Hz, 5=100Hz, 6=200Hz, 7=400Hz, 8=1.620kHz (low power mode ONLY), 9=1.344kHz (normal)/5.376kHz (low power mode)
+    #define ACCEL_RATE          9           // Set the data rate: 0=off, 1=1Hz, 2=10Hz, 3=25Hz, 4=50Hz, 5=100Hz, 6=200Hz, 7=400Hz, 8=1.620kHz (low power mode ONLY), 9=1.344kHz (normal)/5.376kHz (low power mode)
     #define ACCEL_LOW_POWER     0           // Set to enable low power mode
+	#define ACCEL_FIFO_EN		1			// Enable FIFO
 
     #define GYRO_RANGE          2           // Set dynamic range: 0=250dps, 1=500dps, 2=2000dps, 3=2000dps
     #define GYRO_RATE           2           // Set the data rate: 0=100Hz, 1=200Hz, 2=400Hz, 3=800Hz

@@ -69,7 +69,7 @@
 
 //  Running Average Lengths
 #define GAV_LEN 8
-#define AAV_LEN 30
+#define AAV_LEN 90 // With FIFO on, accelerometers effectively run at three times the rate
 #define MAV_LEN 30
 
 
