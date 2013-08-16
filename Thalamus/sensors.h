@@ -80,7 +80,7 @@ void ReadAccelSensors(void) {
 	signed short data[4];
 	unsigned int i;
 
-	for(i=0; i<3; i++) { // using Accel FIFO, sampling at 1.344kHz, so read out 3 values at a time
+	// for(i=0; i<3; i++) { // using Accel FIFO, sampling at 1.344kHz, so read out 3 values at a time
 		if(GetAccel(data)) {
 			// Get raw Accelerometer data
 			Accel.X.raw = data[0];
@@ -97,7 +97,7 @@ void ReadAccelSensors(void) {
 			Accel.Y.history[Accel.count] = Accel.Y.raw;
 			Accel.Z.history[Accel.count] = Accel.Z.raw;
 		}
-	}
+	// }
 	
 	// Output raw data over telemetry (this is just the last value used)
 	ilink_rawimu.xAcc = Accel.X.raw;

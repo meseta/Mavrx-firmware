@@ -46,6 +46,10 @@ void control_attitude(){
 	rollerror = rollDemandSpin - phiAngle;
 	yawerror = yaw.demand + psiAngle; 
 	
+	//Rescues craft if error gets too large at high throttles
+	// TODO: Test to see if this code solves the problem
+	if (((pitcherror > 0.08) || (pitcherror < -0.08) || (rollerror > 0.08) || (rollerror < -0.08)) && (throttle > 600)) throttle -= 200;
+	
 	// This section ensures that on swapping between -PI and PI, 
 	// the craft always takes the shortest route to the desired angle
 	if(pitcherror > M_PI) pitcherror -= M_TWOPI;
