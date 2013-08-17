@@ -1,3 +1,10 @@
+
+void control_throttle(){
+
+
+}
+
+
 // ****************************************************************************
 // *** Attitude PID Control
 // ****************************************************************************	
@@ -155,7 +162,6 @@ void control_motors(){
 		// Reset Important variables
 		pitch.integral=0;
 		roll.integral=0;
-		alt.integral = 0;   
 		motorN = 0;
 		motorE = 0;
 		motorS = 0;

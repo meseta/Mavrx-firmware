@@ -91,6 +91,8 @@ void ReadRXInput(void);
 void LinkInit(void);
 void EEPROMLoadAll(void);
 void EEPROMSaveAll(void);
+void control_throttle(void);
+void filter_GPS_baro();
 
 
 ///////////////////////////////////////////// ILINK ///////////////////////////////////////
@@ -124,15 +126,13 @@ directionStruct pitch;
 directionStruct roll;
 directionStruct yaw;
 
-typedef struct {
+typedef struct 
+{
+	float baro;
+	float gps;
+	float filtered;
+	float GPS_baro_loopgain;
 	float ultra;
-	float value;
-	float valueOld;
-	float error;
-	float demand;
-	float derivative;
-	float integral;
-	float demandold;
 } altStruct;
 altStruct alt;
 
@@ -523,6 +523,7 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 	ReadGyroSensors();
 	AHRS();
 
+	control_throttle();
 	control_attitude();
 	control_motors();
 
