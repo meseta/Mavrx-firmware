@@ -4,14 +4,12 @@ void filter_GPS_baro(){
 	//TODO, put in a more appropriate function
 	alt.gps = ilink_position.craftZ;
 
-	float looperror = alt.filtered - alt.gps;
-	static float barobias = 0;
-	barobias += Baro_GPS_k * looperror;
-	alt.filtered = alt.baro - barobias;
+	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);
+	alt.filtered += Filt_baroK * (alt.baro - alt.filtered);
 
 	static float oldaltfilt = 0;
 	//TODO: substitute for real vel from gps, not differenced
-	alt.vel = (1/(float)FAST_RATE) * (alt.filtered - oldaltfilt);
+	alt.vel = (float)SLOW_RATE * (alt.filtered - oldaltfilt);
 	oldaltfilt = alt.filtered;
 	
 }
