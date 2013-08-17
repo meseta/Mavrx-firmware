@@ -66,7 +66,7 @@ void control_attitude(){
 	// This section of code limits the rate at which the craft is allowed to track angle demand changes
 	if ((attitude_demand_body.pitch - pitchold) > PITCH_SPL) attitude_demand_body.pitch = pitchold + PITCH_SPL;
 	if ((attitude_demand_body.pitch - pitchold) < -PITCH_SPL) attitude_demand_body.pitch = pitchold - PITCH_SPL;
-	pitchold = attitude_demand_body.pitch;		
+	pitchold = attitude_demand_body.pitch;
 	if ((attitude_demand_body.roll - rollold) > ROLL_SPL) attitude_demand_body.roll = rollold + ROLL_SPL;
 	if ((attitude_demand_body.roll - rollold) < -ROLL_SPL) attitude_demand_body.roll = rollold - ROLL_SPL;
 	rollold = attitude_demand_body.roll;
@@ -126,6 +126,12 @@ void control_attitude(){
 	pitchIntegral += pitcherror;
 	rollIntegral += rollerror;
 	yawIntegral += yawerror;
+	pitchIntegral *= PITCH_De;
+	rollIntegral *= ROLL_De;
+	yawIntegral *= YAW_De;
+
+	ilink_attitude.pitch = pitchIntegral;
+
 	
 	// Detune at high throttle - We turn the tunings down at high throttle to prevent oscillations
 	// happening on account of the higher energy input to the system
