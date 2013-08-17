@@ -415,6 +415,11 @@ struct paramStorage_struct paramStorage[] = {
 	#define YAW_Ki		paramStorage[59].value
 	{"YAW_De",		 1.0},
 	#define YAW_De		paramStorage[60].value
+
+	{"Baro_GPS_k",		 1.0},
+	#define Baro_GPS_k		paramStorage[61].value
+
+
 	};
 
 
@@ -423,7 +428,7 @@ struct paramStorage_struct paramStorage[] = {
 // TODO: make it more standard
 
 #include "setup.h"
-#include "AHRS.h"
+#include "filter.h"
 #include "userinput.h"
 #include "control.h"
 #include "sensors.h"

@@ -59,11 +59,6 @@ void setup() {
 		Delay(500);
 		SensorInit();
 		SensorZero();
-		
-
-	// *** Ultrasound
-		UltraInit();
-		UltraFast();
 	
 	// *** quaternion AHRS init
 		q1 = 1;

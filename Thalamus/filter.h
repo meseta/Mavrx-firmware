@@ -3,7 +3,7 @@ void filter_GPS_baro(){
 
 	float looperror = alt.filtered - alt.gps;
 	static float barobias = 0;
-	barobias += alt.GPS_baro_loopgain * looperror;
+	barobias += Baro_GPS_k * looperror;
 	alt.filtered = alt.baro - barobias;
 
 }
