@@ -1,4 +1,20 @@
 
+void ReadBaroSensors(void) {
+	// Get raw barometric pressure reading in Pascals, when it reads 0
+	float baro = GetBaroPressure();	
+	// There is an I2C or sensor error if 0 is returned, so only update altitude when pressure is greater than 0
+	if(baro > 0) {	
+		// Run an LPF filter on the barometer data
+		alt.baro *= LPF_BARO;
+		alt.baro += (1-LPF_BARO) * baro;
+		// Linearise around Sea Level
+		
+		//Scale to Metres
+		alt.baro = alt.baro/1.0;
+		// Output processed data over telemetry
+		ilink_altitude.baro = alt.baro;
+	}
+}
 
 void ReadUltrasound(void) {			
 	// Get ultrasound data and scale to mm??
