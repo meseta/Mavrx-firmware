@@ -14,6 +14,8 @@
 // Have done some test flights and witnessed the loss of control at high throttles, it only does it when applying a high throttle and a large attitude demand, it inverts then enters a continual spin at high throttle
 // Have added code on line 51 of control.h to try and solve this problem
 
+//TODO: check all integrators for decoupling, and make sure they are locked in this case
+
 // TODO: Assess and Improve leveling on take off and leveling in flight
 // Key areas to investigate are integral gain on takeoff
 // Accelerometer feedback gain
@@ -120,17 +122,33 @@ ilink_position_t ilink_position;
 
 
 ///////////////////////////////////////// GLOBAL VARIABLE STRUCTURES /////////////////////
-typedef struct{
-	float demand;
-	float demandOld;
-	float valueOld;
-	float derivative;
-	float integral;
-} directionStruct;
 
-directionStruct pitch;
-directionStruct roll;
-directionStruct yaw;
+typedef struct {
+	float roll;
+	float pitch;
+	float yaw;
+	float throttle;
+} userStruct;
+userStruct user;
+
+typedef struct {
+	float roll;
+	float pitch;
+	float yaw;
+} attitude_demand_body_struct;
+attitude_demand_body_struct attitude_demand_body = {0};
+
+// typedef struct{
+// 	float demand;
+// 	float demandOld;
+// 	float valueOld;
+// 	float derivative;
+// 	float integral;
+// } directionStruct;
+
+// directionStruct pitch;
+// directionStruct roll;
+// directionStruct yaw;
 
 typedef struct 
 {

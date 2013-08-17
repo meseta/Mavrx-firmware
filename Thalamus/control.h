@@ -34,8 +34,22 @@ void control_throttle(){
 
 void control_attitude(){
 
-	float pitcherror, rollerror, yawerror;
-	float pitchcorrection, rollcorrection, yawcorrection;
+	//TODO: use real states
+	if (auxState == 1)
+	{
+		//simplicty! 
+		attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
+		attitude_demand_body.roll = fsin(-psiAngle+psiAngleinit) * user.pitch + fsin(-psiAngle+psiAngleinit+M_PI_2) * user.roll;
+		attitude_demand_body.yaw = user.yaw;
+	}
+
+	if (auxState == 0)
+	{
+		attitude_demand_body.pitch = user.pitch;
+		attitude_demand_body.roll = user.roll;
+		attitude_demand_body.yaw = user.yaw;
+	}
+	
 
 	// This section of code applies some throttle increase with high tilt angles
 	//It doesn't seem hugely effective and maybe completely redundant when Barometer control is implemented
@@ -45,36 +59,50 @@ void control_attitude(){
 	else M9temp = -M9;
 	throttle_angle = ((throttle / M9temp) - throttle); 
 	if (throttle_angle < 0) throttle_angle = 0;
+
+	static float rollold = 0;
+	static float pitchold = 0;
 	
 	// This section of code limits the rate at which the craft is allowed to track angle demand changes
-	if ((pitchDemandSpin - pitchDemandSpinold) > PITCH_SPL) pitchDemandSpin = pitchDemandSpinold + PITCH_SPL;
-	if ((pitchDemandSpin - pitchDemandSpinold) < -PITCH_SPL) pitchDemandSpin = pitchDemandSpinold - PITCH_SPL;
-	pitchDemandSpinold = pitchDemandSpin;		
-	if ((rollDemandSpin - rollDemandSpinold) > ROLL_SPL) rollDemandSpin = rollDemandSpinold + ROLL_SPL;
-	if ((rollDemandSpin - rollDemandSpinold) < -ROLL_SPL) rollDemandSpin = rollDemandSpinold - ROLL_SPL;
-	rollDemandSpinold = rollDemandSpin;
+	if ((attitude_demand_body.pitch - pitchold) > PITCH_SPL) attitude_demand_body.pitch = pitchold + PITCH_SPL;
+	if ((attitude_demand_body.pitch - pitchold) < -PITCH_SPL) attitude_demand_body.pitch = pitchold - PITCH_SPL;
+	pitchold = attitude_demand_body.pitch;		
+	if ((attitude_demand_body.roll - rollold) > ROLL_SPL) attitude_demand_body.roll = rollold + ROLL_SPL;
+	if ((attitude_demand_body.roll - rollold) < -ROLL_SPL) attitude_demand_body.roll = rollold - ROLL_SPL;
+	rollold = attitude_demand_body.roll;
 			
 			
 	// This part of the code sets the maximum angle the quadrotor can go to in the pitch and roll axes
-	if(pitchDemandSpin > LIM_ANGLE) pitchDemandSpin = LIM_ANGLE;	
-	if(pitchDemandSpin < -LIM_ANGLE) pitchDemandSpin = -LIM_ANGLE;
-	if(rollDemandSpin > LIM_ANGLE) rollDemandSpin = LIM_ANGLE;
-	if(rollDemandSpin < -LIM_ANGLE) rollDemandSpin = -LIM_ANGLE;
+	if(attitude_demand_body.pitch > LIM_ANGLE) attitude_demand_body.pitch = LIM_ANGLE;	
+	if(attitude_demand_body.pitch < -LIM_ANGLE) attitude_demand_body.pitch = -LIM_ANGLE;
+	if(attitude_demand_body.roll > LIM_ANGLE) attitude_demand_body.roll = LIM_ANGLE;
+	if(attitude_demand_body.roll < -LIM_ANGLE) attitude_demand_body.roll = -LIM_ANGLE;
 
 	// Create the demand derivative (demand and external rotations are split) term for the attitude motor control
-	pitch.derivative = (pitchDemandSpin - pitch.demandOld);	
-	roll.derivative = (rollDemandSpin - roll.demandOld);
-	yaw.derivative = (yaw.demand - yaw.demandOld);	   
-	pitch.demandOld = pitchDemandSpin;
-	roll.demandOld = rollDemandSpin;
-	yaw.demandOld = yaw.demand;
+	static float rollDemandOld = 0;
+	static float pitchDemandOld = 0;
+	static float yawDemandOld = 0;
+
+	float deltaPitch = (attitude_demand_body.pitch - pitchDemandOld);	
+	float deltaRoll = (attitude_demand_body.roll - rollDemandOld);
+	float deltaYaw = (attitude_demand_body.yaw - yawDemandOld);
+	if(deltaYaw > M_PI) {
+		deltaYaw -= M_TWOPI;
+	}
+	else if(deltaYaw < -M_PI) {
+		deltaYaw += M_TWOPI;
+	}
+
+	pitchDemandOld = attitude_demand_body.pitch;
+	rollDemandOld = attitude_demand_body.roll;
+	yawDemandOld = attitude_demand_body.yaw;
 	
 	// Use the Current and demanded angles to create the error for the proportional part of the PID loop
 	// TODO: it might be more mathematically elegant (but harder to understand) 
 	//to express the demand as a quaternion, but this is not a high priority
-	pitcherror = pitchDemandSpin + thetaAngle;
-	rollerror = rollDemandSpin - phiAngle;
-	yawerror = yaw.demand + psiAngle; 
+	float pitcherror = attitude_demand_body.pitch + thetaAngle;
+	float rollerror = attitude_demand_body.roll - phiAngle;
+	float yawerror = attitude_demand_body.yaw + psiAngle; 
 	
 	//Rescues craft if error gets too large at high throttles
 	// TODO: Test to see if this code solves the problem
@@ -92,12 +120,12 @@ void control_attitude(){
 	// Creating the integral for the motor PID
 	// TODO: Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates)
 	//TODO: Check to see if added Yaw integral solves yaw offsets in autonomous flight
-	pitch.integral += pitcherror;
-	roll.integral += rollerror;
-	yaw.integral += yawerror;
-	pitch.integral *= PITCH_De;
-	roll.integral *= ROLL_De;
-	yaw.integral *= YAW_De;
+	static float pitchIntegral = 0;
+	static float rollIntegral = 0;
+	static float yawIntegral = 0;
+	pitchIntegral += pitcherror;
+	rollIntegral += rollerror;
+	yawIntegral += yawerror;
 	
 	// Detune at high throttle - We turn the tunings down at high throttle to prevent oscillations
 	// happening on account of the higher energy input to the system
@@ -114,30 +142,32 @@ void control_attitude(){
 			
 	// Attitude control PID Assembly - We use a proportional, derivative, and integral on pitch roll and yaw
 	// we add a double derivative term for pitch and roll.
-	pitchcorrection = -((float)Gyro.Y.value - PITCH_Boost*pitch.derivative) * thisPITCH_Kd;
-	pitchcorrection += -thisPITCH_Kdd*((float)Gyro.Y.value - pitch.valueOld);
+	static float oldGyroValuePitch = 0;
+	static float oldGyroValueRoll = 0;
+
+	float pitchcorrection = -((float)Gyro.Y.value - PITCH_Boost*deltaPitch) * thisPITCH_Kd;
+	pitchcorrection += -thisPITCH_Kdd*((float)Gyro.Y.value - oldGyroValuePitch);
 	pitchcorrection += -PITCH_Kp*pitcherror;
-	pitchcorrection += -thisPITCH_Ki*pitch.integral;
+	pitchcorrection += -thisPITCH_Ki*pitchIntegral;
 
-	rollcorrection = -((float)Gyro.X.value - ROLL_Boost*roll.derivative) * thisROLL_Kd;
-	rollcorrection += -thisROLL_Kdd*((float)Gyro.X.value - roll.valueOld);
+	float rollcorrection = -((float)Gyro.X.value - ROLL_Boost*deltaRoll) * thisROLL_Kd;
+	rollcorrection += -thisROLL_Kdd*((float)Gyro.X.value - oldGyroValueRoll);
 	rollcorrection += ROLL_Kp*rollerror;
-	rollcorrection += thisROLL_Ki*roll.integral;
+	rollcorrection += thisROLL_Ki*rollIntegral;
 
-	yawcorrection = -((float)Gyro.Z.value + YAW_Boost*yaw.derivative) * YAW_Kd; 
+	float yawcorrection = -((float)Gyro.Z.value + YAW_Boost*deltaYaw) * YAW_Kd; 
 	yawcorrection += -YAW_Kp*yawerror;
 	// TODO: Check direction of yaw integral
-	yawcorrection += -YAW_Ki*yaw.integral;
+	yawcorrection += -YAW_Ki*yawIntegral;
 	
-	// If the craft is upsidedown, turn off pitch and yaw control until roll control brings it back upright.
+	// If the craft is upsidedown, turn off yaw control until control brings it back upright.
 	// TODO: Test this code
-	if ((phiAngle > M_PI_2) || (phiAngle < -M_PI_2)) {
+	if (M9 < 0) {
 		yawcorrection = 0;
-		pitchcorrection = 0;
 	}
 	
-	pitch.valueOld = (float)Gyro.Y.value;
-	roll.valueOld = (float)Gyro.X.value;
+	oldGyroValuePitch = (float)Gyro.Y.value;
+	oldGyroValueRoll = (float)Gyro.X.value;
    
 	//Assigning the PID results to the correct motors
 	// TODO: add support for multiple orientations here
@@ -183,8 +213,6 @@ void control_motors(){
 		throttle = 0;
 					
 		// Reset Important variables
-		pitch.integral=0;
-		roll.integral=0;
 		motorN = 0;
 		motorE = 0;
 		motorS = 0;
@@ -194,8 +222,7 @@ void control_motors(){
 		motorSav = 0;
 		motorWav = 0;
 		// Reseting the yaw demand to the actual yaw angle continuously helps stop yawing happening on takeoff
-		yaw.demand = -psiAngle;
-		yaw.demandOld = -psiAngle;
+		user.yaw = -psiAngle;
 
 
 		
