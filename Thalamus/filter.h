@@ -1,3 +1,13 @@
+
+void filter_GPS_baro(){
+
+	float looperror = alt.filtered - alt.gps;
+	static float barobias = 0;
+	barobias += alt.GPS_baro_loopgain * looperror;
+	alt.filtered = alt.baro - barobias;
+
+}
+
 void AHRS(){
 
 // ****************************************************************************
