@@ -7,7 +7,7 @@ void control_throttle(){
 
 	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
 	//if (MODE_ST != MODE_AUTO) //TODO: make it use the global state
-	if(1 /*auxState == 0*/)
+	if(auxState == 0)
 	{
 		targetZ = alt.filtered;
 		KerrI = throttle;
@@ -15,7 +15,7 @@ void control_throttle(){
 
 	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
 	//if (MODE_ST == MODE_AUTO)
-	if(0 /*auxState == 1*/)
+	if(auxState == 1)
 	{
 		float errP = targetZ - alt.filtered;
 		//TODO: we need D term for setpoint for Derr.
@@ -38,9 +38,22 @@ void control_attitude(){
 	if (auxState == 1)
 	{
 		//simplicty! 
-		attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
-		attitude_demand_body.roll = fsin(-psiAngle+psiAngleinit) * user.pitch + fsin(-psiAngle+psiAngleinit+M_PI_2) * user.roll;
-		attitude_demand_body.yaw = user.yaw;
+		//attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
+		//attitude_demand_body.roll = fsin(-psiAngle+psiAngleinit) * user.pitch + fsin(-psiAngle+psiAngleinit+M_PI_2) * user.roll;
+		
+		attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
+		attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
+		
+		if (ilink_gpsfly.headingDemand != 42.0f)
+		{
+			attitude_demand_body.yaw = ilink_gpsfly.headingDemand;
+		}
+
+		//debug
+		ilink_debug.debug0 = ilink_gpsfly.northDemand;
+		ilink_debug.debug1 = ilink_gpsfly.eastDemand;
+		ilink_debug.debug2 = ilink_gpsfly.headingDemand;
+		
 	}
 
 	if (auxState == 0)
