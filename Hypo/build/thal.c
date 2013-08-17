@@ -3968,12 +3968,12 @@ unsigned char PRGPoll(void) {
     float GetBaroPressure(void) { // in Pa
         unsigned int reading;
         reading = GetBaro();
-        if(((reading & 0x800000) == 1) | (reading == 0)) return 0; // bit numer 24 is the sign bit, shouldn't be 1 (signifying negative value) because we're not using delta pressure
+        if(((reading & 0x800000) == 1) || (reading == 0)) return 0; // bit numer 24 is the sign bit, shouldn't be 1 (signifying negative value) because we're not using delta pressure
         else return (float)reading/40.96f;
     }
     
-    float Pressure2Alt(float pressure) { // in mm
-        return (pressure - (float)101325) * 83.2546913138f; // max error around 25m, linearise around sea level
+    float Pressure2Alt(float pressure) { // in m
+        return (pressure - (float)101325) * 83254.6913138f; // max error around 25m, linearise around sea level
     }
     
     float GetBaroTemp(void) { // in degrees C

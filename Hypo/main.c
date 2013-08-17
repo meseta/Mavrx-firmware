@@ -144,8 +144,7 @@ ilink_thalpareq_t ilink_thalpareq;
 ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
 ilink_atdemand_t ilink_atdemand;
-ilink_position_t ilink_position;
-ilink_payldctrl_t ilink_payldctrl;
+ilink_gpsfly_t ilink_gpsfly;
 
 typedef struct paramBuffer_struct {
     char name[16];
@@ -187,6 +186,13 @@ unsigned int waypointLoiter;
 unsigned char waypointProviderID, waypointProviderComp;
 float waypointPhase;
 
+float lat_diff_i;
+float lon_diff_i;
+
+float GPS_Kp = 10.0f;
+float GPS_Ki = 0.0001f;
+float GPS_Kd = 20.0f;
+
 // ****************************************************************************
 // *** Initialiseation
 // ****************************************************************************
@@ -214,9 +220,12 @@ void setup() {
 
     // *** GPS
     GPSInit();
-    GPSSetRate(ID_NAV_POSLLH, 1);
-    GPSSetRate(ID_NAV_SOL, 5);
-    GPSSetRate(ID_NAV_VELNED, 1);
+    GPSSetRate(ID_NAV_POSLLH, 5);
+    GPSSetRate(ID_NAV_STATUS, 5);
+    GPSSetRate(ID_NAV_VELNED, 5);
+    
+    lat_diff_i = 0;
+    lon_diff_i = 0;
     
     mavlink_sys_status.onboard_control_sensors_present |= MAVLINK_SENSOR_GPS | MAVLINK_CONTROL_Z | MAVLINK_CONTROL_XY;
     mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_GPS;
@@ -236,7 +245,7 @@ void setup() {
     XBeeInhibit();
     ILinkPoll(ID_ILINK_CLEARBUF); // forces Thalamus to clear its output buffers
 	ILinkPoll(ID_ILINK_IDENTIFY);
-            XBeeAllow();
+    XBeeAllow();
 	
     // *** Things start happening as soon as RIT is enabled!
     RITInitms(1000/MESSAGE_LOOP_HZ);  // RIT at 25Hz
@@ -398,28 +407,38 @@ void RITInterrupt(void) {
         // send GPS position
         if(posupdate == 1) {
             posupdate = 0;
-			
-			
-			ilink_position.craftX = gps_nav_posllh.lat / 10000000.0f;
-            ilink_position.craftY = gps_nav_posllh.lon / 10000000.0f;
-            ilink_position.craftZ = (float)gps_nav_posllh.hMSL/ 1000.0f;
             
+            double craftX = gps_nav_posllh.lat / 10000000.0f;
+            double craftY = gps_nav_posllh.lon / 10000000.0f;
+            float craftZ = (float)gps_nav_posllh.hMSL/ 1000.0f;
+            
+            float lat_diff_d = gps_nav_velned.velN;
+            float lon_diff_d = gps_nav_velned.velE;
+                
             if((waypointGo == 1) && ((waypointCurrent == WAYPOINT_HOME && waypointHomeValid == 1) || (waypointCurrent < waypointCount && waypointValid == 1))) {
-                ilink_position.targetX = waypoint[waypointCurrent].x;
-                ilink_position.targetY = waypoint[waypointCurrent].y;
-                ilink_position.targetZ = waypoint[waypointCurrent].z;
+                double targetX = waypoint[waypointCurrent].x;
+                double targetY = waypoint[waypointCurrent].y;
+                float targetZ = waypoint[waypointCurrent].z;
                 
                 float radius = waypoint[waypointCurrent].param2; // param2 is radius in QGroumdcontrol 1.0.1
                 if(radius < 1) radius = 1;
                 
-                // detect target reached
-                
-                float lat_diff = (double)(ilink_position.targetX - ilink_position.craftX) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
-                float lon_diff = (double)(ilink_position.targetY - ilink_position.craftY) * (double)111194.92664455873734580834 * fcos((float)((double)ilink_position.craftX*(double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
-                float alt_diff = (float)(ilink_position.targetZ - ilink_position.craftZ);
-                
-                float lat_diff2 = lat_diff;
-                float lon_diff2 = lon_diff;
+                // calculate differences
+
+                float lat_diff = (double)(targetX - craftX) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
+                float lon_diff = (double)(targetY - craftY) * (double)111194.92664455873734580834 * fcos((float)((double)craftX*(double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
+                float alt_diff = (float)(targetZ - craftZ);
+
+                lat_diff_i += lat_diff;
+                lon_diff_i += lon_diff;
+
+                ilink_gpsfly.northDemand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*lat_diff_d;
+                ilink_gpsfly.eastDemand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd*lon_diff_d;
+                ilink_gpsfly.headingDemand = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // param4 is yaw angle, degrees to radian conversion M_PI / 180.0f = 0.01745329251994329577...;;
+                ilink_gpsfly.altitudeDemand = targetZ;
+
+                //float lat_diff2 = lat_diff; // for orbit phase calculation
+                //float lon_diff2 = lon_diff;
                 
                 // assume cube of sides 2*radius rather than a sphere for target detection
                 if(lat_diff < 0) lat_diff = -lat_diff;
@@ -457,13 +476,13 @@ void RITInterrupt(void) {
                                 }
                             }
                             
-                            ilink_payldctrl.camRoll = 0;
+                            /*ilink_payldctrl.camRoll = 0;
                             ilink_payldctrl.camPitch = 0;
                             ilink_payldctrl.camYaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // param4 is yaw angle, degrees to radian conversion M_PI / 180.0f = 0.01745329251994329577...;
                             ilink_payldctrl.controlMask = 0b100;
                             XBeeInhibit();
                             ILinkSendMessage(ID_ILINK_PAYLDCTRL, (unsigned short *) & ilink_payldctrl, sizeof(ilink_payldctrl)/2-1);
-                            XBeeAllow();
+                            XBeeAllow();*/
                             
                             // TODO: tween yaw between waypoints
                             
@@ -489,29 +508,30 @@ void RITInterrupt(void) {
                             
                             
                         case MAV_CMD_NAV_RETURN_TO_LAUNCH:
-                            //waypointCurrent = WAYPOINT_HOME;
-                            //waypointReached = 0;
-                            ilink_position.state = 3;
+                            waypointCurrent = WAYPOINT_HOME;
+                            waypointReached = 0;
                             break;
                             
                         case MAV_CMD_NAV_LAND:
-                            ilink_position.state = 0;
+                            //ilink_position.state = 0; // LAND NOW
                             break;
                     }
                 }
-                else {
-                    ilink_position.state = 2;
-                }
             }
             else {
-                ilink_position.targetX = ilink_position.craftX;
-                ilink_position.targetY = ilink_position.craftY;
-                ilink_position.targetZ = ilink_position.craftZ;
-                ilink_position.state = 1;
+                ilink_gpsfly.northDemand = GPS_Kd*lat_diff_d;
+                ilink_gpsfly.eastDemand = GPS_Kd*lon_diff_d;
+                ilink_gpsfly.headingDemand = 0; // param4 is yaw angle, degrees to radian conversion M_PI / 180.0f = 0.01745329251994329577...;;
+                ilink_gpsfly.altitudeDemand = craftZ;
             }
+            
+                            
+            ilink_gpsfly.altitude = craftZ;
+            ilink_gpsfly.vAcc = (float)gps_nav_posllh.vAcc / 1000.0f; // we think this is 1 sigma
+            ilink_gpsfly.velD = (float)gps_nav_velned.velD / 100.0f;
                 
             XBeeInhibit();
-            ILinkSendMessage(ID_ILINK_POSITION, (unsigned short *) & ilink_position, sizeof(ilink_position)/2-1);
+            ILinkSendMessage(ID_ILINK_GPSFLY, (unsigned short *) & ilink_gpsfly, sizeof(ilink_gpsfly)/2-1);
             XBeeAllow();
         }
     }
@@ -568,14 +588,15 @@ void RITInterrupt(void) {
             }
         }
         else if(ilink_thalctrl.isNew) {
-            ilink_thalctrl.isNew = 0;
+            // TODO translate mavlink command to thalctrl
+            /*ilink_thalctrl.isNew = 0;
             if(ilink_thalctrl.command == MAVLINK_MSG_ID_COMMAND_LONG) {
                 mavlink_command_ack.result = 0;
                 mavlink_command_ack.command = ilink_thalctrl.data;
                 mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
                 mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
                 XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-            }
+            }*/
         }
         else if(dataRate[MAV_DATA_STREAM_RAW_SENSORS] && rawSensorStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_SENSORS]) {
             rawSensorStreamCounter = 0;
@@ -789,18 +810,18 @@ void RITInterrupt(void) {
             positionStreamCounter= 0;
             unsigned int change = 0;
             
-            if(gps_nav_sol.isNew) {
+            if(gps_nav_status.isNew) {
                 change = 1;
-                gps_nav_sol.isNew = 0;
+                gps_nav_status.isNew = 0;
                 gpsWatchdog = 0;
 
-                if(gps_nav_sol.flags & 0x1) { // fix is valid
-                    mavlink_gps_raw_int.fix_type = gps_nav_sol.gpsFix;
+                if(gps_nav_status.flags & 0x1) { // fix is valid
+                    mavlink_gps_raw_int.fix_type = gps_nav_status.gpsFix;
                 }
                 else {
                     mavlink_gps_raw_int.fix_type = 0;
                 }
-                mavlink_gps_raw_int.satellites_visible = gps_nav_sol.numSV;
+                //mavlink_gps_raw_int.satellites_visible = gps_nav_sol.numSV;
             }
             
             if(gps_nav_posllh.isNew) {
@@ -863,8 +884,9 @@ void RITInterrupt(void) {
             
             if(ilink_altitude.isNew) {
                 ilink_altitude.isNew = 0;
-                MAVSendFloat("ALT_ULTRA",  ilink_altitude.relAlt);
-                MAVSendFloat("ALT_BARO",  ilink_altitude.absAlt);
+                MAVSendFloat("ALT_ULTRA",  ilink_altitude.ultra);
+                MAVSendFloat("ALT_BARO",  ilink_altitude.baro);
+                MAVSendFloat("ALT_FILT",  ilink_altitude.filtered);
             }
             XBeeInhibit();
             ILinkPoll(ID_ILINK_ALTITUDE);
@@ -1031,9 +1053,9 @@ void MAVLinkParse(unsigned char UARTData) {
                     //mavlink_heartbeat.base_mode = mavlink_set_mode.base_mode;
                     //mavlink_heartbeat.custom_mode = mavlink_set_mode.custom_mode;
                     
-                    ilink_thalctrl.command = MAVLINK_MSG_ID_SET_MODE;
+                    /*ilink_thalctrl.command = MAVLINK_MSG_ID_SET_MODE;
                     ilink_thalctrl.data = mavlink_set_mode.base_mode;
-                    ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl, sizeof(ilink_thalctrl)/2-1);
+                    ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl, sizeof(ilink_thalctrl)/2-1);*/
                 }
                 break;
             case MAVLINK_MSG_ID_COMMAND_LONG:
@@ -1098,9 +1120,9 @@ void MAVLinkParse(unsigned char UARTData) {
                         case MAV_CMD_NAV_LAND:
                         case MAV_CMD_NAV_TAKEOFF:
                         case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: // KILL UAS
-                            ilink_thalctrl.command = MAVLINK_MSG_ID_COMMAND_LONG;
+                            /*ilink_thalctrl.command = MAVLINK_MSG_ID_COMMAND_LONG;
                             ilink_thalctrl.data = mavlink_command_long.command;
-                            ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl, sizeof(ilink_thalctrl)/2-1);
+                            ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl, sizeof(ilink_thalctrl)/2-1);*/
                             break;
                         
                         case MAV_CMD_OVERRIDE_GOTO:

@@ -924,19 +924,20 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ID_ILINK_ALTITUDE   0x7e00
     #define ID_ILINK_ATTITUDE   0x7f00
     #define ID_ILINK_ATDEMAND   0x7f01
-    #define ID_ILINK_MODEMAND   0x7f02   
+    #define ID_ILINK_MODEMAND   0x7f02
     #define ID_ILINK_GPSFLY     0x7f03
 
     typedef struct ilink_gpsfly_struct {
-        float rollDemand;
-        float pitchDemand;
-        float yawDemand;
+        float northDemand;
+        float eastDemand;
+        float headingDemand;
         float altitude;
         float altitudeDemand;
-        float vdop;
+        float vAcc;
+        float velD;
         unsigned short isNew;
     } PACKED ilink_gpsfly_t;
-    
+
     typedef struct ilink_identify_struct {  // Contains the ID of the craft
         unsigned short deviceID;            // ID: Thalamus is 1 for example
         unsigned int firmVersion;           // Firmware version: check that this matches
@@ -998,7 +999,6 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_payldctrl_t;
     
-    
     typedef struct ilink_atdemand_struct {  // Attitude data
         float roll;
         float pitch;
@@ -1028,9 +1028,9 @@ static inline void RSTReset(void) { ResetInit(); }
     } PACKED ilink_iochan_t;
     
     typedef struct ilink_altitude_struct {  // Altitude data
-        float relAlt;                      // E.g. ultrasound
-        float absAlt;                      // E.g. barometer
-        float difAlt;                      // Change in altitude
+        float ultra;                      // E.g. ultrasound
+        float baro;                      // E.g. barometer
+        float filtered;                      // Change in altitude
         unsigned short isNew;
     } PACKED ilink_altitude_t;
     
@@ -1336,7 +1336,7 @@ static inline void RSTReset(void) { ResetInit(); }
             typedef struct gps_nav_velned_struct{
                 unsigned int iTOW;
                 signed int velN;
-                signed int vleE;
+                signed int velE;
                 signed int velD;
                 unsigned int speed;
                 unsigned int gSpeed;
