@@ -30,7 +30,7 @@ void ReadUltrasound(void) {
 		alt.ultra += (1-LPF_ULTRA) * ultra;
 		
 		// Output the ultrasound altitude
-		ilink_altitude.relAlt = alt.ultra;
+		ilink_altitude.ultra = alt.ultra;
 	
 		
 	}

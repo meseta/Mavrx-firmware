@@ -240,7 +240,7 @@ __attribute__ ((section(".crp"))) const unsigned int CRP_WORD = CRP;
 // *** Clock Functions
 // ****************************************************************************
 
-__attribute__ ((section(".after_vectors"))) void ClockModeXTAL(void) {
+/*__attribute__ ((section(".after_vectors")))*/ void ClockModeXTAL(void) {
     unsigned int i;
     
     LPC_SYSCON->PDRUNCFG &= ~(0x1UL << 5);			// Power up system oscillator
