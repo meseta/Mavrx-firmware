@@ -34,6 +34,7 @@ unsigned int counter = 0;
 // *** Timers and counters
 unsigned int sysMS;
 unsigned long long sysUS;
+unsigned int statusCounter;
 unsigned int idleCount;
 unsigned short heartbeatWatchdog;
 unsigned short gpsWatchdog;
@@ -190,9 +191,9 @@ float waypointPhase;
 float lat_diff_i;
 float lon_diff_i;
 
-float GPS_Kp = 10.0f;
-float GPS_Ki = 0.0001f;
-float GPS_Kd = 20.0f;
+float GPS_Kp = 0.03f;
+float GPS_Ki = 0.00005f;
+float GPS_Kd = 0.1f;
 
 unsigned int gpsFixed;
 unsigned int gpsChange;
@@ -364,6 +365,7 @@ void RITInterrupt(void) {
     heartbeatCounter++;
     heartbeatWatchdog++;
     gpsWatchdog++;
+    statusCounter++;
     thalWatchdog++;
     rawSensorStreamCounter++;
     extStatusStreamCounter++;
@@ -406,7 +408,13 @@ void RITInterrupt(void) {
     }
     
     // *** Status and GPS
-    
+    if(statusCounter >= MESSAGE_LOOP_HZ/5) {
+        statusCounter = 0;
+        
+        XBeeInhibit();
+        ILinkPoll(ID_ILINK_THALCTRL);
+        XBeeAllow();
+    }
         
     // *** Process GPS
     XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
@@ -452,8 +460,6 @@ void RITInterrupt(void) {
             mavlink_gps_raw_int.cog = gps_nav_velned.heading / 100; // because GPS assumes cog IS heading.
         }
         
-
-        
         // send GPS position
         if(posupdate == 1 && gpsFixed == 1) {
             posupdate = 0;
@@ -486,8 +492,8 @@ void RITInterrupt(void) {
                 targetYaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // param4 is yaw angle, degrees to radian conversion M_PI / 180.0f = 0.01745329251994329577...
             }
             else {
-                targetX = horizontalHoldLat;
-                targetY = horizontalHoldLon;
+                targetX = craftX;
+                targetY = craftY;
                 targetZ = craftZ;
                 targetYaw = 42.0f;
             }
@@ -499,8 +505,8 @@ void RITInterrupt(void) {
             lat_diff_i += lat_diff;
             lon_diff_i += lon_diff;
 
-            ilink_gpsfly.northDemand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*gps_nav_velned.velN;
-            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd* gps_nav_velned.velE;
+            ilink_gpsfly.northDemand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*(gps_nav_velned.velN / 100.0f);
+            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd*(gps_nav_velned.velE / 100.0f);
             ilink_gpsfly.headingDemand = targetYaw;
             ilink_gpsfly.altitudeDemand = targetZ;
             ilink_gpsfly.altitude = craftZ;
@@ -1456,17 +1462,16 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
         switch(id) {
             case ID_ILINK_THALCTRL:
                 switch(ilink_thalctrl_rx.command) {
-                    case 0x90: // horizontal hold
+                    case 0x0090: // horizontal hold
                         if(horizontalHold == 0) {
                             horizontalHold = 1;
                         }
                         break;
                         
-                    case 0x91: // horizontal releas
+                    case 0x0091: // horizontal releas
                         horizontalHold = 0;
                         break;
                 }
-            
                 break;
             case ID_ILINK_THALPARAM: // store parameters in buffer
                 if(paramPointer > 0) {

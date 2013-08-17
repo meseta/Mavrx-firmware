@@ -104,9 +104,6 @@ void ReadRXInput(void) {
             // TEMPORARY FOR TESTING, switches into GPS mode
             if(auxState != 0) {
                 ilink_thalctrl_tx.command = 0x91;
-                //if(ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1)) {
-                //    auxState = 0;
-                //}
                 auxState = 0;
             }
 		}
@@ -114,9 +111,6 @@ void ReadRXInput(void) {
             // TEMPORARY FOR TESTING, switches into GPS mode
             if(auxState != 1) {
                 ilink_thalctrl_tx.command = 0x90;
-                //if(ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1)) {
-                //    auxState = 1;
-                //}
                 auxState = 1;
             }
 		}
