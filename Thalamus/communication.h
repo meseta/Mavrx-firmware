@@ -17,13 +17,7 @@ void ILinkMessageRequest(unsigned short id) {
 		case ID_ILINK_SCALEDIMU:	ptr = (unsigned short *) &ilink_scaledimu;  maxlength = sizeof(ilink_scaledimu)/2 - 1;  break;
 		case ID_ILINK_ALTITUDE:	 ptr = (unsigned short *) &ilink_altitude;   maxlength = sizeof(ilink_altitude)/2 - 1;   break;
 		case ID_ILINK_ATTITUDE:	 ptr = (unsigned short *) &ilink_attitude;   maxlength = sizeof(ilink_attitude)/2 - 1;   break;
-		case ID_ILINK_INPUTS0:
-			if(ilink_inputs0.isNew) {
-				ilink_inputs0.isNew = 0;
-				ptr = (unsigned short *) &ilink_inputs0;
-				maxlength = sizeof(ilink_inputs0)/2 - 1;
-			}
-			break;
+		case ID_ILINK_INPUTS0:   ptr = (unsigned short *) &ilink_inputs0;  maxlength = sizeof(ilink_inputs0)/2 - 1;  break;
 		case ID_ILINK_OUTPUTS0:	 ptr = (unsigned short *) &ilink_outputs0;   maxlength = sizeof(ilink_outputs0)/2 - 1;   break;
 		case ID_ILINK_CLEARBUF:
 			FUNCILinkTxBufferPushPtr = 0;
