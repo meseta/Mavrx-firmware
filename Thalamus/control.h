@@ -129,9 +129,6 @@ void control_attitude(){
 	pitchIntegral *= PITCH_De;
 	rollIntegral *= ROLL_De;
 	yawIntegral *= YAW_De;
-
-	ilink_attitude.pitch = pitchIntegral;
-
 	
 	// Detune at high throttle - We turn the tunings down at high throttle to prevent oscillations
 	// happening on account of the higher energy input to the system

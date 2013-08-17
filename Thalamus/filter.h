@@ -183,9 +183,7 @@ void AHRS(){
 		psiAngle = fatan2((2*(q1 * q4 + q2 * q3)), (1 - 2*(q33 + q44)));  
 	}
 	// Output angles over telemetry
-	/* TODO: uncomment temp hijack
 	ilink_attitude.roll = phiAngle;
 	ilink_attitude.pitch = thetaAngle;
 	ilink_attitude.yaw = psiAngle;
-	*/
 }
