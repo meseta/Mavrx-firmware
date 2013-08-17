@@ -926,6 +926,19 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ID_ILINK_ATDEMAND   0x7f01
     #define ID_ILINK_MODEMAND   0x7f02
     #define ID_ILINK_GPSFLY     0x7f03
+    #define ID_ILINK_DEBUG      0x00ff
+    
+    typedef struct ilink_debug_struct {
+        float debug0;
+        float debug1;
+        float debug2;
+        float debug3;
+        float debug4;
+        float debug5;
+        float debug6;
+        float debug7;
+        unsigned short isNew;
+    } PACKED ilink_debug_t;
 
     typedef struct ilink_gpsfly_struct {
         float northDemand;
@@ -1036,7 +1049,7 @@ static inline void RSTReset(void) { ResetInit(); }
     
     extern volatile unsigned char FUNCILinkState;
     extern volatile unsigned short FUNCILinkID, FUNCILinkChecksumA, FUNCILinkChecksumB, FUNCILinkLength, FUNCILinkPacket;
-    extern unsigned short FUNCILinkRxBuffer[ILINK_BUFFER_SIZE];
+    extern unsigned short FUNCILinkRxBuffer[ILINK_RXBUFFER_SIZE];
     
     void ILinkInit(unsigned short speed);
     void ILinkPoll(unsigned short message);
@@ -1048,7 +1061,8 @@ static inline void RSTReset(void) { ResetInit(); }
     extern WEAK void ILinkMessageRequest(unsigned short id);
     extern WEAK void ILinkMessageError(unsigned short id);
     
-    extern unsigned short FUNCILinkTxBuffer[ILINK_BUFFER_SIZE];
+    extern unsigned int FUNCILinkTxBufferBusy;
+    extern unsigned short FUNCILinkTxBuffer[ILINK_TXBUFFER_SIZE];
     extern volatile unsigned short FUNCILinkTxBufferPushPtr, FUNCILinkTxBufferPopPtr;
 
     unsigned short ILinkWritable(void);

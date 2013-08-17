@@ -240,7 +240,7 @@ __attribute__ ((section(".crp"))) const unsigned int CRP_WORD = CRP;
 // *** Clock Functions
 // ****************************************************************************
 
-__attribute__ ((section(".after_vectors"))) void ClockModeXTAL(void) {
+/*__attribute__ ((section(".after_vectors")))*/ void ClockModeXTAL(void) {
     unsigned int i;
     
     LPC_SYSCON->PDRUNCFG &= ~(0x1UL << 5);			// Power up system oscillator
@@ -3109,11 +3109,12 @@ unsigned char PRGPoll(void) {
 #if ILINK_EN & SSP0_EN
     volatile unsigned char FUNCILinkState;
     volatile unsigned short FUNCILinkID, FUNCILinkChecksumA, FUNCILinkChecksumB, FUNCILinkLength, FUNCILinkPacket;
-    unsigned short FUNCILinkRxBuffer[ILINK_BUFFER_SIZE];
+    unsigned short FUNCILinkRxBuffer[ILINK_RXBUFFER_SIZE];
     
     void ILinkInit(unsigned short speed) {
         SSP0Init(speed);
         FUNCILinkState = 0;
+        FUNCILinkTxBufferBusy = 0;
     }
     
     void ILinkPoll(unsigned short message) {
@@ -3159,7 +3160,7 @@ unsigned char PRGPoll(void) {
                 FUNCILinkChecksumA += data;
                 FUNCILinkChecksumB += FUNCILinkChecksumA;
                 
-                if(FUNCILinkLength >= ILINK_BUFFER_SIZE) FUNCILinkState = 0;
+                if(FUNCILinkLength >= ILINK_RXBUFFER_SIZE) FUNCILinkState = 0;
                 else if(FUNCILinkLength > 0) FUNCILinkState = 4;
                 else { // special case for zero-length packet
                     if(ILinkMessageRequest) ILinkMessageRequest(FUNCILinkID);
@@ -3225,48 +3226,54 @@ unsigned char PRGPoll(void) {
         unsigned int j;
         unsigned short chkA, chkB;
         
-        if(ILinkWritable() > length+6) {
-            ILinkPush(0xec41);
-            ILinkPush(0x13be);
-            ILinkPush(id);
-            ILinkPush(length);
-            chkA = id + length;
-            chkB = chkA + id;
-            
-            for(j=0; j<length; j++) {
-                value = buffer[j];
-                ILinkPush(value);
-                chkA += value;
-                chkB += chkA;
+        if(FUNCILinkTxBufferBusy == 0) {
+            FUNCILinkTxBufferBusy = 1;
+            if(ILinkWritable() > length+6) {
+                ILinkPush(0xec41);
+                ILinkPush(0x13be);
+                ILinkPush(id);
+                ILinkPush(length);
+                chkA = id + length;
+                chkB = chkA + id;
+                
+                for(j=0; j<length; j++) {
+                    value = buffer[j];
+                    ILinkPush(value);
+                    chkA += value;
+                    chkB += chkA;
+                }
+                ILinkPush(chkA);
+                ILinkPush(chkB);
+                FUNCILinkTxBufferBusy = 0;
+                return 1;
             }
-            ILinkPush(chkA);
-            ILinkPush(chkB);
-            return 1;
         }
-        else return 0;
+        
+        return 0;
     }
     
     //#if ILINK_EN == 2
-        unsigned short FUNCILinkTxBuffer[ILINK_BUFFER_SIZE];
+        unsigned short FUNCILinkTxBuffer[ILINK_TXBUFFER_SIZE];
+        unsigned int FUNCILinkTxBufferBusy;
         volatile unsigned short FUNCILinkTxBufferPushPtr, FUNCILinkTxBufferPopPtr;
 
         unsigned short ILinkWritable(void) {
             if(FUNCILinkTxBufferPushPtr < FUNCILinkTxBufferPopPtr) return FUNCILinkTxBufferPopPtr - FUNCILinkTxBufferPushPtr - 1;
-            else return ILINK_BUFFER_SIZE + FUNCILinkTxBufferPopPtr - FUNCILinkTxBufferPushPtr - 1;
+            else return ILINK_TXBUFFER_SIZE + FUNCILinkTxBufferPopPtr - FUNCILinkTxBufferPushPtr - 1;
         }
         unsigned short ILinkReadable(void) {
-            if(FUNCILinkTxBufferPushPtr < FUNCILinkTxBufferPopPtr) return ILINK_BUFFER_SIZE + FUNCILinkTxBufferPushPtr - FUNCILinkTxBufferPopPtr;
+            if(FUNCILinkTxBufferPushPtr < FUNCILinkTxBufferPopPtr) return ILINK_TXBUFFER_SIZE + FUNCILinkTxBufferPushPtr - FUNCILinkTxBufferPopPtr;
             else return FUNCILinkTxBufferPushPtr - FUNCILinkTxBufferPopPtr;
         }
         unsigned short ILinkPop(void) {
             unsigned short retval;
             retval = FUNCILinkTxBuffer[FUNCILinkTxBufferPopPtr++];
-            if(FUNCILinkTxBufferPopPtr >= ILINK_BUFFER_SIZE) FUNCILinkTxBufferPopPtr = 0;
+            if(FUNCILinkTxBufferPopPtr >= ILINK_TXBUFFER_SIZE) FUNCILinkTxBufferPopPtr = 0;
             return retval;
         }
         void ILinkPush(unsigned short data) {
             FUNCILinkTxBuffer[FUNCILinkTxBufferPushPtr++] = data;
-            if(FUNCILinkTxBufferPushPtr >= ILINK_BUFFER_SIZE) FUNCILinkTxBufferPushPtr = 0;
+            if(FUNCILinkTxBufferPushPtr >= ILINK_TXBUFFER_SIZE) FUNCILinkTxBufferPushPtr = 0;
         }
 
         void SSP0Interrupt(unsigned short data) {

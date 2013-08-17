@@ -105,7 +105,8 @@ void filter_GPS_baro();
 ///////////////////////////////////////////// ILINK ///////////////////////////////////////
 ilink_identify_t ilink_identify;
 ilink_thalstat_t ilink_thalstat;
-ilink_thalctrl_t ilink_thalctrl;
+ilink_thalctrl_t ilink_thalctrl_rx;
+ilink_thalctrl_t ilink_thalctrl_tx;
 ilink_imu_t ilink_rawimu;
 ilink_imu_t ilink_scaledimu;
 ilink_altitude_t ilink_altitude;
@@ -117,6 +118,7 @@ ilink_thalpareq_t ilink_thalpareq;
 ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
 ilink_gpsfly_t ilink_gpsfly;
+ilink_debug_t ilink_debug;
 
 //TEMP TODO REMOVE
 ilink_position_t ilink_position;
