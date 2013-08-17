@@ -9,7 +9,7 @@ void filter_GPS_baro(){
 
 	static float oldaltfilt = 0;
 	//TODO: substitute for real vel from gps, not differenced
-	alt.vel = (1/(float)SLOW_RATE) * (alt.filtered - oldaltfilt);
+	alt.vel = (float)SLOW_RATE * (alt.filtered - oldaltfilt);
 	oldaltfilt = alt.filtered;
 	
 }
