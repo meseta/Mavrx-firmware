@@ -1,7 +1,28 @@
 
 void control_throttle(){
 
+	//PID states
+	static float targetZ = 0;
+	static float KerrI = 0;
 
+	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
+	if (MODE_ST != MODE_AUTO)
+	{
+		targetZ = alt.filtered;
+		KerrI = throttle;
+	}
+
+	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
+	if (MODE_ST == MODE_AUTO)
+	{
+		float errP = targetZ - alt.filtered;
+		//TODO: we need D term for setpoint for Derr.
+		float errD = -alt.vel;
+		KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * errP;
+
+		throttle = GPS_ALTKp * errP + KerrI + GPS_ALTKd * errD;
+	}
+	
 }
 
 

@@ -88,7 +88,6 @@ void setup() {
 		RM8 = 0;
 		RM9 = 1;
 		
-		
 	// *** Timer for AHRS
 		// Set high confidence in accelerometer/magneto to rotate AHRS to initial heading
 		float tempAccelKp = DRIFT_AccelKp;

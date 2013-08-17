@@ -74,6 +74,10 @@
 #define AAV_LEN 30
 #define MAV_LEN 30
 
+//This is used with MODE_ST
+#define MODE_MANUAL 1
+#define MODE_AUTO 2
+
 
 /////////////////////////////// FUNCTIONS //////////////////////////////////////
 void SensorZero(void);
@@ -111,6 +115,9 @@ ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
 ilink_gpsfly_t ilink_gpsfly;
 
+//TEMP TODO REMOVE
+ilink_position_t ilink_position;
+
 
 ///////////////////////////////////////// GLOBAL VARIABLE STRUCTURES /////////////////////
 typedef struct{
@@ -130,10 +137,10 @@ typedef struct
 	float baro;
 	float gps;
 	float filtered;
-	float GPS_baro_loopgain;
 	float ultra;
+	float vel;
 } altStruct;
-altStruct alt;
+altStruct alt = {0};
 
 typedef struct{
 	volatile signed short raw;
@@ -312,7 +319,7 @@ struct paramStorage_struct paramStorage[] = {
 	#define YAW_Boost	   paramStorage[21].value 	
 
 	// Mode
-	{"MODE_ST",	   1.0f},  //0 is Acrobatic,  1 is Regular, 2 is Simplicity, 3 is Easy, 4 is GPS Hold, 5 is Auto 1, 6 is Auto 2
+	{"MODE_ST",	   1.0f},  //used with the #dfine MODE_MANUAL etc
 	#define MODE_ST 		paramStorage[22].value
 
 	//Limits
@@ -353,7 +360,7 @@ struct paramStorage_struct paramStorage[] = {
 	#define ULTRA_Ki		paramStorage[36].value 
 	#define ULTRA_De		paramStorage[37].value
 	#define ULTRA_TKOFF	 paramStorage[38].value 
-	#define ULTRA_LND	   paramStorage[39].value 
+	#define ULTRA_LND	   paramStorage[39].value
 
 	// TODO: I don't think these should be tunable parameters should they? Remember that the gyros are calibrated on every Arm
 	{"CAL_GYROX",   0.0f},
@@ -418,6 +425,18 @@ struct paramStorage_struct paramStorage[] = {
 
 	{"Baro_GPS_k",		 1.0},
 	#define Baro_GPS_k		paramStorage[61].value
+
+	{"LPF_BARO",   1.0},
+	 #define LPF_BARO  paramStorage[62].value
+
+	{"GPS_ALTKp", 10.0f},
+    {"GPS_ALTKi", 0.0001f},
+    {"GPS_ALTDe", 1.0f},
+    {"GPS_ALTKd", 20.0f},
+    #define GPS_ALTKp paramStorage[63].value
+    #define GPS_ALTKi paramStorage[64].value
+    #define GPS_ALTDe paramStorage[65].value
+    #define GPS_ALTKd paramStorage[66].value
 
 
 	};
@@ -519,6 +538,7 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 		ReadRXInput();
 		read_sticks();
 		ReadUltrasound();
+		ReadBaroSensors();
 		ReadBattVoltage();
 			
 	}
