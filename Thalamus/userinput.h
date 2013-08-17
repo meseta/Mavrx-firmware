@@ -101,10 +101,22 @@ void ReadRXInput(void) {
 		
 		// Controller's aux or gear switch (Can be switched permanently either way)
 		if(rcInput[RX_AUX1] > MIDSTICK) {
-			auxState = 0;
+            // TEMPORARY FOR TESTING, switches into GPS mode
+            if(auxState != 0) {
+                ilink_thalctrl_tx.command = 0x91;
+                if(ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1)) {
+                    auxState = 0;
+                }
+            }
 		}
-		else {								
-			auxState = 1;
+		else {
+            // TEMPORARY FOR TESTING, switches into GPS mode
+            if(auxState != 1) {
+                ilink_thalctrl_tx.command = 0x90;
+                if(ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1)) {
+                    auxState = 1;
+                }
+            }
 		}
 		
 		
