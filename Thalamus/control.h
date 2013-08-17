@@ -7,7 +7,7 @@ void control_throttle(){
 
 	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
 	//if (MODE_ST != MODE_AUTO) //TODO: make it use the global state
-	if(auxState == 0)
+	if(1 /*auxState == 0*/)
 	{
 		targetZ = alt.filtered;
 		KerrI = throttle;
@@ -15,7 +15,7 @@ void control_throttle(){
 
 	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
 	//if (MODE_ST == MODE_AUTO)
-	if(auxState == 1)
+	if(0 /*auxState == 1*/)
 	{
 		float errP = targetZ - alt.filtered;
 		//TODO: we need D term for setpoint for Derr.
