@@ -924,8 +924,19 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ID_ILINK_ALTITUDE   0x7e00
     #define ID_ILINK_ATTITUDE   0x7f00
     #define ID_ILINK_ATDEMAND   0x7f01
-    #define ID_ILINK_MODEMAND   0x7f02    
+    #define ID_ILINK_MODEMAND   0x7f02   
+    #define ID_ILINK_GPSFLY     0x7f03
 
+    typedef struct ilink_gpsfly_struct {
+        float rollDemand;
+        float pitchDemand;
+        float yawDemand;
+        float altitude;
+        float altitudeDemand;
+        float vdop;
+        unsigned short isNew;
+    } PACKED ilink_gpsfly_t;
+    
     typedef struct ilink_identify_struct {  // Contains the ID of the craft
         unsigned short deviceID;            // ID: Thalamus is 1 for example
         unsigned int firmVersion;           // Firmware version: check that this matches

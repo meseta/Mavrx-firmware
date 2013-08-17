@@ -83,7 +83,7 @@
 // ****************************************************************************
 // *** USB HID and MSC functions
 // ****************************************************************************
-#define USB_EN              1           // Set to 1 to enable USB ROM functions
+#define USB_EN              0           // Set to 1 to enable USB ROM functions
 
 #define USB_VENDOR_ID       0x1FC9      // The default NXP Vendor ID is 0x1FC9
 #define USB_MSC_ID          0x0114      // Product ID for MSC device
@@ -242,7 +242,6 @@
     #define MAGNETO_GAIN        1           // Sets gain for certain sensor ranges.  0=+/-0.88Ga, 1=+/-1.3Ga, 2=+/-1.9Ga, 3=+/-2.5Ga, 4=+/-4.0Ga, 5=+/-4.7Ga, 6=+/-5.6Ga, 7=+/-8.1Ga
     #define MAGNETO_TRIES_MAX   5           // When in single-measurement mode, how many tries to read data from the stream before giving up?
     #define MAGNETO_TRIES_DELAY 1           // Millisecond delay between trying to read data from the magneto
-
     #define BARO_PRES_AVERAGING 9           // Pressure oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128, 8=256, 9=384, 10=512 (512/128 not available on ODR=25/25Hz)
     #define BARO_TEMP_AVERAGING 4           // Temperature oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128 (512/128 not available on ODR=25Hz)
     #define BARO_RATE           7           // Sets the output data rate (pressure/temperature): 0=one shot, 1=1/1Hz, 2=7/1Hz, 3=12.5/1Hz, 4=25/1Hz,  5=7/7Hz, 6=12.5/12.5Hz, 7=25Hz/25Hz
@@ -293,12 +292,12 @@
     
 #endif
 
-#if WHO_AM_I == I_AM_HYPX
+#if WHO_AM_I == I_AM_HYPX || WHO_AM_I == I_AM_HYPO
     #define XBEE_EN             1           // Set to 1 to enable the XBee code
 
     #define XBEE_POWER_LEVEL    0           // Set transmit power: 4=18dBm/63mW, 3=16dBm/40mW, 2=14dBm/25mW, 1=12dBm/16mW, 0=0dBm/1mW
     #define XBEE_BUFFER_SIZE    128         // XBee buffer size
-    #define XBEE_JOINPERIOD     60          // Number of seconds to allow bind
+    #define XBEE_JOINPERIOD     30          // Number of seconds to allow bind
 #endif
 
 

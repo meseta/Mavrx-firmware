@@ -80,45 +80,42 @@ void ReadGyroSensors(void) {
 void ReadAccelSensors(void) {
 	float sumsqu;
 	signed short data[4];
-	unsigned int i;
-
-	// for(i=0; i<3; i++) { // using Accel FIFO, sampling at 1.344kHz, so read out 3 values at a time
-		if(GetAccel(data)) {
-			// Get raw Accelerometer data
-			Accel.X.raw = data[0];
-			Accel.Y.raw = data[2];
-			Accel.Z.raw = -data[1];
-			// Perform Running Average
-			Accel.X.total -= Accel.X.history[Accel.count];
-			Accel.Y.total -= Accel.Y.history[Accel.count];
-			Accel.Z.total -= Accel.Z.history[Accel.count];
-			Accel.X.total += Accel.X.raw;
-			Accel.Y.total += Accel.Y.raw;
-			Accel.Z.total += Accel.Z.raw;
-			Accel.X.history[Accel.count] = Accel.X.raw;
-			Accel.Y.history[Accel.count] = Accel.Y.raw;
-			Accel.Z.history[Accel.count] = Accel.Z.raw;
-		}
-	// }
+    
+    if(GetAccel(data)) {
+        // Get raw Accelerometer data
+        Accel.X.raw = data[0];
+        Accel.Y.raw = data[2];
+        Accel.Z.raw = -data[1];
+        // Perform Running Average
+        Accel.X.total -= Accel.X.history[Accel.count];
+        Accel.Y.total -= Accel.Y.history[Accel.count];
+        Accel.Z.total -= Accel.Z.history[Accel.count];
+        Accel.X.total += Accel.X.raw;
+        Accel.Y.total += Accel.Y.raw;
+        Accel.Z.total += Accel.Z.raw;
+        Accel.X.history[Accel.count] = Accel.X.raw;
+        Accel.Y.history[Accel.count] = Accel.Y.raw;
+        Accel.Z.history[Accel.count] = Accel.Z.raw;
 	
-	// Output raw data over telemetry (this is just the last value used)
-	ilink_rawimu.xAcc = Accel.X.raw;
-	ilink_rawimu.yAcc = Accel.Y.raw;
-	ilink_rawimu.zAcc = Accel.Z.raw;
-	// Get average
-	Accel.X.av = (float)Accel.X.total/(float)AAV_LEN;
-	Accel.Y.av = (float)Accel.Y.total/(float)AAV_LEN;
-	Accel.Z.av = (float)Accel.Z.total/(float)AAV_LEN;
-	if(++Accel.count >= AAV_LEN) Accel.count = 0;
-	// Normalise accelerometer so it is a unit vector
-	sumsqu = finvSqrt((float)Accel.X.av*(float)Accel.X.av + (float)Accel.Y.av*(float)Accel.Y.av + (float)Accel.Z.av*(float)Accel.Z.av); // Accelerometr data is normalised so no need to convert units.
-	Accel.X.value = (float)Accel.X.av * sumsqu;
-	Accel.Y.value = (float)Accel.Y.av * sumsqu;
-	Accel.Z.value = (float)Accel.Z.av * sumsqu;
-	//Output processed values over telemetry
-	ilink_scaledimu.xAcc = Accel.X.value * 1000;
-	ilink_scaledimu.yAcc = Accel.Y.value * 1000;
-	ilink_scaledimu.zAcc = Accel.Z.value * 1000;
+        // Output raw data over telemetry (this is just the last value used)
+        ilink_rawimu.xAcc = Accel.X.raw;
+        ilink_rawimu.yAcc = Accel.Y.raw;
+        ilink_rawimu.zAcc = Accel.Z.raw;
+        // Get average
+        Accel.X.av = (float)Accel.X.total/(float)AAV_LEN;
+        Accel.Y.av = (float)Accel.Y.total/(float)AAV_LEN;
+        Accel.Z.av = (float)Accel.Z.total/(float)AAV_LEN;
+        if(++Accel.count >= AAV_LEN) Accel.count = 0;
+        // Normalise accelerometer so it is a unit vector
+        sumsqu = finvSqrt((float)Accel.X.av*(float)Accel.X.av + (float)Accel.Y.av*(float)Accel.Y.av + (float)Accel.Z.av*(float)Accel.Z.av); // Accelerometr data is normalised so no need to convert units.
+        Accel.X.value = (float)Accel.X.av * sumsqu;
+        Accel.Y.value = (float)Accel.Y.av * sumsqu;
+        Accel.Z.value = (float)Accel.Z.av * sumsqu;
+        //Output processed values over telemetry
+        ilink_scaledimu.xAcc = Accel.X.value * 1000;
+        ilink_scaledimu.yAcc = Accel.Y.value * 1000;
+        ilink_scaledimu.zAcc = Accel.Z.value * 1000;
+    }
 }
 
 void ReadMagSensors(void) {

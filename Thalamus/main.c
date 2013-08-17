@@ -71,7 +71,7 @@
 
 //  Running Average Lengths
 #define GAV_LEN 8
-#define AAV_LEN 30 // With FIFO on, accelerometers effectively run at three times the rate
+#define AAV_LEN 30
 #define MAV_LEN 30
 
 
@@ -109,8 +109,7 @@ ilink_thalparam_t ilink_thalparam_rx;
 ilink_thalpareq_t ilink_thalpareq;
 ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
-ilink_position_t ilink_position;
-ilink_payldctrl_t ilink_payldctrl;
+ilink_gpsfly_t ilink_gpsfly;
 
 
 ///////////////////////////////////////// GLOBAL VARIABLE STRUCTURES /////////////////////
