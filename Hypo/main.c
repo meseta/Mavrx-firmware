@@ -477,7 +477,7 @@ void RITInterrupt(void) {
                 targetX = horizontalHoldLat;
                 targetY = horizontalHoldLon;
                 targetZ = craftZ;
-                targetYaw = 42;
+                targetYaw = 42.0f;
             }
             else if((waypointCurrent == WAYPOINT_HOME && waypointHomeValid == 1) || (waypointCurrent < waypointCount && waypointValid == 1)) { // with 
                 targetX = waypoint[waypointCurrent].x;
@@ -489,7 +489,7 @@ void RITInterrupt(void) {
                 targetX = horizontalHoldLat;
                 targetY = horizontalHoldLon;
                 targetZ = craftZ;
-                targetYaw = 42;
+                targetYaw = 42.0f;
             }
                 
             float lat_diff = (double)(targetX - craftX) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
@@ -937,6 +937,9 @@ void RITInterrupt(void) {
                 MAVSendFloat("DEBUG7",  ilink_debug.debug7);
             }
             
+            XBeeInhibit();
+            ILinkPoll(ID_ILINK_DEBUG);
+            XBeeAllow();
             
         }
     }
