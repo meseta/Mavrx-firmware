@@ -30,6 +30,9 @@
 // The craft should be position flat and level for at least 3 seconds. (45 degree tolerance)
 // The craft should be tilted in the forward direction greater than 45 degrees and for at least 3 seconds. (snap to nearest 45 degree angle)
 
+// TODO: Measure loop rates instead of just assuming it
+// The control needs to know how fast they're going, right now we assume the loops are going at their specified rate
+// however, it would be better to just time instead.  Use one of the hardware timers to get sub-ms resolution.
 
 // ****************************************************************************
 // ****************************************************************************
