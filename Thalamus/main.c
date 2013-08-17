@@ -423,8 +423,8 @@ struct paramStorage_struct paramStorage[] = {
 	{"YAW_De",		 1.0},
 	#define YAW_De		paramStorage[60].value
 
-	{"Baro_GPS_k",		 1.0},
-	#define Baro_GPS_k		paramStorage[61].value
+	{"Filt_GPS_K",		 1.0},
+	#define Filt_GPS_K		paramStorage[61].value
 
 	{"LPF_BARO",   1.0},
 	 #define LPF_BARO  paramStorage[62].value
@@ -437,6 +437,9 @@ struct paramStorage_struct paramStorage[] = {
     #define GPS_ALTKi paramStorage[64].value
     #define GPS_ALTDe paramStorage[65].value
     #define GPS_ALTKd paramStorage[66].value
+
+    {"Filt_baroK",		 0.0},
+	#define Filt_baroK		paramStorage[67].value
 
 
 	};
@@ -540,6 +543,8 @@ void Timer0Interrupt0() { // Runs at about 400Hz
 		ReadUltrasound();
 		ReadBaroSensors();
 		ReadBattVoltage();
+
+		filter_GPS_baro();
 			
 	}
 
