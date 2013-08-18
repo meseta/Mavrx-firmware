@@ -136,12 +136,17 @@ void control_attitude(){
 	static float pitchIntegral = 0;
 	static float rollIntegral = 0;
 	static float yawIntegral = 0;
-	pitchIntegral += pitcherror;
-	rollIntegral += rollerror;
-	yawIntegral += yawerror;
-	pitchIntegral *= PITCH_De;
-	rollIntegral *= ROLL_De;
-	yawIntegral *= YAW_De;
+	
+	if (rcInput[RX_THRO] - throttletrim > OFFSTICK){
+		pitchIntegral += pitcherror;
+		rollIntegral += rollerror;
+		yawIntegral += yawerror;
+	} else {
+		pitchIntegral = 0;
+		rollIntegral = 0;
+		yawIntegral = 0;
+	}
+	
 	
 	// Detune at high throttle - We turn the tunings down at high throttle to prevent oscillations
 	// happening on account of the higher energy input to the system
