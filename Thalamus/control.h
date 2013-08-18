@@ -7,8 +7,7 @@ void control_throttle(){
 	static float ULT_KerrI = 0;
 
 	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
-	//if (MODE_ST != MODE_AUTO) //TODO: make it use the global state
-	if(auxState == 0)
+	if (MODE_ST == MODE_MANUAL)
 	{
 		targetZ = alt.filtered;
 		GPS_KerrI = throttle;
@@ -17,29 +16,40 @@ void control_throttle(){
 	}
 
 	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
-	//if (MODE_ST == MODE_AUTO)
-	if(auxState == 1)
+	if (MODE_ST == MODE_AUTO)
 	{	
+
+		float tergetAltVel = 0;
+		if (land = 1){
+			targetZ_gps -= 0.2 * (1/(float)FAST_RATE);
+			targetZ_ult -= 0.2 * (1/(float)FAST_RATE);
+			tergetAltVel = -0.2;
+		}
+
+		if (takeoff = 1){
+
+		}
+
 		// ULTRASOUND THROTTLE CONTROL - If we have good confidence in the ultrasound, we use it exclusively
 		if (alt.ult_conf > 80) {
-		
+
 			GPS_KerrI = throttle;
 			targetZ_gps = alt.filtered;
-			
-			float ULT_errP = targetZ_ult - alt.ult;
-			float ULT_errD = ULT_errP - ULT_errP_Old;
-			ULT_errP_Old = ULT_errP;
-			ULT_KerrI += ULT_ALTKi * (1/(float)FAST_RATE) * ULT_errP;
-			// Prevent the integral winding up massively
-			if (ULT_KerrI > 1000)  ULT_KerrI = 1000;
-			if (ULT_KerrI < -1000) ULT_KerrI = -1000;
-			
-			throttle = ULT_ALTKp * ULT_errP + ULT_KerrI + ULT_ALTKd * ULT_errD;
-			
-			if (land = 1)
-			targetZ_ult -= 0.05;
-			
-			if (takeoff = 1)
+
+				if(newultrasound) {
+				
+				static float ULT_errP_Old = 0;
+				float ULT_errP = targetZ_ult - alt.ult;
+				float ULT_errD = tergetAltVel - (ULT_errP - ULT_errP_Old) * (float)ULTRA_RATE;
+				ULT_errP_Old = ULT_errP;
+				ULT_KerrI += ULT_ALTKi * (1/(float)ULTRA_RATE) * ULT_errP;
+				
+				// Prevent the integral winding up massively
+				if (ULT_KerrI > 1000)  ULT_KerrI = 1000;
+				if (ULT_KerrI < -1000) ULT_KerrI = -1000;
+				
+				throttle = ULT_ALTKp * ULT_errP + ULT_KerrI + ULT_ALTKd * ULT_errD;
+			}
 			
 		}
 		
@@ -48,23 +58,19 @@ void control_throttle(){
 		
 			KULT_errI = throttle;
 			targetZ_ult = alt.ult;
-			
-			float GPS_errP = targetZ_gps - alt.filtered;
-			//TODO: we need D term for setpoint for Derr.
-			float GPS_errD = -alt.vel;
-			GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
-			// Prevent the integral winding up massively
-			if (GPS_KerrI > 1000)  GPS_KerrI = 1000;
-			if (GPS_KerrI < -1000) GPS_KerrI = -1000;
-			
-			throttle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
-			
-			if (land = 1)
-			targetZ_gps -= 0.05;
-			
-			if (takeoff = 1)
 
-			
+			if (newGPS)
+			{
+				float GPS_errP = targetZ_gps - alt.filtered;
+				//TODO: we need D term for setpoint for Derr.
+				float GPS_errD = tergetAltVel - alt.vel;
+				GPS_KerrI += GPS_ALTKi * (1/(float)GPS_RATE) * GPS_errP;
+				// Prevent the integral winding up massively
+				if (GPS_KerrI > 1000)  GPS_KerrI = 1000;
+				if (GPS_KerrI < -1000) GPS_KerrI = -1000;
+				
+				throttle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
+			}
 		}
 		
 		
@@ -113,7 +119,7 @@ void control_throttle(){
 void control_attitude(){
 
 	//TODO: use real states
-	if (auxState == 1)
+	if (MODE_ST == MODE_AUTO)
 	{
 		//simplicty! 
 		//attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
@@ -136,7 +142,7 @@ void control_attitude(){
 		
 	}
 
-	if (auxState == 0)
+	if (MODE_ST == MODE_MANUAL)
 	{
 		attitude_demand_body.pitch = user.pitch;
 		attitude_demand_body.roll = user.roll;

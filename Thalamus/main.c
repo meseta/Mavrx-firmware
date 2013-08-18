@@ -81,7 +81,8 @@
 
 //This is used with MODE_ST
 #define MODE_MANUAL 1
-#define MODE_AUTO 2
+#define MODE_EASY 2
+#define MODE_AUTO 3
 
 
 /////////////////////////////// FUNCTIONS //////////////////////////////////////
