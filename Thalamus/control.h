@@ -2,27 +2,105 @@
 void control_throttle(){
 
 	//PID states
-	static float targetZ = 0;
-	static float KerrI = 0;
+	static float targetZ = 0; // Target in Metres
+	static float GPS_KerrI = 0;
+	static float ULT_KerrI = 0;
 
 	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
 	//if (MODE_ST != MODE_AUTO) //TODO: make it use the global state
 	if(auxState == 0)
 	{
 		targetZ = alt.filtered;
-		KerrI = throttle;
+		GPS_KerrI = throttle;
+		ULT_KerrI = throttle;
+		targetZ_ult = alt.ult;
 	}
 
 	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
 	//if (MODE_ST == MODE_AUTO)
 	if(auxState == 1)
-	{
-		float errP = targetZ - alt.filtered;
-		//TODO: we need D term for setpoint for Derr.
-		float errD = -alt.vel;
-		KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * errP;
+	{	
+		// ULTRASOUND THROTTLE CONTROL - If we have good confidence in the ultrasound, we use it exclusively
+		if (alt.ult_conf > 80) {
+		
+			GPS_KerrI = throttle;
+			targetZ_gps = alt.filtered;
+			
+			float ULT_errP = targetZ_ult - alt.ult;
+			float ULT_errD = ULT_errP - ULT_errP_Old;
+			ULT_errP_Old = ULT_errP;
+			ULT_KerrI += ULT_ALTKi * (1/(float)FAST_RATE) * ULT_errP;
+			// Prevent the integral winding up massively
+			if (ULT_KerrI > 1000)  ULT_KerrI = 1000;
+			if (ULT_KerrI < -1000) ULT_KerrI = -1000;
+			
+			throttle = ULT_ALTKp * ULT_errP + ULT_KerrI + ULT_ALTKd * ULT_errD;
+			
+			if (land = 1)
+			targetZ_ult -= 0.05;
+			
+			if (takeoff = 1)
+			
+		}
+		
+		//GPS THROTTLE CONTROL - If we don't have confidence in the ultrasound readings we use GPS and or Barometer
+		else {
+		
+			KULT_errI = throttle;
+			targetZ_ult = alt.ult;
+			
+			float GPS_errP = targetZ_gps - alt.filtered;
+			//TODO: we need D term for setpoint for Derr.
+			float GPS_errD = -alt.vel;
+			GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
+			// Prevent the integral winding up massively
+			if (GPS_KerrI > 1000)  GPS_KerrI = 1000;
+			if (GPS_KerrI < -1000) GPS_KerrI = -1000;
+			
+			throttle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
+			
+			if (land = 1)
+			targetZ_gps -= 0.05;
+			
+			if (takeoff = 1)
 
-		throttle = GPS_ALTKp * errP + KerrI + GPS_ALTKd * errD;
+			
+		}
+		
+		
+		// MOTOR SHUT OFF ON LANDING, 1-Ultrasound Driven  2-GPS Driven:
+		//1 - Ultrasound driven
+		// If ultrasound reading is valid and less than landing threshold (ULTRA_LD_TD) and we are airborne
+		// then increase landing counter
+		if ((ultra > 0) && (ultra < ULTRA_LD_TD) && (airborne == 1)) ult_landing++;
+		
+		//If the above is satisfied consecutively more than ULT_LD_DT times then shut down the motors
+		if(ult_landing > ULT_LD_DT) { 
+			airborne = 0;
+			throttleHoldOff = 1;
+			throttle = 0;
+		}
+				
+		// If consecutive run of readings is broken, reset the landing counter.
+		else ult_landing = 0;
+
+		
+		// 2 - GPS driven
+		// If the GPS altitude integral stays maxed out at minimum value, increment the landing counter
+		if ((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
+		
+		//If the above is satisfied consecutively more than GPS_LD_DT times then shut down the motors
+		if(gps_landing > GPS_LD_DT) { 
+			airborne = 0;
+			throttleHoldOff = 1;
+			throttle = 0;
+		}
+		
+		// If consecutive run of readings is broken, reset the landing counter.
+		else gps_landing = 0;
+		
+		
+		
 	}
 	
 }

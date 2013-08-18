@@ -39,6 +39,7 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 		case ID_ILINK_THALPAREQ: ptr = (unsigned short *) &ilink_thalpareq; break;
 		case ID_ILINK_THALPARAM: ptr = (unsigned short *) &ilink_thalparam_rx; break;
 		case ID_ILINK_THALCTRL: ptr = (unsigned short *) &ilink_thalctrl; break;
+		case ID_ILINK_POSITION: ptr = (unsigned short *) &ilink_position; break;
 		case ID_ILINK_GPSFLY: ptr = (unsigned short *) &ilink_gpsfly; break;
 	}
 	
