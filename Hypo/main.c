@@ -230,7 +230,7 @@ void setup() {
     // *** GPS
     GPSInit();
     GPSSetRate(ID_NAV_POSLLH, 5);
-    GPSSetRate(ID_NAV_STATUS, 5);
+    GPSSetRate(ID_NAV_STATUS, 1);
     GPSSetRate(ID_NAV_VELNED, 5);
     
     lat_diff_i = 0;
@@ -282,11 +282,10 @@ void MAVLinkInit() {
     mavlink_sys_status.battery_remaining = -1;
     
     dataRate[MAV_DATA_STREAM_EXTENDED_STATUS] = 2;
-    dataRate[MAV_DATA_STREAM_POSITION] = 5;
     dataRate[MAV_DATA_STREAM_RAW_SENSORS] = 0;
     dataRate[MAV_DATA_STREAM_RAW_CONTROLLER] = 0;
     dataRate[MAV_DATA_STREAM_RC_CHANNELS] = 0;
-    dataRate[MAV_DATA_STREAM_POSITION] = 0;
+    dataRate[MAV_DATA_STREAM_POSITION] = 5;
     dataRate[MAV_DATA_STREAM_EXTRA1] = 0;
     dataRate[MAV_DATA_STREAM_EXTRA2] = 0;
     dataRate[MAV_DATA_STREAM_EXTRA3] = 0;
@@ -406,6 +405,10 @@ void RITInterrupt(void) {
         ILinkPoll(ID_ILINK_IDENTIFY);
         XBeeAllow();
     }
+        // *** Process GPS
+    XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
+    GPSFetchData();
+    XBeeAllow();
     
     // *** Status and GPS
     if(statusCounter >= MESSAGE_LOOP_HZ/5) {
@@ -416,10 +419,7 @@ void RITInterrupt(void) {
         XBeeAllow();
     }
         
-    // *** Process GPS
-    XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
-    GPSFetchData();
-    XBeeAllow();
+
     
     if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
         gpsSendCounter = 0;
@@ -657,7 +657,7 @@ void RITInterrupt(void) {
                 MAVSendText(255, "Receiving Waypoint timeout");
             }
         }
-        else if(ilink_thalctrl_rx.isNew) {
+        //else if(ilink_thalctrl_rx.isNew) {
             // TODO translate mavlink command to thalctrl
             /*ilink_thalctrl_rx.isNew = 0;
             if(ilink_thalctrl_rx.command == MAVLINK_MSG_ID_COMMAND_LONG) {
@@ -667,7 +667,7 @@ void RITInterrupt(void) {
                 mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
                 XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
             }*/
-        }
+        //}
         else if(dataRate[MAV_DATA_STREAM_RAW_SENSORS] && rawSensorStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_SENSORS]) {
             rawSensorStreamCounter = 0;
             

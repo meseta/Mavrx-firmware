@@ -103,14 +103,14 @@ void ReadRXInput(void) {
 		if(rcInput[RX_AUX1] > MIDSTICK) {
             // TEMPORARY FOR TESTING, switches into GPS mode
             if(auxState != 0) {
-                ilink_thalctrl_tx.command = 0x91;
+                ilink_thalctrl_tx.command = 0x0091;
                 auxState = 0;
             }
 		}
 		else {
             // TEMPORARY FOR TESTING, switches into GPS mode
             if(auxState != 1) {
-                ilink_thalctrl_tx.command = 0x90;
+                ilink_thalctrl_tx.command = 0x0090;
                 auxState = 1;
             }
 		}
