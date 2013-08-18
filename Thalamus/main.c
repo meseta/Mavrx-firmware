@@ -161,6 +161,7 @@ typedef struct
 	float filtered;
 	float ultra;
 	float vel;
+	float ult_conf;
 } altStruct;
 altStruct alt = {0};
 
@@ -284,7 +285,7 @@ unsigned int PRGBlankTimer; // Blanking time for button pushes
 unsigned int PRGTimer; // Timer for button pushes, continuously increments as the button is held
 unsigned int PRGPushTime; // Contains the time that a button was pushed for, populated after button is released
 
-bool airborne = 0;
+unsigned char airborne = 0; //boolean
 
 
 /////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////

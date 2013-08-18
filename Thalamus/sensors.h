@@ -31,6 +31,8 @@ void ReadUltrasound(void) {
 		
 		// Output the ultrasound altitude
 		ilink_altitude.ultra = alt.ultra;
+
+		alt.ult_conf += (1-alt.ult_conf)*0.1;
 		
 	}
 	// if ultra = 0 then there isn't valid data
@@ -38,7 +40,11 @@ void ReadUltrasound(void) {
 	else {
 		ultraLoss++;
 		if(ultraLoss > ULTRA_OVTH) ultraLoss = ULTRA_OVTH;
+
+		alt.ult_conf += (0-alt.ult_conf)*0.1;
 	}
+
+
 			
 }			
 		
