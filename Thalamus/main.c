@@ -14,6 +14,8 @@
 // Have done some test flights and witnessed the loss of control at high throttles, it only does it when applying a high throttle and a large attitude demand, it inverts then enters a continual spin at high throttle
 // Have added code on line 51 of control.h to try and solve this problem
 
+//TODO: check all integrators for decoupling, and make sure they are locked in this case
+
 // TODO: Assess and Improve leveling on take off and leveling in flight
 // Key areas to investigate are integral gain on takeoff
 // Accelerometer feedback gain
@@ -30,6 +32,9 @@
 // The craft should be position flat and level for at least 3 seconds. (45 degree tolerance)
 // The craft should be tilted in the forward direction greater than 45 degrees and for at least 3 seconds. (snap to nearest 45 degree angle)
 
+// TODO: Measure loop rates instead of just assuming it
+// The control needs to know how fast they're going, right now we assume the loops are going at their specified rate
+// however, it would be better to just time instead.  Use one of the hardware timers to get sub-ms resolution.
 
 // ****************************************************************************
 // ****************************************************************************
@@ -102,7 +107,8 @@ void filter_GPS_baro();
 ///////////////////////////////////////////// ILINK ///////////////////////////////////////
 ilink_identify_t ilink_identify;
 ilink_thalstat_t ilink_thalstat;
-ilink_thalctrl_t ilink_thalctrl;
+ilink_thalctrl_t ilink_thalctrl_rx;
+ilink_thalctrl_t ilink_thalctrl_tx;
 ilink_imu_t ilink_rawimu;
 ilink_imu_t ilink_scaledimu;
 ilink_altitude_t ilink_altitude;
@@ -114,23 +120,37 @@ ilink_thalpareq_t ilink_thalpareq;
 ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
 ilink_gpsfly_t ilink_gpsfly;
-
-//TEMP TODO REMOVE
-ilink_position_t ilink_position;
+ilink_debug_t ilink_debug;
 
 
 ///////////////////////////////////////// GLOBAL VARIABLE STRUCTURES /////////////////////
-typedef struct{
-	float demand;
-	float demandOld;
-	float valueOld;
-	float derivative;
-	float integral;
-} directionStruct;
 
-directionStruct pitch;
-directionStruct roll;
-directionStruct yaw;
+typedef struct {
+	float roll;
+	float pitch;
+	float yaw;
+	float throttle;
+} userStruct;
+userStruct user;
+
+typedef struct {
+	float roll;
+	float pitch;
+	float yaw;
+} attitude_demand_body_struct;
+attitude_demand_body_struct attitude_demand_body = {0};
+
+// typedef struct{
+// 	float demand;
+// 	float demandOld;
+// 	float valueOld;
+// 	float derivative;
+// 	float integral;
+// } directionStruct;
+
+// directionStruct pitch;
+// directionStruct roll;
+// directionStruct yaw;
 
 typedef struct 
 {

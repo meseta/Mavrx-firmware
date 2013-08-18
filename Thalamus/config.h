@@ -187,7 +187,8 @@
 // *** ILink Config
 // ****************************************************************************
 #define ILINK_EN            1              // Enable the Interlink functions (0=off, 1=on)
-#define ILINK_BUFFER_SIZE   256          // ILink buffer size
+#define ILINK_TXBUFFER_SIZE   512          // ILink buffer size
+#define ILINK_RXBUFFER_SIZE   128          // ILink buffer size
 #define ILINK_MAX_FETCH     256          // Maximum characters to fetch at once
 
 #if WHO_AM_I == I_AM_THALAMUS
@@ -274,7 +275,7 @@
     #define GPS_EN              1           // Set to 1 to enable GPS code (set to 0 to save some RAM)
     
     #define GPS_5HZ_RATE        1           // Set to 1 to allow up to 5Hz position rate (set to 0 for the default 0Hz)
-    #define GPS_AIRBORNE        0           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
+    #define GPS_AIRBORNE        1           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
     
     #define GPS_METHOD          1           // Method, use 0 for the slow but simple polling method, or 1 for the faster but more complex periodic method    
     

@@ -11,7 +11,8 @@ void ILinkMessageRequest(unsigned short id) {
 	unsigned short maxlength = 0;
 	
 	switch(id) {
-		case ID_ILINK_IDENTIFY:	  ptr = (unsigned short *) &ilink_identify;   maxlength = sizeof(ilink_identify)/2 - 1;   break;
+		case ID_ILINK_IDENTIFY:	  ptr = (unsigned short *) &ilink_identify;   maxlength = sizeof(ilink_identify)/2 - 1; break;
+        case ID_ILINK_THALCTRL:  ptr = (unsigned short *) &ilink_thalctrl_tx;   maxlength = sizeof(ilink_thalctrl_tx)/2 - 1;   break;
 		case ID_ILINK_THALSTAT:	 ptr = (unsigned short *) &ilink_thalstat;   maxlength = sizeof(ilink_thalstat)/2 - 1;   break;
 		case ID_ILINK_RAWIMU:	   ptr = (unsigned short *) &ilink_rawimu;	 maxlength = sizeof(ilink_rawimu)/2 - 1;	 break;
 		case ID_ILINK_SCALEDIMU:	ptr = (unsigned short *) &ilink_scaledimu;  maxlength = sizeof(ilink_scaledimu)/2 - 1;  break;
@@ -19,7 +20,8 @@ void ILinkMessageRequest(unsigned short id) {
 		case ID_ILINK_ATTITUDE:	 ptr = (unsigned short *) &ilink_attitude;   maxlength = sizeof(ilink_attitude)/2 - 1;   break;
 		case ID_ILINK_INPUTS0:   ptr = (unsigned short *) &ilink_inputs0;  maxlength = sizeof(ilink_inputs0)/2 - 1;  break;
 		case ID_ILINK_OUTPUTS0:	 ptr = (unsigned short *) &ilink_outputs0;   maxlength = sizeof(ilink_outputs0)/2 - 1;   break;
-		case ID_ILINK_CLEARBUF:
+		case ID_ILINK_DEBUG:	 ptr = (unsigned short *) &ilink_debug;   maxlength = sizeof(ilink_debug)/2 - 1;   break;
+        case ID_ILINK_CLEARBUF:
 			FUNCILinkTxBufferPushPtr = 0;
 			FUNCILinkTxBufferPopPtr = 0;
 			break;
@@ -38,8 +40,7 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 	switch(id) {
 		case ID_ILINK_THALPAREQ: ptr = (unsigned short *) &ilink_thalpareq; break;
 		case ID_ILINK_THALPARAM: ptr = (unsigned short *) &ilink_thalparam_rx; break;
-		case ID_ILINK_THALCTRL: ptr = (unsigned short *) &ilink_thalctrl; break;
-		case ID_ILINK_POSITION: ptr = (unsigned short *) &ilink_position; break;
+		case ID_ILINK_THALCTRL: ptr = (unsigned short *) &ilink_thalctrl_rx; break;
 		case ID_ILINK_GPSFLY: ptr = (unsigned short *) &ilink_gpsfly; break;
 	}
 	
@@ -86,16 +87,16 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 				case 2: // save all
 					EEPROMSaveAll();
 					ilink_thalpareq.isNew = 1;
-					ilink_thalctrl.command = MAVLINK_MSG_ID_COMMAND_LONG;
-					ilink_thalctrl.data = MAV_CMD_PREFLIGHT_STORAGE;
-					ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl, sizeof(ilink_thalctrl)/2 - 1);
+					ilink_thalctrl_rx.command = MAVLINK_MSG_ID_COMMAND_LONG;
+					ilink_thalctrl_rx.data = MAV_CMD_PREFLIGHT_STORAGE;
+					//ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_rx, sizeof(ilink_thalctrl_rx)/2 - 1);
 					break;
 				case 3: // reload all
 					EEPROMLoadAll();
 					ilink_thalpareq.isNew = 1;
-					ilink_thalctrl.command = MAVLINK_MSG_ID_COMMAND_LONG;
-					ilink_thalctrl.data = MAV_CMD_PREFLIGHT_STORAGE;
-					ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl, sizeof(ilink_thalctrl)/2 - 1);
+					ilink_thalctrl_rx.command = MAVLINK_MSG_ID_COMMAND_LONG;
+					ilink_thalctrl_rx.data = MAV_CMD_PREFLIGHT_STORAGE;
+					//ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_rx, sizeof(ilink_thalctrl_rx)/2 - 1);
 					// fall through to get all
 				default:
 				case 0: // get all
@@ -105,7 +106,7 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 				}
 			break;
 		case ID_ILINK_THALCTRL:
-            switch(ilink_thalctrl.command) {
+            switch(ilink_thalctrl_rx.command) {
                 case 0:
                     break;
             }
