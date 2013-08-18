@@ -505,8 +505,8 @@ void RITInterrupt(void) {
             lat_diff_i += lat_diff;
             lon_diff_i += lon_diff;
 
-            ilink_gpsfly.northDemand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*(gps_nav_velned.velN / 100.0f);
-            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd*(gps_nav_velned.velE / 100.0f);
+            ilink_gpsfly.northDemand = GPS_Kp*lat_diff /*+ GPS_Ki*lat_diff_i*/ + GPS_Kd*( 0 /*targ vel*/ - gps_nav_velned.velN / 100.0f);
+            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff /*+ GPS_Ki*lon_diff_i*/ + GPS_Kd*( 0 /*targ vel*/- gps_nav_velned.velE / 100.0f);
             ilink_gpsfly.headingDemand = targetYaw;
             ilink_gpsfly.altitudeDemand = targetZ;
             ilink_gpsfly.altitude = craftZ;

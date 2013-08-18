@@ -2,15 +2,16 @@
 void filter_GPS_baro(){
 
 	//TODO, put in a more appropriate function
-	alt.gps = ilink_position.craftZ;
+	alt.gps = ilink_gpsfly.altitude;
 
 	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);
 	alt.filtered += Filt_baroK * (alt.baro - alt.filtered);
 
-	static float oldaltfilt = 0;
+	//static float oldaltfilt = 0;
 	//TODO: substitute for real vel from gps, not differenced
-	alt.vel = (float)SLOW_RATE * (alt.filtered - oldaltfilt);
-	oldaltfilt = alt.filtered;
+	//alt.vel = (float)SLOW_RATE * (alt.filtered - oldaltfilt);
+	alt.vel = -ilink_gpsfly.velD;
+	//oldaltfilt = alt.filtered;
 	
 }
 

@@ -122,9 +122,6 @@ ilink_iochan_t ilink_outputs0;
 ilink_gpsfly_t ilink_gpsfly;
 ilink_debug_t ilink_debug;
 
-//TEMP TODO REMOVE
-ilink_position_t ilink_position;
-
 
 ///////////////////////////////////////// GLOBAL VARIABLE STRUCTURES /////////////////////
 

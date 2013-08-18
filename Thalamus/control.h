@@ -44,8 +44,10 @@ void control_attitude(){
 		attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
 		attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
 		
-		if (ilink_gpsfly.headingDemand != 42.0f)
-		{
+		if (ilink_gpsfly.headingDemand == 42.0f){
+			attitude_demand_body.yaw = user.yaw;
+        }
+        else {
 			attitude_demand_body.yaw = ilink_gpsfly.headingDemand;
 		}
 
