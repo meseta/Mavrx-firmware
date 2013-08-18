@@ -34,6 +34,7 @@ unsigned int counter = 0;
 // *** Timers and counters
 unsigned int sysMS;
 unsigned long long sysUS;
+unsigned int statusCounter;
 unsigned int idleCount;
 unsigned short heartbeatWatchdog;
 unsigned short gpsWatchdog;
@@ -190,9 +191,9 @@ float waypointPhase;
 float lat_diff_i;
 float lon_diff_i;
 
-float GPS_Kp = 10.0f;
-float GPS_Ki = 0.0001f;
-float GPS_Kd = 20.0f;
+float GPS_Kp = 0.03f;
+float GPS_Ki = 0.00005f;
+float GPS_Kd = 0.1f;
 
 unsigned int gpsFixed;
 unsigned int gpsChange;
@@ -229,7 +230,7 @@ void setup() {
     // *** GPS
     GPSInit();
     GPSSetRate(ID_NAV_POSLLH, 5);
-    GPSSetRate(ID_NAV_STATUS, 5);
+    GPSSetRate(ID_NAV_STATUS, 1);
     GPSSetRate(ID_NAV_VELNED, 5);
     
     lat_diff_i = 0;
@@ -281,11 +282,10 @@ void MAVLinkInit() {
     mavlink_sys_status.battery_remaining = -1;
     
     dataRate[MAV_DATA_STREAM_EXTENDED_STATUS] = 2;
-    dataRate[MAV_DATA_STREAM_POSITION] = 5;
     dataRate[MAV_DATA_STREAM_RAW_SENSORS] = 0;
     dataRate[MAV_DATA_STREAM_RAW_CONTROLLER] = 0;
     dataRate[MAV_DATA_STREAM_RC_CHANNELS] = 0;
-    dataRate[MAV_DATA_STREAM_POSITION] = 0;
+    dataRate[MAV_DATA_STREAM_POSITION] = 5;
     dataRate[MAV_DATA_STREAM_EXTRA1] = 0;
     dataRate[MAV_DATA_STREAM_EXTRA2] = 0;
     dataRate[MAV_DATA_STREAM_EXTRA3] = 0;
@@ -364,6 +364,7 @@ void RITInterrupt(void) {
     heartbeatCounter++;
     heartbeatWatchdog++;
     gpsWatchdog++;
+    statusCounter++;
     thalWatchdog++;
     rawSensorStreamCounter++;
     extStatusStreamCounter++;
@@ -404,14 +405,21 @@ void RITInterrupt(void) {
         ILinkPoll(ID_ILINK_IDENTIFY);
         XBeeAllow();
     }
-    
-    // *** Status and GPS
-    
-        
-    // *** Process GPS
+        // *** Process GPS
     XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
     GPSFetchData();
     XBeeAllow();
+    
+    // *** Status and GPS
+    if(statusCounter >= MESSAGE_LOOP_HZ/5) {
+        statusCounter = 0;
+        
+        XBeeInhibit();
+        ILinkPoll(ID_ILINK_THALCTRL);
+        XBeeAllow();
+    }
+        
+
     
     if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
         gpsSendCounter = 0;
@@ -452,8 +460,6 @@ void RITInterrupt(void) {
             mavlink_gps_raw_int.cog = gps_nav_velned.heading / 100; // because GPS assumes cog IS heading.
         }
         
-
-        
         // send GPS position
         if(posupdate == 1 && gpsFixed == 1) {
             posupdate = 0;
@@ -486,8 +492,8 @@ void RITInterrupt(void) {
                 targetYaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // param4 is yaw angle, degrees to radian conversion M_PI / 180.0f = 0.01745329251994329577...
             }
             else {
-                targetX = horizontalHoldLat;
-                targetY = horizontalHoldLon;
+                targetX = craftX;
+                targetY = craftY;
                 targetZ = craftZ;
                 targetYaw = 42.0f;
             }
@@ -499,8 +505,8 @@ void RITInterrupt(void) {
             lat_diff_i += lat_diff;
             lon_diff_i += lon_diff;
 
-            ilink_gpsfly.northDemand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*gps_nav_velned.velN;
-            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd* gps_nav_velned.velE;
+            ilink_gpsfly.northDemand = GPS_Kp*lat_diff /*+ GPS_Ki*lat_diff_i*/ + GPS_Kd*( 0 /*targ vel*/ - gps_nav_velned.velN / 100.0f);
+            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff /*+ GPS_Ki*lon_diff_i*/ + GPS_Kd*( 0 /*targ vel*/- gps_nav_velned.velE / 100.0f);
             ilink_gpsfly.headingDemand = targetYaw;
             ilink_gpsfly.altitudeDemand = targetZ;
             ilink_gpsfly.altitude = craftZ;
@@ -651,7 +657,7 @@ void RITInterrupt(void) {
                 MAVSendText(255, "Receiving Waypoint timeout");
             }
         }
-        else if(ilink_thalctrl_rx.isNew) {
+        //else if(ilink_thalctrl_rx.isNew) {
             // TODO translate mavlink command to thalctrl
             /*ilink_thalctrl_rx.isNew = 0;
             if(ilink_thalctrl_rx.command == MAVLINK_MSG_ID_COMMAND_LONG) {
@@ -661,7 +667,7 @@ void RITInterrupt(void) {
                 mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
                 XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
             }*/
-        }
+        //}
         else if(dataRate[MAV_DATA_STREAM_RAW_SENSORS] && rawSensorStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_SENSORS]) {
             rawSensorStreamCounter = 0;
             
@@ -1456,17 +1462,16 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
         switch(id) {
             case ID_ILINK_THALCTRL:
                 switch(ilink_thalctrl_rx.command) {
-                    case 0x90: // horizontal hold
+                    case 0x0090: // horizontal hold
                         if(horizontalHold == 0) {
                             horizontalHold = 1;
                         }
                         break;
                         
-                    case 0x91: // horizontal releas
+                    case 0x0091: // horizontal releas
                         horizontalHold = 0;
                         break;
                 }
-            
                 break;
             case ID_ILINK_THALPARAM: // store parameters in buffer
                 if(paramPointer > 0) {

@@ -11,7 +11,8 @@ void ILinkMessageRequest(unsigned short id) {
 	unsigned short maxlength = 0;
 	
 	switch(id) {
-		case ID_ILINK_IDENTIFY:	  ptr = (unsigned short *) &ilink_identify;   maxlength = sizeof(ilink_identify)/2 - 1;   break;
+		case ID_ILINK_IDENTIFY:	  ptr = (unsigned short *) &ilink_identify;   maxlength = sizeof(ilink_identify)/2 - 1; break;
+        case ID_ILINK_THALCTRL:  ptr = (unsigned short *) &ilink_thalctrl_tx;   maxlength = sizeof(ilink_thalctrl_tx)/2 - 1;   break;
 		case ID_ILINK_THALSTAT:	 ptr = (unsigned short *) &ilink_thalstat;   maxlength = sizeof(ilink_thalstat)/2 - 1;   break;
 		case ID_ILINK_RAWIMU:	   ptr = (unsigned short *) &ilink_rawimu;	 maxlength = sizeof(ilink_rawimu)/2 - 1;	 break;
 		case ID_ILINK_SCALEDIMU:	ptr = (unsigned short *) &ilink_scaledimu;  maxlength = sizeof(ilink_scaledimu)/2 - 1;  break;
@@ -20,7 +21,7 @@ void ILinkMessageRequest(unsigned short id) {
 		case ID_ILINK_INPUTS0:   ptr = (unsigned short *) &ilink_inputs0;  maxlength = sizeof(ilink_inputs0)/2 - 1;  break;
 		case ID_ILINK_OUTPUTS0:	 ptr = (unsigned short *) &ilink_outputs0;   maxlength = sizeof(ilink_outputs0)/2 - 1;   break;
 		case ID_ILINK_DEBUG:	 ptr = (unsigned short *) &ilink_debug;   maxlength = sizeof(ilink_debug)/2 - 1;   break;
-		case ID_ILINK_CLEARBUF:
+        case ID_ILINK_CLEARBUF:
 			FUNCILinkTxBufferPushPtr = 0;
 			FUNCILinkTxBufferPopPtr = 0;
 			break;
