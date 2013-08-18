@@ -186,15 +186,22 @@
 // *** ILink Config
 // ****************************************************************************
 #define ILINK_EN            1              // Enable the Interlink functions (0=off, 1=on)
-#define ILINK_BUFFER_SIZE   128          // ILink buffer size
+#define ILINK_TXBUFFER_SIZE 256
+#define ILINK_RXBUFFER_SIZE   256          // ILink buffer size
 #define ILINK_MAX_FETCH     128          // Maximum characters to fetch at once
 
 #if WHO_AM_I == I_AM_THALAMUS
 
     // ****************************************************************************
+    // *** RX Functions (Thalamus only)
+    // ****************************************************************************
+    #define RX_EN           1              // Enable RX library functions
+    #define RX_TYPE         0               // 0: Spektrum satellite decode
+                                            // 1: Futaba S.Bus decode
+    
+    // ****************************************************************************
     // *** PWM Functions (Thalamus only)
     // ****************************************************************************
-
     #define PWM_DEFAULT_N   1000            // Default PWM outputs (in microseconds), 
     #define PWM_DEFAULT_E   1000            //  use low values (i.e. 1000) for ESCs
     #define PWM_DEFAULT_S   1000
@@ -208,19 +215,19 @@
     #define PWM_XY_FILTER   0               // value is between 0 and 1, lower is less filterig
 
     #define PWM_NESWFREQ    400             // PWM frequency (maximum 450)
-    #define PWM_XYFREQ      50              // This value needs to be a fraction of PWM_NESWFREQ
+    #define PWM_XYFREQ      100              // This value needs to be a fraction of PWM_NESWFREQ
 
     // ****************************************************************************
     // *** IMU Functions (Thalamus only)
     // ****************************************************************************
 
-    #define ACCEL_RANGE         0           // Set the dynamic range: 0=+/- 2g, 1= +/- 4g, 2=+/-8g, 3=+/-16g
-    #define ACCEL_RATE          5           // Set the data rate: 0=off, 1=1Hz, 2=10Hz, 3=25Hz, 4=50Hz, 5=100Hz, 6=200Hz, 7=400Hz, 8=1.620kHz (low power mode ONLY), 9=1.344kHz (normal)/5.376kHz (low power mode)
+    #define ACCEL_RANGE         1           // Set the dynamic range: 0=+/- 2g, 1= +/- 4g, 2=+/-8g, 3=+/-16g
+    #define ACCEL_RATE          7           // Set the data rate: 0=off, 1=1Hz, 2=10Hz, 3=25Hz, 4=50Hz, 5=100Hz, 6=200Hz, 7=400Hz, 8=1.620kHz (low power mode ONLY), 9=1.344kHz (normal)/5.376kHz (low power mode)
     #define ACCEL_LOW_POWER     0           // Set to enable low power mode
-
+	#define ACCEL_FIFO_EN		0			// Enable FIFO
     #define GYRO_RANGE          2           // Set dynamic range: 0=250dps, 1=500dps, 2=2000dps, 3=2000dps
-    #define GYRO_RATE           3           // Set the data rate: 0=100Hz, 1=200Hz, 2=400Hz, 3=800Hz
-    #define GYRO_BANDWIDTH      3           // Sets the bandwidth
+    #define GYRO_RATE           2           // Set the data rate: 0=100Hz, 1=200Hz, 2=400Hz, 3=800Hz
+    #define GYRO_BANDWIDTH      2           // Sets the bandwidth
                                                 //      For Gyro rate 0 (100Hz): 0=12.5Hz, 1=25Hz, 2=25Hz, 3=25Hz
                                                 //      For Gyro rate 1 (200Hz): 0=12.5Hz, 1=25Hz, 2=50Hz, 3=70Hz
                                                 //      For Gyro rate 2 (400Hz): 0=20Hz, 1=25Hz, 2=50Hz, 3=110Hz
@@ -234,9 +241,9 @@
     #define MAGNETO_TRIES_MAX   5           // When in single-measurement mode, how many tries to read data from the stream before giving up?
     #define MAGNETO_TRIES_DELAY 1           // Millisecond delay between trying to read data from the magneto
 
-    #define BARO_EN                 0           // Set to 1 to enable the barometer functions (set to 0 to disable and save some RAM)
-    #define BARO_OVERSAMPLE         3           // Sets the barometer oversampling mode, 0: ultra low power, 1: standard, 2: high resolution, 3: ultra high resolution
-
+    #define BARO_PRES_AVERAGING 9           // Pressure oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128, 8=256, 9=384, 10=512 (512/128 not available on ODR=25/25Hz)
+    #define BARO_TEMP_AVERAGING 4           // Temperature oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128 (512/128 not available on ODR=25Hz)
+    #define BARO_RATE           7           // Sets the output data rate (pressure/temperature): 0=one shot, 1=1/1Hz, 2=7/1Hz, 3=12.5/1Hz, 4=25/1Hz,  5=7/7Hz, 6=12.5/12.5Hz, 7=25Hz/25Hz
 #endif
 
 #if WHO_AM_I == I_AM_HYPO
@@ -265,7 +272,7 @@
     #define GPS_EN              1           // Set to 1 to enable GPS code (set to 0 to save some RAM)
     
     #define GPS_5HZ_RATE        1           // Set to 1 to allow up to 5Hz position rate (set to 0 for the default 0Hz)
-    #define GPS_AIRBORNE        0           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
+    #define GPS_AIRBORNE        1           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
     
     #define GPS_METHOD          1           // Method, use 0 for the slow but simple polling method, or 1 for the faster but more complex periodic method    
     

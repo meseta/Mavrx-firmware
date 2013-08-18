@@ -240,7 +240,7 @@ __attribute__ ((section(".crp"))) const unsigned int CRP_WORD = CRP;
 // *** Clock Functions
 // ****************************************************************************
 
-__attribute__ ((section(".after_vectors"))) void ClockModeXTAL(void) {
+/*__attribute__ ((section(".after_vectors")))*/ void ClockModeXTAL(void) {
     unsigned int i;
     
     LPC_SYSCON->PDRUNCFG &= ~(0x1UL << 5);			// Power up system oscillator
@@ -3109,11 +3109,12 @@ unsigned char PRGPoll(void) {
 #if ILINK_EN & SSP0_EN
     volatile unsigned char FUNCILinkState;
     volatile unsigned short FUNCILinkID, FUNCILinkChecksumA, FUNCILinkChecksumB, FUNCILinkLength, FUNCILinkPacket;
-    unsigned short FUNCILinkRxBuffer[ILINK_BUFFER_SIZE];
+    unsigned short FUNCILinkRxBuffer[ILINK_RXBUFFER_SIZE];
     
     void ILinkInit(unsigned short speed) {
         SSP0Init(speed);
         FUNCILinkState = 0;
+        FUNCILinkTxBufferBusy = 0;
     }
     
     void ILinkPoll(unsigned short message) {
@@ -3159,7 +3160,7 @@ unsigned char PRGPoll(void) {
                 FUNCILinkChecksumA += data;
                 FUNCILinkChecksumB += FUNCILinkChecksumA;
                 
-                if(FUNCILinkLength >= ILINK_BUFFER_SIZE) FUNCILinkState = 0;
+                if(FUNCILinkLength >= ILINK_RXBUFFER_SIZE) FUNCILinkState = 0;
                 else if(FUNCILinkLength > 0) FUNCILinkState = 4;
                 else { // special case for zero-length packet
                     if(ILinkMessageRequest) ILinkMessageRequest(FUNCILinkID);
@@ -3225,48 +3226,54 @@ unsigned char PRGPoll(void) {
         unsigned int j;
         unsigned short chkA, chkB;
         
-        if(ILinkWritable() > length+6) {
-            ILinkPush(0xec41);
-            ILinkPush(0x13be);
-            ILinkPush(id);
-            ILinkPush(length);
-            chkA = id + length;
-            chkB = chkA + id;
-            
-            for(j=0; j<length; j++) {
-                value = buffer[j];
-                ILinkPush(value);
-                chkA += value;
-                chkB += chkA;
+        if(FUNCILinkTxBufferBusy == 0) {
+            FUNCILinkTxBufferBusy = 1;
+            if(ILinkWritable() > length+6) {
+                ILinkPush(0xec41);
+                ILinkPush(0x13be);
+                ILinkPush(id);
+                ILinkPush(length);
+                chkA = id + length;
+                chkB = chkA + id;
+                
+                for(j=0; j<length; j++) {
+                    value = buffer[j];
+                    ILinkPush(value);
+                    chkA += value;
+                    chkB += chkA;
+                }
+                ILinkPush(chkA);
+                ILinkPush(chkB);
+                FUNCILinkTxBufferBusy = 0;
+                return 1;
             }
-            ILinkPush(chkA);
-            ILinkPush(chkB);
-            return 1;
         }
-        else return 0;
+        
+        return 0;
     }
     
     //#if ILINK_EN == 2
-        unsigned short FUNCILinkTxBuffer[ILINK_BUFFER_SIZE];
+        unsigned short FUNCILinkTxBuffer[ILINK_TXBUFFER_SIZE];
+        unsigned int FUNCILinkTxBufferBusy;
         volatile unsigned short FUNCILinkTxBufferPushPtr, FUNCILinkTxBufferPopPtr;
 
         unsigned short ILinkWritable(void) {
             if(FUNCILinkTxBufferPushPtr < FUNCILinkTxBufferPopPtr) return FUNCILinkTxBufferPopPtr - FUNCILinkTxBufferPushPtr - 1;
-            else return ILINK_BUFFER_SIZE + FUNCILinkTxBufferPopPtr - FUNCILinkTxBufferPushPtr - 1;
+            else return ILINK_TXBUFFER_SIZE + FUNCILinkTxBufferPopPtr - FUNCILinkTxBufferPushPtr - 1;
         }
         unsigned short ILinkReadable(void) {
-            if(FUNCILinkTxBufferPushPtr < FUNCILinkTxBufferPopPtr) return ILINK_BUFFER_SIZE + FUNCILinkTxBufferPushPtr - FUNCILinkTxBufferPopPtr;
+            if(FUNCILinkTxBufferPushPtr < FUNCILinkTxBufferPopPtr) return ILINK_TXBUFFER_SIZE + FUNCILinkTxBufferPushPtr - FUNCILinkTxBufferPopPtr;
             else return FUNCILinkTxBufferPushPtr - FUNCILinkTxBufferPopPtr;
         }
         unsigned short ILinkPop(void) {
             unsigned short retval;
             retval = FUNCILinkTxBuffer[FUNCILinkTxBufferPopPtr++];
-            if(FUNCILinkTxBufferPopPtr >= ILINK_BUFFER_SIZE) FUNCILinkTxBufferPopPtr = 0;
+            if(FUNCILinkTxBufferPopPtr >= ILINK_TXBUFFER_SIZE) FUNCILinkTxBufferPopPtr = 0;
             return retval;
         }
         void ILinkPush(unsigned short data) {
             FUNCILinkTxBuffer[FUNCILinkTxBufferPushPtr++] = data;
-            if(FUNCILinkTxBufferPushPtr >= ILINK_BUFFER_SIZE) FUNCILinkTxBufferPushPtr = 0;
+            if(FUNCILinkTxBufferPushPtr >= ILINK_TXBUFFER_SIZE) FUNCILinkTxBufferPushPtr = 0;
         }
 
         void SSP0Interrupt(unsigned short data) {
@@ -3786,15 +3793,17 @@ unsigned char PRGPoll(void) {
         I2CBuffer[2] = 0x80 | ((ACCEL_RANGE & 0x3) << 4) | (((~ACCEL_LOW_POWER) & 0x1) << 3);
         I2CMaster(I2CBuffer, 3, 0, 0);
         
-        // I2CBuffer[0] = ACCEL_ADDR;
-        // I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_A
-        // I2CBuffer[2] = 0x40; // FIFO enable
-        // I2CMaster(I2CBuffer, 3, 0, 0);
-        
-        // I2CBuffer[0] = ACCEL_ADDR;
-        // I2CBuffer[1] = 0x2e + 0x80; // Control Register FIFO_CTRL_REG_A
-        // I2CBuffer[2] = 0x40; // FIFO mode
-        // I2CMaster(I2CBuffer, 3, 0, 0);
+		#if ACCEL_FIFO_EN
+			I2CBuffer[0] = ACCEL_ADDR;
+			I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_A
+			I2CBuffer[2] = 0x40; // FIFO enable
+			I2CMaster(I2CBuffer, 3, 0, 0);
+			
+			I2CBuffer[0] = ACCEL_ADDR;
+			I2CBuffer[1] = 0x2e + 0x80; // Control Register FIFO_CTRL_REG_A
+			I2CBuffer[2] = 0x40; // FIFO mode
+			I2CMaster(I2CBuffer, 3, 0, 0);
+		#endif
         
         // *** Gyroscope
         I2CBuffer[0] = GYRO_ADDR;
@@ -3858,7 +3867,6 @@ unsigned char PRGPoll(void) {
             data[0] = -data[0];
 			data[1] = -data[1];
 			
-            
             return 1;
         }
         else return 0;
@@ -3967,12 +3975,12 @@ unsigned char PRGPoll(void) {
     float GetBaroPressure(void) { // in Pa
         unsigned int reading;
         reading = GetBaro();
-        if(((reading & 0x800000) == 1) | (reading == 0)) return 0; // bit numer 24 is the sign bit, shouldn't be 1 (signifying negative value) because we're not using delta pressure
+        if(((reading & 0x800000) == 1) || (reading == 0)) return 0; // bit numer 24 is the sign bit, shouldn't be 1 (signifying negative value) because we're not using delta pressure
         else return (float)reading/40.96f;
     }
     
-    float Pressure2Alt(float pressure) { // in mm
-        return (pressure - (float)101325) * 83.2546913138f; // max error around 25m, linearise around sea level
+    float Pressure2Alt(float pressure) { // in m
+        return (pressure - (float)101325) * 83254.6913138f; // max error around 25m, linearise around sea level
     }
     
     float GetBaroTemp(void) { // in degrees C

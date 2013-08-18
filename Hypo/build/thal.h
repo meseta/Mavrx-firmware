@@ -924,7 +924,32 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ID_ILINK_ALTITUDE   0x7e00
     #define ID_ILINK_ATTITUDE   0x7f00
     #define ID_ILINK_ATDEMAND   0x7f01
-    #define ID_ILINK_MODEMAND   0x7f02    
+    #define ID_ILINK_MODEMAND   0x7f02
+    #define ID_ILINK_GPSFLY     0x7f03
+    #define ID_ILINK_DEBUG      0x00ff
+    
+    typedef struct ilink_debug_struct {
+        float debug0;
+        float debug1;
+        float debug2;
+        float debug3;
+        float debug4;
+        float debug5;
+        float debug6;
+        float debug7;
+        unsigned short isNew;
+    } PACKED ilink_debug_t;
+
+    typedef struct ilink_gpsfly_struct {
+        float northDemand;
+        float eastDemand;
+        float headingDemand;
+        float altitude;
+        float altitudeDemand;
+        float vAcc;
+        float velD;
+        unsigned short isNew;
+    } PACKED ilink_gpsfly_t;
 
     typedef struct ilink_identify_struct {  // Contains the ID of the craft
         unsigned short deviceID;            // ID: Thalamus is 1 for example
@@ -968,7 +993,7 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_attitude_t;
     
-    typedef struct ilink_position_struct {  // Position data
+	typedef struct ilink_position_struct {  // Position data
         double craftX;
         double craftY;
         double craftZ;
@@ -986,7 +1011,6 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short controlMask;
         unsigned short isNew;
     } PACKED ilink_payldctrl_t;
-    
     
     typedef struct ilink_atdemand_struct {  // Attitude data
         float roll;
@@ -1017,15 +1041,15 @@ static inline void RSTReset(void) { ResetInit(); }
     } PACKED ilink_iochan_t;
     
     typedef struct ilink_altitude_struct {  // Altitude data
-        float relAlt;                      // E.g. ultrasound
-        float absAlt;                      // E.g. barometer
-        float difAlt;                      // Change in altitude
+        float ultra;                      // E.g. ultrasound
+        float baro;                      // E.g. barometer
+        float filtered;                      // Change in altitude
         unsigned short isNew;
     } PACKED ilink_altitude_t;
     
     extern volatile unsigned char FUNCILinkState;
     extern volatile unsigned short FUNCILinkID, FUNCILinkChecksumA, FUNCILinkChecksumB, FUNCILinkLength, FUNCILinkPacket;
-    extern unsigned short FUNCILinkRxBuffer[ILINK_BUFFER_SIZE];
+    extern unsigned short FUNCILinkRxBuffer[ILINK_RXBUFFER_SIZE];
     
     void ILinkInit(unsigned short speed);
     void ILinkPoll(unsigned short message);
@@ -1037,7 +1061,8 @@ static inline void RSTReset(void) { ResetInit(); }
     extern WEAK void ILinkMessageRequest(unsigned short id);
     extern WEAK void ILinkMessageError(unsigned short id);
     
-    extern unsigned short FUNCILinkTxBuffer[ILINK_BUFFER_SIZE];
+    extern unsigned int FUNCILinkTxBufferBusy;
+    extern unsigned short FUNCILinkTxBuffer[ILINK_TXBUFFER_SIZE];
     extern volatile unsigned short FUNCILinkTxBufferPushPtr, FUNCILinkTxBufferPopPtr;
 
     unsigned short ILinkWritable(void);
@@ -1189,7 +1214,7 @@ static inline void RSTReset(void) { ResetInit(); }
     unsigned char GetMagneto(signed short * data);
     unsigned int GetBaro(void);
     float GetBaroPressure(void);
-    float Pressure2Alt(void);
+    float Pressure2Alt(float pressure);
     float GetBaroTemp(void);
     void SensorSleep(void);
 
@@ -1325,7 +1350,7 @@ static inline void RSTReset(void) { ResetInit(); }
             typedef struct gps_nav_velned_struct{
                 unsigned int iTOW;
                 signed int velN;
-                signed int vleE;
+                signed int velE;
                 signed int velD;
                 unsigned int speed;
                 unsigned int gSpeed;

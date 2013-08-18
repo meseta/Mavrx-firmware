@@ -83,7 +83,7 @@
 // ****************************************************************************
 // *** USB HID and MSC functions
 // ****************************************************************************
-#define USB_EN              1           // Set to 1 to enable USB ROM functions
+#define USB_EN              0           // Set to 1 to enable USB ROM functions
 
 #define USB_VENDOR_ID       0x1FC9      // The default NXP Vendor ID is 0x1FC9
 #define USB_MSC_ID          0x0114      // Product ID for MSC device
@@ -187,7 +187,8 @@
 // *** ILink Config
 // ****************************************************************************
 #define ILINK_EN            1              // Enable the Interlink functions (0=off, 1=on)
-#define ILINK_BUFFER_SIZE   256          // ILink buffer size
+#define ILINK_TXBUFFER_SIZE   512          // ILink buffer size
+#define ILINK_RXBUFFER_SIZE   128          // ILink buffer size
 #define ILINK_MAX_FETCH     256          // Maximum characters to fetch at once
 
 #if WHO_AM_I == I_AM_THALAMUS
@@ -224,6 +225,7 @@
     #define ACCEL_RANGE         1           // Set the dynamic range: 0=+/- 2g, 1= +/- 4g, 2=+/-8g, 3=+/-16g
     #define ACCEL_RATE          7           // Set the data rate: 0=off, 1=1Hz, 2=10Hz, 3=25Hz, 4=50Hz, 5=100Hz, 6=200Hz, 7=400Hz, 8=1.620kHz (low power mode ONLY), 9=1.344kHz (normal)/5.376kHz (low power mode)
     #define ACCEL_LOW_POWER     0           // Set to enable low power mode
+	#define ACCEL_FIFO_EN		0			// Enable FIFO
 
     #define GYRO_RANGE          2           // Set dynamic range: 0=250dps, 1=500dps, 2=2000dps, 3=2000dps
     #define GYRO_RATE           2           // Set the data rate: 0=100Hz, 1=200Hz, 2=400Hz, 3=800Hz
@@ -241,7 +243,6 @@
     #define MAGNETO_GAIN        1           // Sets gain for certain sensor ranges.  0=+/-0.88Ga, 1=+/-1.3Ga, 2=+/-1.9Ga, 3=+/-2.5Ga, 4=+/-4.0Ga, 5=+/-4.7Ga, 6=+/-5.6Ga, 7=+/-8.1Ga
     #define MAGNETO_TRIES_MAX   5           // When in single-measurement mode, how many tries to read data from the stream before giving up?
     #define MAGNETO_TRIES_DELAY 1           // Millisecond delay between trying to read data from the magneto
-
     #define BARO_PRES_AVERAGING 9           // Pressure oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128, 8=256, 9=384, 10=512 (512/128 not available on ODR=25/25Hz)
     #define BARO_TEMP_AVERAGING 4           // Temperature oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128 (512/128 not available on ODR=25Hz)
     #define BARO_RATE           7           // Sets the output data rate (pressure/temperature): 0=one shot, 1=1/1Hz, 2=7/1Hz, 3=12.5/1Hz, 4=25/1Hz,  5=7/7Hz, 6=12.5/12.5Hz, 7=25Hz/25Hz
@@ -274,7 +275,7 @@
     #define GPS_EN              1           // Set to 1 to enable GPS code (set to 0 to save some RAM)
     
     #define GPS_5HZ_RATE        1           // Set to 1 to allow up to 5Hz position rate (set to 0 for the default 0Hz)
-    #define GPS_AIRBORNE        0           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
+    #define GPS_AIRBORNE        1           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
     
     #define GPS_METHOD          1           // Method, use 0 for the slow but simple polling method, or 1 for the faster but more complex periodic method    
     
@@ -292,12 +293,12 @@
     
 #endif
 
-#if WHO_AM_I == I_AM_HYPX
+#if WHO_AM_I == I_AM_HYPX || WHO_AM_I == I_AM_HYPO
     #define XBEE_EN             1           // Set to 1 to enable the XBee code
 
     #define XBEE_POWER_LEVEL    0           // Set transmit power: 4=18dBm/63mW, 3=16dBm/40mW, 2=14dBm/25mW, 1=12dBm/16mW, 0=0dBm/1mW
     #define XBEE_BUFFER_SIZE    128         // XBee buffer size
-    #define XBEE_JOINPERIOD     60          // Number of seconds to allow bind
+    #define XBEE_JOINPERIOD     30          // Number of seconds to allow bind
 #endif
 
 
