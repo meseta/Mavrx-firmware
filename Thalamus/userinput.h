@@ -1,7 +1,5 @@
-// ****************************************************************************
-// *** Arm, Disarm and Calibrate
-// ****************************************************************************
 
+// TODO PUT THIS INTO CONTROL.H and RENAME IT STATEMACHINE.H -DISCUSS -it's currently a mess
 void read_sticks(){
 	///////////////////////// REGULAR MODE ///////////////////////////////////
 	if (MODE_ST == 1) { 
@@ -62,8 +60,7 @@ void read_sticks(){
 			user.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
 			float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 						
 			user.throttle = rcInput[RX_THRO] - throttletrim;
-			throttle = user.throttle;
-			if (throttle < 0) throttle = 0;
+			
 			
 			// A yaw rate is demanded by the rudder input, not an absolute angle.
 			// This code increments the demanded angle at a rate proportional to the rudder input
@@ -81,6 +78,8 @@ void read_sticks(){
 	
 	}
 }
+
+// TODO: PUT THIS INTO SENSORS
 
 void ReadRXInput(void) {			
 

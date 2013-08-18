@@ -52,6 +52,7 @@
 
 #define FAST_RATE		   400
 #define SLOW_RATE		   75
+#define ULTRA_RATE			50 //TODO: Not sure if this is the right place for this!
 
 #define ZEROTHROTMAX		1*FAST_RATE
 
@@ -72,7 +73,7 @@
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	32 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	35 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
@@ -102,6 +103,7 @@ void LinkInit(void);
 void EEPROMLoadAll(void);
 void EEPROMSaveAll(void);
 void control_throttle(void);
+void control_attitude(void);
 void filter_GPS_baro();
 
 
@@ -161,6 +163,7 @@ typedef struct
 	float ultra;
 	float vel;
 	float ult_conf;
+	float ult;
 } altStruct;
 altStruct alt = {0};
 
@@ -372,7 +375,7 @@ struct paramStorage_struct paramStorage[] = {
 
 	// Ultrasound
 	{"ULTRA_Kp",		0.05f},
-	{"ULTRA_Kd",		5.0f},
+	{"ULTRA_Kd",		0.1f},
 	{"ULTRA_Ki",		0.00001f},
 	{"ULTRA_De",	  	0.9999f},
 	{"ULTRA_TKOFF",   	200.0f}, 
@@ -462,6 +465,9 @@ struct paramStorage_struct paramStorage[] = {
 
     {"Filt_baroK",		 0.0},
 	#define Filt_baroK		paramStorage[67].value
+	
+	{"GPS_LAND",		 0.0},
+	#define GPS_LAND		paramStorage[68].value
 
 
 	};

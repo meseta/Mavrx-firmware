@@ -41,10 +41,12 @@ void ReadUltrasound(void) {
 		ultraLoss++;
 		if(ultraLoss > ULTRA_OVTH) ultraLoss = ULTRA_OVTH;
 
-		alt.ult_conf += (0-alt.ult_conf)*0.1;
+		alt.ult_conf += (0-alt.ult_conf)*0.1;	
 	}
 
-
+	//debug
+	ilink_debug.debug0 = alt.ult_conf;
+	
 			
 }			
 		

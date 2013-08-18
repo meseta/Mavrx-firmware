@@ -1,5 +1,9 @@
-
+// ****************************************************************************
+// *** Throttle Control
+// ****************************************************************************	
 void control_throttle(){
+
+	
 
 	//PID states
 	static float GPS_KerrI = 0;
@@ -8,9 +12,16 @@ void control_throttle(){
 	static unsigned char got_setpoint = 0; //bool
 	static float oldUltra = 0;
 
-	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
-	if (MODE_ST == MODE_MANUAL)
-	{
+	//Manual Mode
+	// if (MODE_ST == MODE_MANUAL)	{
+	if (auxState == 0)	{
+		
+		//TODO: Must set airborne or not in all modes
+		// Throttle comes straight from userinput
+		throttle = user.throttle;
+		if (throttle < 0) throttle = 0;
+		
+		//We store key variables to ensure a stepless transition.
 		GPS_KerrI = throttle;
 		ULT_KerrI = throttle;
 
@@ -24,122 +35,149 @@ void control_throttle(){
 
 	static float gpsThrottle = 0;
 	static float ultraThrottle = 0;
+	static float alt_tkoff = 0;
 
-	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
-	if (MODE_ST == MODE_AUTO)	{
-	
-		////////////////// TAKEOFF CONTROL  ///////////////////////
-		//TODO: Switch over when Hypo requests active if (takeoff == 1) {
-		// If take off requested
-		if ((flapState == 1)
-		// And not currently airborne
-		&& (airborne == 0)
-		// and throttlestick in middle
-		&& ((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420)
-		) {
-			//If still on the ground (throttle zero), record altitude
-			if (throttle == 0) alt.tkoff = alt.filtered;
-			// Increase throttle
-			throttle += 0.1;
-		}
+	//Autonomous Mode
+	// if (MODE_ST == MODE_AUTO)	{
+	if (auxState == 1)	{	
 		
-		if (((alt.filtered > alt.tkoff + 0.8 ) || (alt.ult > ULTRA_TKOFF)) && (airborne == 0)) { 
-			// just taken off, set airborne to 1 and remember takeoff throttle
-			airborne = 1;
-			ULT_KerrI = throttle;
-			GPS_KerrI = throttle;
-			targetZ_ult = alt.ult;				
+		//When not airborne
+		if (airborne == 0) {
+			////////////////// TAKEOFF CONTROL  ///////////////////////
+			//TODO: Switch over when Hypo requests active if (takeoff == 1) {
+			// If take off requested
+			if ((flapState == 1)
+			// and throttlestick in middle
+			&& ((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420)
+			) {
+				//If still on the ground (throttle zero), record altitude
+				if (throttle == 0) {
+					//debug
+					ilink_debug.debug2 += 1.0;
+					alt_tkoff = alt.filtered;
+					throttle += 200;
+				}
+				// Increase throttle
+				throttle += 0.1;
+				//debug
+				ilink_debug.debug3 += 1.0;
+			}
+			
+			if ((alt.filtered > alt_tkoff + 0.8 ) || (alt.ultra > ULTRA_TKOFF)) { 
+				// just taken off, set airborne to 1 and remember takeoff throttle
+				airborne = 1;
+				ULT_KerrI = throttle;
+				GPS_KerrI = throttle;
+				targetZ_ult = alt.ultra;				
+			}
 		}
 	
+		if (airborne == 1) {
 		
-		/////////////////  PID ALTITUDE CONTROL ////////////////////////////
-		//run ultrasound and gps in parallell, and select which one drives higher
-		static float ultTouchdownHyst = 0;
-		if (alt.ult_conf > (0.90 - ultTouchdownHyst)) {
-			ultTouchdownHyst = 10;
+			//Reset Launcher Button State
+			flapState = 0;
+			/////////////////  PID ALTITUDE CONTROL ////////////////////////////
+			//run ultrasound and gps in parallell, and select which one drives higher
+			// This prevents Hypo dumping the craft onto the ground when it decreases the GPS demand too low
+			// It also drags the craft out of the Ultrasound hold when Hypo asks for an increase in GPS altitude.
+			
+			//TODO: Oskar, explain what your Hysteresis does
+			static float ultTouchdownHyst = 0;
+			if (alt.ult_conf > (0.90 - ultTouchdownHyst)) {
+				ultTouchdownHyst = 10;
 
-			if (!got_setpoint) {
-				targetZ_ult = alt.ultra;
-				got_setpoint = 1;
+				// When we enter the confidence range, we store the ultrasound altitude and attempt to hold it.
+				// TODO: Work out what happens if move out of the ultrasound confidence zone again.
+				if (!got_setpoint) {
+					targetZ_ult = alt.ultra;
+					got_setpoint = 1;
+					oldUltra = alt.ultra;
+				}
+
+				float targetAltVel = 0;
+				
+				// If the allowLand flag is set, we lower the craft onto the ground by decrementing the ultrasound altitude.
+				//TODO: Replace with allowLand
+				// if (ilink_gpsfly.allowLand) {
+				if (GPS_LAND) {
+					targetZ_ult -= 0.2 * (1/(float)ULTRA_RATE);
+					targetAltVel = -0.2;
+				}
+		
+				//Ultrasound derived PID controller
+				float ULT_errP = targetZ_ult - alt.ultra;
+				ULT_KerrI += ULTRA_Ki * (1/(float)FAST_RATE) * ULT_errP;
+				float ULT_errD = targetAltVel - (alt.ultra - oldUltra) * (float)FAST_RATE;
 				oldUltra = alt.ultra;
+				// Collecting the PID terms
+				ultraThrottle = ULTRA_Kp * ULT_errP + ULT_KerrI + ULTRA_Kd * ULT_errD;
+				
+				
+
+			} 
+			else {
+				got_setpoint = 0;
+				ultraThrottle = 0;
+				ultTouchdownHyst = 0;
 			}
 
-			float targetAltVel = 0;
-			if (ilink_gpsfly.allowLand) {
-				targetZ_ult -= 0.2 * (1/(float)ULTRA_RATE);
-				targetAltVel = -0.2;
-			}
-	
-			//Ultrasound derived PID controller
-			float ULT_errP = targetZ_ult - alt.ultra;
-			ULT_KerrI += ULTRA_Ki * (1/(float)FAST_RATE) * ULT_errP;
-			float ULT_errD = targetAltVel - (alt.ultra - oldUltra) * (float)FAST_RATE;
-			oldUltra = alt.ultra;
+
+			//Baro/GPS derived PID controller
+			float GPS_errP = ilink_gpsfly.altitudeDemand - alt.filtered;
+			GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
+			// float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel; TODO: Set this back when COde finished
+			float GPS_errD = 0.0 - alt.vel;
 			// Collecting the PID terms
-			ultraThrottle = ULTRA_Kp * ULT_errP + ULT_KerrI + ULTRA_Kd * ULT_errD;
+			gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
+
+
+			//Use largest throttle output, and cross-feed the integrals for step free transition
+			// if (ultraThrottle > gpsThrottle){
+				// GPS_KerrI = ULT_KerrI;
+				throttle = ultraThrottle;
+			// } else {
+				// ULT_KerrI = GPS_KerrI;
+				// throttle = gpsThrottle;
+			// }
+
+
+			///////////////////////////////// LANDING MOTOR SHUT OFF, 1-Ultrasound Driven  2-GPS Driven ////////////////////////
+			//1 - Ultrasound driven
+			// If ultrasound reading is valid and less than landing threshold (ULTRA_LD_TD) and we are airborne
+			// then increase landing counter
+			static int ult_landing = 0;
+			if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) ult_landing++;
+			// If consecutive run of readings is broken, reset the landing counter.
+			else ult_landing = 0;
 			
+			//If the above is satisfied consecutively more than ULT_LD_DT times then shut down the motors
+			if(ult_landing > ULTRA_DTCT) { 
+				airborne = 0;
+				throttleHoldOff = 1;
+				throttle = 0;
+			}
+
+			// 2 - GPS driven
+			// If the GPS altitude integral stays maxed out at minimum value, increment the landing counter
+			static int gps_landing = 0;
+			if ((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
+			// If consecutive run of readings is broken, reset the landing counter.
+			else gps_landing = 0;
 			
-
-		} 
-		else {
-			got_setpoint = 0;
-			ultraThrottle = 0;
-			ultTouchdownHyst = 0;
-		}
-
-
-		//Baro/GPS derived PID controller
-		float GPS_errP = ilink_gpsfly.altitudeDemand - alt.filtered;
-		GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
-		float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel;
-		// Collecting the PID terms
-		gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
-
-
-		//Use largest throttle output, and cross-feed the integrals for step free transition
-		if (ultraThrottle > gpsThrottle){
-			GPS_KerrI = ULT_KerrI;
-			throttle = ultraThrottle;
-		} else {
-			ULT_KerrI = GPS_KerrI;
-			throttle = gpsThrottle;
-		}
-
-		
-		///////////////////////////////// LANDING MOTOR SHUT OFF, 1-Ultrasound Driven  2-GPS Driven ////////////////////////
-		//1 - Ultrasound driven
-		// If ultrasound reading is valid and less than landing threshold (ULTRA_LD_TD) and we are airborne
-		// then increase landing counter
-		static int ult_landing = 0;
-		if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) ult_landing++;
-		// If consecutive run of readings is broken, reset the landing counter.
-		else ult_landing = 0;
-		
-		//If the above is satisfied consecutively more than ULT_LD_DT times then shut down the motors
-		if(ult_landing > ULTRA_DTCT) { 
-			airborne = 0;
-			throttleHoldOff = 1;
-			throttle = 0;
-		}
-
-		// 2 - GPS driven
-		// If the GPS altitude integral stays maxed out at minimum value, increment the landing counter
-		static int gps_landing = 0;
-		if ((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
-		// If consecutive run of readings is broken, reset the landing counter.
-		else gps_landing = 0;
-		
-		//If the above is satisfied consecutively more than GPS_LD_DT times then shut down the motors
-		if(gps_landing > ULTRA_DTCT) { 
-			airborne = 0;
-			throttleHoldOff = 1;
-			throttle = 0;
+			//If the above is satisfied consecutively more than GPS_LD_DT times then shut down the motors
+			if(gps_landing > ULTRA_DTCT) { 
+				airborne = 0;
+				throttleHoldOff = 1;
+				throttle = 0;
+			}
 		}
 		
+		//debug
+		ilink_debug.debug1 = airborne;
 	}
 	
-}
 
+}
 
 // ****************************************************************************
 // *** Attitude PID Control
@@ -164,10 +202,6 @@ void control_attitude(){
 			attitude_demand_body.yaw = ilink_gpsfly.headingDemand;
 		}
 
-		//debug
-		ilink_debug.debug0 = ilink_gpsfly.northDemand;
-		ilink_debug.debug1 = ilink_gpsfly.eastDemand;
-		ilink_debug.debug2 = ilink_gpsfly.headingDemand;
 		
 	}
 
