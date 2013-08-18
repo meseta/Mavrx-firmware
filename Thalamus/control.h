@@ -2,104 +2,111 @@
 void control_throttle(){
 
 	//PID states
-	static float targetZ = 0; // Target in Metres
 	static float GPS_KerrI = 0;
 	static float ULT_KerrI = 0;
+	static float targetZ_ult = 0;
+	static unsigned char got_setpoint = 0; //bool
+	static float oldUltra = 0;
 
 	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
-	//if (MODE_ST != MODE_AUTO) //TODO: make it use the global state
-	if(auxState == 0)
+	if (MODE_ST == MODE_MANUAL)
 	{
-		targetZ = alt.filtered;
 		GPS_KerrI = throttle;
 		ULT_KerrI = throttle;
-		targetZ_ult = alt.ult;
+
+		if (alt.ult_conf > 80) {
+			targetZ_ult = alt.ultra;
+			oldUltra = alt.ultra;
+			got_setpoint = 1;
+		}
+		
 	}
 
-	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
-	//if (MODE_ST == MODE_AUTO)
-	if(auxState == 1)
-	{	
-		// ULTRASOUND THROTTLE CONTROL - If we have good confidence in the ultrasound, we use it exclusively
-		if (alt.ult_conf > 80) {
-		
-			GPS_KerrI = throttle;
-			targetZ_gps = alt.filtered;
-			
-			float ULT_errP = targetZ_ult - alt.ult;
-			float ULT_errD = ULT_errP - ULT_errP_Old;
-			ULT_errP_Old = ULT_errP;
-			ULT_KerrI += ULT_ALTKi * (1/(float)FAST_RATE) * ULT_errP;
-			// Prevent the integral winding up massively
-			if (ULT_KerrI > 1000)  ULT_KerrI = 1000;
-			if (ULT_KerrI < -1000) ULT_KerrI = -1000;
-			
-			throttle = ULT_ALTKp * ULT_errP + ULT_KerrI + ULT_ALTKd * ULT_errD;
-			
-			if (land = 1)
-			targetZ_ult -= 0.05;
-			
-			if (takeoff = 1)
-			
-		}
-		
-		//GPS THROTTLE CONTROL - If we don't have confidence in the ultrasound readings we use GPS and or Barometer
-		else {
-		
-			KULT_errI = throttle;
-			targetZ_ult = alt.ult;
-			
-			float GPS_errP = targetZ_gps - alt.filtered;
-			//TODO: we need D term for setpoint for Derr.
-			float GPS_errD = -alt.vel;
-			GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
-			// Prevent the integral winding up massively
-			if (GPS_KerrI > 1000)  GPS_KerrI = 1000;
-			if (GPS_KerrI < -1000) GPS_KerrI = -1000;
-			
-			throttle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
-			
-			if (land = 1)
-			targetZ_gps -= 0.05;
-			
-			if (takeoff = 1)
+	static float gpsThrottle = 0;
+	static float ultraThrottle = 0;
 
+	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
+	if (MODE_ST == MODE_AUTO)
+	{
+
+		//run ultrasound and gps in parallell, and select which one drives higher
+		static float ultTouchdownHyst = 0;
+		if (alt.ult_conf > (0.90 - ultTouchdownHyst)) {
+			ultTouchdownHyst = 10;
+
+			if (!got_setpoint) {
+				targetZ_ult = alt.ultra;
+				got_setpoint = 1;
+				oldUltra = alt.ultra;
+			}
+
+			float targetAltVel = 0;
+			if (ilink_gpsfly.allowLand) {
+				targetZ_ult -= 0.2 * (1/(float)ULTRA_RATE);
+				targetAltVel = -0.2;
+			}
+
+			float ULT_errP = targetZ_ult - alt.ultra;
+			ULT_KerrI += ULTRA_Ki * (1/(float)FAST_RATE) * ULT_errP;
+			float ULT_errD = targetAltVel - (alt.ultra - oldUltra) * (float)FAST_RATE;
+			oldUltra = alt.ultra;
 			
+			ultraThrottle = ULTRA_Kp * ULT_errP + ULT_KerrI + ULTRA_Kd * ULT_errD;
+
+		} else {
+			got_setpoint = 0;
+			ultraThrottle = 0;
+			ultTouchdownHyst = 0;
 		}
+
+
+		//BaroGPS controller
+		float GPS_errP = ilink_gpsfly.altitudeDemand - alt.filtered;
+		GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
+		float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel;
 		
+		gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
+
+
+		//Use largest output, and cross-feed the integrals
+		if (ultraThrottle > gpsThrottle){
+			GPS_KerrI = ULT_KerrI;
+			throttle = ultraThrottle;
+		} else {
+			ULT_KerrI = GPS_KerrI;
+			throttle = gpsThrottle;
+		}
+
 		
 		// MOTOR SHUT OFF ON LANDING, 1-Ultrasound Driven  2-GPS Driven:
 		//1 - Ultrasound driven
 		// If ultrasound reading is valid and less than landing threshold (ULTRA_LD_TD) and we are airborne
 		// then increase landing counter
-		if ((ultra > 0) && (ultra < ULTRA_LD_TD) && (airborne == 1)) ult_landing++;
-		
-		//If the above is satisfied consecutively more than ULT_LD_DT times then shut down the motors
-		if(ult_landing > ULT_LD_DT) { 
-			airborne = 0;
-			throttleHoldOff = 1;
-			throttle = 0;
-		}
-				
+		static int ult_landing = 0;
+		if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) ult_landing++;
 		// If consecutive run of readings is broken, reset the landing counter.
 		else ult_landing = 0;
-
 		
-		// 2 - GPS driven
-		// If the GPS altitude integral stays maxed out at minimum value, increment the landing counter
-		if ((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
-		
-		//If the above is satisfied consecutively more than GPS_LD_DT times then shut down the motors
-		if(gps_landing > GPS_LD_DT) { 
+		//If the above is satisfied consecutively more than ULT_LD_DT times then shut down the motors
+		if(ult_landing > ULTRA_DTCT) { 
 			airborne = 0;
 			throttleHoldOff = 1;
 			throttle = 0;
 		}
-		
+
+		// 2 - GPS driven
+		// If the GPS altitude integral stays maxed out at minimum value, increment the landing counter
+		static int gps_landing = 0;
+		if ((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
 		// If consecutive run of readings is broken, reset the landing counter.
 		else gps_landing = 0;
 		
-		
+		//If the above is satisfied consecutively more than GPS_LD_DT times then shut down the motors
+		if(gps_landing > ULTRA_DTCT) { 
+			airborne = 0;
+			throttleHoldOff = 1;
+			throttle = 0;
+		}
 		
 	}
 	
@@ -113,7 +120,7 @@ void control_throttle(){
 void control_attitude(){
 
 	//TODO: use real states
-	if (auxState == 1)
+	if (MODE_ST == MODE_AUTO)
 	{
 		//simplicty! 
 		//attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
@@ -136,7 +143,7 @@ void control_attitude(){
 		
 	}
 
-	if (auxState == 0)
+	if (MODE_ST == MODE_MANUAL)
 	{
 		attitude_demand_body.pitch = user.pitch;
 		attitude_demand_body.roll = user.roll;

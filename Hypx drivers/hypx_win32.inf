@@ -1,0 +1,50 @@
+[Version] 
+Signature="$Windows NT$" 
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318} 
+Provider=%ProviderName% 
+DriverVer=01/06/07
+
+[Manufacturer] 
+%ProviderName%=DeviceList
+
+[DestinationDirs] 
+DefaultDestDir=12 
+
+[SourceDisksFiles]
+
+[SourceDisksNames]
+
+[DeviceList] 
+%Description%=HYPX, USB\VID_1FC9&PID_0233 
+
+[HYPX.nt] 
+include=mdmcpq.inf
+CopyFiles=DriverCopyFiles.nt
+AddReg=HYPX.nt.AddReg 
+
+[DriverCopyFiles.nt]
+usbser.sys,,,0x20
+
+[HYPX.nt.AddReg] 
+HKR,,DevLoader,,*ntkern 
+HKR,,NTMPDriver,,usbser.sys 
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider" 
+
+[HYPX.nt.Services] 
+include=mdmcpq.inf
+AddService=usbser, 0x00000002, DriverService.nt
+
+[HYPX.nt.HW]
+include=mdmcpq.inf
+
+[DriverService.nt] 
+DisplayName=%Description% 
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\usbser.sys 
+
+[Strings] 
+ProviderName="UAir"
+Description="Hypx VCom Port" 

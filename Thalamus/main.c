@@ -81,7 +81,8 @@
 
 //This is used with MODE_ST
 #define MODE_MANUAL 1
-#define MODE_AUTO 2
+#define MODE_EASY 2
+#define MODE_AUTO 3
 
 
 /////////////////////////////// FUNCTIONS //////////////////////////////////////
@@ -159,6 +160,7 @@ typedef struct
 	float filtered;
 	float ultra;
 	float vel;
+	float ult_conf;
 } altStruct;
 altStruct alt = {0};
 
@@ -282,7 +284,7 @@ unsigned int PRGBlankTimer; // Blanking time for button pushes
 unsigned int PRGTimer; // Timer for button pushes, continuously increments as the button is held
 unsigned int PRGPushTime; // Contains the time that a button was pushed for, populated after button is released
 
-
+unsigned char airborne = 0; //boolean
 
 
 /////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////
