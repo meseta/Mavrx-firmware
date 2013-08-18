@@ -82,6 +82,7 @@ void control_throttle(){
 		//1 - Ultrasound driven
 		// If ultrasound reading is valid and less than landing threshold (ULTRA_LD_TD) and we are airborne
 		// then increase landing counter
+		static int ult_landing = 0;
 		if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) ult_landing++;
 		// If consecutive run of readings is broken, reset the landing counter.
 		else ult_landing = 0;
@@ -95,6 +96,7 @@ void control_throttle(){
 
 		// 2 - GPS driven
 		// If the GPS altitude integral stays maxed out at minimum value, increment the landing counter
+		static int gps_landing = 0;
 		if ((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
 		// If consecutive run of readings is broken, reset the landing counter.
 		else gps_landing = 0;

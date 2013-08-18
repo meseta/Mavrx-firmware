@@ -52,7 +52,6 @@
 
 #define FAST_RATE		   400
 #define SLOW_RATE		   75
-#define ULTRA_RATE			75
 
 #define ZEROTHROTMAX		1*FAST_RATE
 
