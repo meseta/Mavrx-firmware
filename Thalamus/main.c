@@ -52,6 +52,7 @@
 
 #define FAST_RATE		   400
 #define SLOW_RATE		   75
+#define ULTRA_RATE			75
 
 #define ZEROTHROTMAX		1*FAST_RATE
 
@@ -283,7 +284,7 @@ unsigned int PRGBlankTimer; // Blanking time for button pushes
 unsigned int PRGTimer; // Timer for button pushes, continuously increments as the button is held
 unsigned int PRGPushTime; // Contains the time that a button was pushed for, populated after button is released
 
-
+bool airborne = 0;
 
 
 /////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////

@@ -2,41 +2,93 @@
 void control_throttle(){
 
 	//PID states
-	static float targetZ = 0; // Target in Metres
 	static float GPS_KerrI = 0;
 	static float ULT_KerrI = 0;
+	static bool got_setpoint = 0;
 
 	//if we are not using the altitude controller, set input and output bias to be the current ones, for a stepless transition.
 	if (MODE_ST == MODE_MANUAL)
 	{
-		targetZ = alt.filtered;
 		GPS_KerrI = throttle;
 		ULT_KerrI = throttle;
-		targetZ_ult = alt.ult;
+
+		if (alt.ult_conf > 80) {
+			targetZ_ult = alt.ult;
+			oldUltra = alt.ult;
+			got_setpoint = 1;
+		}
+		
 	}
+
+	static float gpsThrottle = 0;
+	static float ultraThrottle = 0;
 
 	//only override throttle if we are in auto. If not, leave it to the throttle set previously by the user.
 	if (MODE_ST == MODE_AUTO)
-	{	
+	{
 
-		float tergetAltVel = 0;
-		if (land = 1){
-			targetZ_gps -= 0.2 * (1/(float)FAST_RATE);
-			targetZ_ult -= 0.2 * (1/(float)FAST_RATE);
-			tergetAltVel = -0.2;
+		//run ultrasound and gps in parallell, and select which one drives higher
+		if (alt.ult_conf > (0.90 - ultTouchdownHyst)) {
+			ultTouchdownHyst = 10;
+
+			static float oldUltra = 0;
+			if (!got_setpoint) {
+				targetZ_ult = alt.ult;
+				got_setpoint = 1;
+				oldUltra = alt.ult;
+			}
+
+			if (allowLand FROM HYPO) {
+				targetZ_ult -= 0.2 * (1/(float)ULTRA_RATE);
+				tergetAltVel = -0.2;
+			}
+
+			float ULT_errP = targetZ_ult - alt.ult;
+			ULT_KerrI += ULT_ALTKi * (1/(float)FAST_RATE) * ULT_errP;
+			float ULT_errD = tergetAltVel - (alt.ult - oldUltra) * (float)FAST_RATE;
+			oldUltra = alt.ult;
+			
+			ultraThrottle = ULT_ALTKp * ULT_errP + ULT_KerrI + ULT_ALTKd * ULT_errD;
+			
+		} else {
+			got_setpoint = 0;
+			ultraThrottle = 0;
+			ultTouchdownHyst = 0;
 		}
 
-		if (takeoff = 1){
 
+		//BaroGPS controller
+		float GPS_errP = targetZ_gps - alt.filtered;
+		GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
+		float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel;
+		
+		gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
+
+
+		//Use largest output, and cross-feed the integrals
+		if (ultraThrottle > gpsThrottle){
+			GPS_KerrI = ULT_KerrI;
+			throttle = ultraThrottle;
+		} else {
+			ULT_KerrI = GPS_KerrI;
+			throttle = gpsThrottle;
 		}
+
+
 
 		// ULTRASOUND THROTTLE CONTROL - If we have good confidence in the ultrasound, we use it exclusively
-		if (alt.ult_conf > 80) {
+		if (alt.ult_conf > 80)  {
 
 			GPS_KerrI = throttle;
-			targetZ_gps = alt.filtered;
 
-				if(newultrasound) {
+			if(newultrasound) {
+
+				float tergetAltVel = 0;
+				if (allowLand = 1){
+					targetZ_ult -= 0.2 * (1/(float)FAST_RATE);
+					tergetAltVel = -0.2;
+				}
+
 				
 				static float ULT_errP_Old = 0;
 				float ULT_errP = targetZ_ult - alt.ult;

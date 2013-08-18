@@ -31,7 +31,6 @@ void ReadUltrasound(void) {
 		
 		// Output the ultrasound altitude
 		ilink_altitude.ultra = alt.ultra;
-	
 		
 	}
 	// if ultra = 0 then there isn't valid data
