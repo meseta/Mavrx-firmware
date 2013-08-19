@@ -47,6 +47,8 @@ void control_throttle(){
 			//TODO: Switch over when Hypo requests active if (takeoff == 1) {
 			// If take off requested
 			if ((flapState == 1)
+			//TODO: ADD CHECK ON GPS CONFIDENCE
+			// && (GPS CONFIDENCE is GOOD)
 			// and throttlestick in middle
 			&& ((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420)
 			) {
@@ -74,8 +76,7 @@ void control_throttle(){
 	
 		if (airborne == 1) {
 		
-			//Reset Launcher Button State
-			flapState = 0;
+			
 			/////////////////  PID ALTITUDE CONTROL ////////////////////////////
 			//run ultrasound and gps in parallell, and select which one drives higher
 			// This prevents Hypo dumping the craft onto the ground when it decreases the GPS demand too low
@@ -88,7 +89,7 @@ void control_throttle(){
 
 				// When we enter the confidence range, we store the ultrasound altitude and attempt to hold it.
 				// TODO: Work out what happens if move out of the ultrasound confidence zone again.
-				if (!got_setpoint) {
+				if (got_setpoint == 0) {
 					targetZ_ult = alt.ultra;
 					got_setpoint = 1;
 					oldUltra = alt.ultra;
@@ -99,9 +100,9 @@ void control_throttle(){
 				// If the allowLand flag is set, we lower the craft onto the ground by decrementing the ultrasound altitude.
 				//TODO: Replace with allowLand
 				// if (ilink_gpsfly.allowLand) {
-				if (GPS_LAND) {
-					targetZ_ult -= 0.2 * (1/(float)ULTRA_RATE);
-					targetAltVel = -0.2;
+				if (flapState == 0) {
+					targetZ_ult -= 100 * (1/(float)FAST_RATE); // -100 mm/second
+					// targetAltVel = -0.2;
 				}
 		
 				//Ultrasound derived PID controller
@@ -153,8 +154,13 @@ void control_throttle(){
 			//If the above is satisfied consecutively more than ULT_LD_DT times then shut down the motors
 			if(ult_landing > ULTRA_DTCT) { 
 				airborne = 0;
+				// Prevent the throttle value from rising again before the throttle stick is returned to the bottom
 				throttleHoldOff = 1;
 				throttle = 0;
+				//Reset Launcher Button State
+				flapState = 0;
+				//Reset Ultrasound setpoint aquisition flag
+				got_setpoint = 0;
 			}
 
 			// 2 - GPS driven
@@ -164,12 +170,19 @@ void control_throttle(){
 			// If consecutive run of readings is broken, reset the landing counter.
 			else gps_landing = 0;
 			
-			//If the above is satisfied consecutively more than GPS_LD_DT times then shut down the motors
+			//If the above is satisfied consecutively more than ULTRA_DTCT times then shut down the motors
 			if(gps_landing > ULTRA_DTCT) { 
 				airborne = 0;
+				// Prevent the throttle value from rising again before the throttle stick is returned to the bottom
 				throttleHoldOff = 1;
 				throttle = 0;
+				//Reset Launcher Button State
+				flapState = 0;
+				//Reset Ultrasound setpoint aquisition flag
+				got_setpoint = 0;
 			}
+			
+			// TODO: Consider accelerometer based shutdown on landing if GPS driven landing causes too much bounce
 		}
 		
 		//debug
@@ -186,31 +199,32 @@ void control_throttle(){
 void control_attitude(){
 
 	//TODO: use real states
-	if (MODE_ST == MODE_AUTO)
-	{
-		//simplicty! 
-		//attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
-		//attitude_demand_body.roll = fsin(-psiAngle+psiAngleinit) * user.pitch + fsin(-psiAngle+psiAngleinit+M_PI_2) * user.roll;
+	//TODO: Temporarily Removed for test purposes
+	// if (MODE_ST == MODE_AUTO)
+	// {
+		// simplicty! 
+		// attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
+		// attitude_demand_body.roll = fsin(-psiAngle+psiAngleinit) * user.pitch + fsin(-psiAngle+psiAngleinit+M_PI_2) * user.roll;
 		
-		attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
-		attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
+		// attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
+		// attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
 		
-		if (ilink_gpsfly.headingDemand == 42.0f){
-			attitude_demand_body.yaw = user.yaw;
-        }
-        else {
-			attitude_demand_body.yaw = ilink_gpsfly.headingDemand;
-		}
+		// if (ilink_gpsfly.headingDemand == 42.0f){
+			// attitude_demand_body.yaw = user.yaw;
+        // }
+        // else {
+			// attitude_demand_body.yaw = ilink_gpsfly.headingDemand;
+		// }
 
 		
-	}
+	// }
 
-	if (MODE_ST == MODE_MANUAL)
-	{
+	// if (MODE_ST == MODE_MANUAL)
+	// {
 		attitude_demand_body.pitch = user.pitch;
 		attitude_demand_body.roll = user.roll;
 		attitude_demand_body.yaw = user.yaw;
-	}
+	// }
 	
 
 	// This section of code applies some throttle increase with high tilt angles
