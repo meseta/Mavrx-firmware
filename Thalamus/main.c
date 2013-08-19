@@ -21,9 +21,6 @@
 // Accelerometer feedback gain
 // Accelerometer feedback method - additional filtering needed?
 
-// Switch to using vectors rather than angles for motor control. 
-// Angles will only be used for telemetry readout, could be calculated on Hypo.
-
 // TODO: Reinsert Modes, build the State machines out to deal with changes in throttle functionality 
 // Add barometer, GPS and Ultrasound merging.
 
@@ -36,6 +33,7 @@
 // The control needs to know how fast they're going, right now we assume the loops are going at their specified rate
 // however, it would be better to just time instead.  Use one of the hardware timers to get sub-ms resolution.
 
+// TODO: Add GPS_Confidence Code, use ilink_gpsfly.isNew to check for new data, use a timer, add autoland code.
 // ****************************************************************************
 // ****************************************************************************
 // *** DECLARATIONS
