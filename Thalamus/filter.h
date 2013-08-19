@@ -2,8 +2,10 @@
 void filter_GPS_baro(){
 
 	//TODO, put in a more appropriate function
+	// GPS Altitude in Metres
 	alt.gps = ilink_gpsfly.altitude;
-
+	
+	// Merge Barometer and GPS Data
 	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);
 	alt.filtered += Filt_baroK * (alt.baro - alt.filtered);
 

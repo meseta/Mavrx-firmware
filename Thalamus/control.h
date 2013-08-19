@@ -36,6 +36,10 @@ void control_throttle(){
 	static float gpsThrottle = 0;
 	static float ultraThrottle = 0;
 	static float alt_tkoff = 0;
+	//debug
+		ilink_debug.debug1 = alt.filtered;
+		//debug
+		ilink_debug.debug2 = (alt_tkoff + 0.8);
 
 	//Autonomous Mode
 	// if (MODE_ST == MODE_AUTO)	{
@@ -50,30 +54,27 @@ void control_throttle(){
 			//TODO: ADD CHECK ON GPS CONFIDENCE
 			// && (GPS CONFIDENCE is GOOD)
 			// and throttlestick in middle
-			&& ((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420)
-			) {
+			&& ((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420))	{
 				//If still on the ground (throttle zero), record altitude
-				if (throttle == 0) {
-					//debug
-					ilink_debug.debug2 += 1.0;
+				if (throttle == 0) {				
 					alt_tkoff = alt.filtered;
 					throttle += 200;
 				}
 				// Increase throttle
-				throttle += 0.1;
-				//debug
-				ilink_debug.debug3 += 1.0;
-			}
-			
-			if ((alt.filtered > alt_tkoff + 0.8 ) || (alt.ultra > ULTRA_TKOFF)) { 
-				// just taken off, set airborne to 1 and remember takeoff throttle
-				airborne = 1;
-				ULT_KerrI = throttle;
-				GPS_KerrI = throttle;
-				targetZ_ult = alt.ultra;				
+				throttle += 0.2;
+
+				if ((alt.filtered > alt_tkoff + 0.8 ) || (alt.ultra > ULTRA_TKOFF)) { 
+					// just taken off, set airborne to 1 and remember takeoff throttle
+					airborne = 1;
+					ULT_KerrI = throttle;
+					GPS_KerrI = throttle;
+					targetZ_ult = alt.ultra;				
+				}
 			}
 		}
 	
+		
+			
 		if (airborne == 1) {
 		
 			
@@ -124,7 +125,9 @@ void control_throttle(){
 
 
 			//Baro/GPS derived PID controller
-			float GPS_errP = ilink_gpsfly.altitudeDemand - alt.filtered;
+			//TODO: Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus
+			// float GPS_errP = ilink_gpsfly.altitudeDemand + (alt_tkoff + 0.8) - alt.filtered;
+			float GPS_errP = (alt_tkoff + 0.8) - alt.filtered;
 			GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
 			// float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel; TODO: Set this back when COde finished
 			float GPS_errD = 0.0 - alt.vel;
@@ -133,13 +136,14 @@ void control_throttle(){
 
 
 			//Use largest throttle output, and cross-feed the integrals for step free transition
-			// if (ultraThrottle > gpsThrottle){
-				// GPS_KerrI = ULT_KerrI;
+			if (ultraThrottle > gpsThrottle){
+				GPS_KerrI = ULT_KerrI;
 				throttle = ultraThrottle;
-			// } else {
-				// ULT_KerrI = GPS_KerrI;
-				// throttle = gpsThrottle;
-			// }
+			} else {
+				ULT_KerrI = GPS_KerrI;
+				throttle = gpsThrottle;
+				
+			}
 
 
 			///////////////////////////////// LANDING MOTOR SHUT OFF, 1-Ultrasound Driven  2-GPS Driven ////////////////////////
@@ -185,8 +189,7 @@ void control_throttle(){
 			// TODO: Consider accelerometer based shutdown on landing if GPS driven landing causes too much bounce
 		}
 		
-		//debug
-		ilink_debug.debug1 = airborne;
+		
 	}
 	
 
@@ -199,32 +202,31 @@ void control_throttle(){
 void control_attitude(){
 
 	//TODO: use real states
-	//TODO: Temporarily Removed for test purposes
-	// if (MODE_ST == MODE_AUTO)
-	// {
+	if ((auxState == 1) && (airborne == 1))	{
+	
 		// simplicty! 
 		// attitude_demand_body.pitch = fsin(-psiAngle+psiAngleinit+M_PI_2) * user.pitch - fsin(-psiAngle+psiAngleinit) * user.roll;
 		// attitude_demand_body.roll = fsin(-psiAngle+psiAngleinit) * user.pitch + fsin(-psiAngle+psiAngleinit+M_PI_2) * user.roll;
 		
-		// attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
-		// attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
+		attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
+		attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
 		
-		// if (ilink_gpsfly.headingDemand == 42.0f){
-			// attitude_demand_body.yaw = user.yaw;
-        // }
-        // else {
-			// attitude_demand_body.yaw = ilink_gpsfly.headingDemand;
-		// }
+		if (ilink_gpsfly.headingDemand == 42.0f){
+			attitude_demand_body.yaw = user.yaw;
+        }
+        else {
+			attitude_demand_body.yaw = ilink_gpsfly.headingDemand;
+		}
 
 		
-	// }
+	}
 
-	// if (MODE_ST == MODE_MANUAL)
-	// {
+	if (auxState == 0)
+	{
 		attitude_demand_body.pitch = user.pitch;
 		attitude_demand_body.roll = user.roll;
 		attitude_demand_body.yaw = user.yaw;
-	// }
+	}
 	
 
 	// This section of code applies some throttle increase with high tilt angles
@@ -393,8 +395,14 @@ void control_motors(){
 	// TODO: Add Auto Land on rxLoss!
 	if (rcInput[RX_THRO] - throttletrim <  OFFSTICK || throttleHoldOff > 0 || rxLoss > 25) {
 		
+		// Set Airborne = 0
+		airborne = 0;
+		
 		// Set throttle off
 		throttle = 0;
+		
+		//Reset Launcher Button State
+		flapState = 0;
 					
 		// Reset Important variables
 		motorN = 0;
