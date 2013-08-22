@@ -5,7 +5,7 @@
 // *** Communications Functions
 // ****************************************************************************
 
-// *** Deal with ilink requets
+// *** Deal with ilink requets between Hypo and Thalamus
 void ILinkMessageRequest(unsigned short id) {
 	unsigned short * ptr = 0;
 	unsigned short maxlength = 0;
@@ -32,7 +32,7 @@ void ILinkMessageRequest(unsigned short id) {
 	}
 }
 
-// *** iLink interrupt handler
+// *** iLink interrupt handler between Hypo and Thalamus
 void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short length) {
 	unsigned short * ptr = 0;
 	unsigned int i, j;
@@ -85,14 +85,14 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 					}
 					break;
 				case 2: // save all
-					EEPROMSaveAll();
+					eeprom_save_all();
 					ilink_thalpareq.isNew = 1;
 					ilink_thalctrl_rx.command = MAVLINK_MSG_ID_COMMAND_LONG;
 					ilink_thalctrl_rx.data = MAV_CMD_PREFLIGHT_STORAGE;
 					//ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_rx, sizeof(ilink_thalctrl_rx)/2 - 1);
 					break;
 				case 3: // reload all
-					EEPROMLoadAll();
+					eeprom_load_all();
 					ilink_thalpareq.isNew = 1;
 					ilink_thalctrl_rx.command = MAVLINK_MSG_ID_COMMAND_LONG;
 					ilink_thalctrl_rx.data = MAV_CMD_PREFLIGHT_STORAGE;

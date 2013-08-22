@@ -1,7 +1,3 @@
-#include "thal.h"
-#include "mavlink.h"
-#include <math.h>
-
 // GENERAL TODO list in order of priority
 // Specific TODO's are listed next to the relevant bit of code.
 
@@ -34,13 +30,22 @@
 // however, it would be better to just time instead.  Use one of the hardware timers to get sub-ms resolution.
 
 // TODO: Add GPS_Confidence Code, use ilink_gpsfly.isNew to check for new data, use a timer, add autoland code.
+
+
+
+
+
+/////////////////////// Libraries to include /////////////
+#include "thal.h"
+#include "mavlink.h"
+#include <math.h>
+
+
 // ****************************************************************************
 // ****************************************************************************
 // *** DECLARATIONS
 // ****************************************************************************
 // ****************************************************************************
-// TODO: Needs sorting, there are unused parameters and a lack of categorisation throughout
-
 
 ////////////////////////////////////////// CONFIGURATION PARAMETERS ////////////////////////////////
 
@@ -78,31 +83,30 @@
 #define AAV_LEN 30
 #define MAV_LEN 30
 
-//This is used with MODE_ST
-#define MODE_MANUAL 1
-#define MODE_EASY 2
-#define MODE_AUTO 3
+//This is used with mode
+#define disarmed 1
+#define manual 2
+#define manual_gps 3
+#define auto 5
 
 
 /////////////////////////////// FUNCTIONS //////////////////////////////////////
-void SensorZero(void);
-void CalibrateGyro(void);
-void CalibrateGyroTemp(unsigned int seconds);
-void CalibrateMagneto(void);
-void Arm(void);
-void Disarm(void);
-void ReadGyroSensors(void);
-void ReadAccelSensors(void);
-void ReadMagSensors(void);
-void ReadUltrasound(void);
-void ReadBattVoltage(void);
-void ReadRXInput(void);
-void LinkInit(void);
-void EEPROMLoadAll(void);
-void EEPROMSaveAll(void);
-void control_throttle(void);
-void control_attitude(void);
-void filter_GPS_baro();
+void sensor_zero(void);
+void calibrate_gyr(void);
+void calibrate_gyr_temperature(unsigned int seconds);
+void calibrate_mag(void);
+void arm(void);
+void disarm(void);
+void read_gyr_sensors(void);
+void read_acc_sensors(void);
+void read_mag_sensors(void);
+void read_ultrasound(void);
+void read_batt_voltage(void);
+void read_rx_input(void);
+void eeprom_load_all(void);
+void eeprom_save_all(void);
+void control_motors(void);
+void filter_gps_baro(void);
 
 
 ///////////////////////////////////////////// ILINK ///////////////////////////////////////
@@ -141,17 +145,6 @@ typedef struct {
 } attitude_demand_body_struct;
 attitude_demand_body_struct attitude_demand_body = {0};
 
-// typedef struct{
-// 	float demand;
-// 	float demandOld;
-// 	float valueOld;
-// 	float derivative;
-// 	float integral;
-// } directionStruct;
-
-// directionStruct pitch;
-// directionStruct roll;
-// directionStruct yaw;
 
 typedef struct 
 {
@@ -253,7 +246,7 @@ signed short yawtrim;
 signed short throttletrim;
 float throttle;
 float throttle_angle;
-int throttleHoldOff;
+int hold_thro_off;
 unsigned int auxState, flapState;
 float pitchDemandSpin = 0;
 float rollDemandSpin = 0;
@@ -287,6 +280,7 @@ unsigned int PRGPushTime; // Contains the time that a button was pushed for, pop
 
 unsigned char airborne = 0; //boolean
 
+unsigned char gps_valid = 0;
 
 /////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////
 
@@ -342,8 +336,8 @@ struct paramStorage_struct paramStorage[] = {
 	#define YAW_Boost	   paramStorage[21].value 	
 
 	// Mode
-	{"MODE_ST",	   1.0f},  //used with the #dfine MODE_MANUAL etc
-	#define MODE_ST 		paramStorage[22].value
+	{"state",	   1.0f},  //used with the #dfine MODE_MANUAL etc
+	#define state 		paramStorage[22].value
 
 	//Limits
 	{"LIM_ANGLE",	   0.35f},  // Roll and Pitch Angle Limit in Radians
@@ -468,14 +462,12 @@ struct paramStorage_struct paramStorage[] = {
 
 
 
-// System functionality crudly split into files
-// TODO: make it more standard
-
 #include "setup.h"
 #include "filter.h"
-#include "userinput.h"
-#include "control.h"
-#include "sensors.h"
+#include "calibrate.h"
+#include "states.h"
+#include "outputs.h"
+#include "inputs.h"
 #include "eeprom.h"
 #include "communication.h"
 
@@ -553,95 +545,32 @@ void RITInterrupt(void) {
 
 
 //Main functional periodic loop
-void Timer0Interrupt0() { // Runs at about 400Hz
+void Timer0Interrupt0() {
 
 	
 	if(++slowSoftscale >= SLOW_DIVIDER) {
 		slowSoftscale = 0;
 
 		// These run at SLOW_RATE
-		ReadMagSensors();
-		ReadRXInput();
-		read_sticks();
-		ReadUltrasound();
-		ReadBaroSensors();
-		ReadBattVoltage();
-
-		filter_GPS_baro();
+		read_mag_sensors();
+		read_rx_input();		
+		read_ultrasound();
+		read_barometer();
+		read_batt_voltage();
+		filter_gps_baro();
+		gps_status();
 			
 	}
 
 	// These run at FAST_RATE
-	ReadAccelSensors();
-	ReadGyroSensors();
-	AHRS();
+	read_acc_sensors();
+	read_gyr_sensors();
+	
+	a_h_r_s();
+	
+	state_machine();
 
-	control_throttle();
-	control_attitude();
 	control_motors();
 
+
 }
-
-
-void Arm(void) {
-
-	if(CAL_AUTO > 0) {
-		CalibrateGyroTemp(1);
-	}
-	
-	PWMInit(PWM_NESW);
-	PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-	//TODO: inline Delays cause system hang.
-	if(armed == 0) {
-		Delay(500);
-		PWMSetNESW(THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE);
-		Delay(100);
-		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-		Delay(300);
-		PWMSetNESW(THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE);
-		Delay(100);
-		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-	}
-	
-	psiAngleinit = psiAngle; 
-	yawtrim = rcInput[RX_RUDD];
-	
-	armed = 1;
-	
-	ilink_thalstat.sensorStatus &= ~(0x7); // mask status
-	ilink_thalstat.sensorStatus |= 4; // active/armed
-}
-
-
-
-void Disarm(void) {
-	if(armed) {
-		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-		//TODO: inline Delays cause system hang.
-		Delay(100);
-		
-		PWMSetN(THROTTLEOFFSET + IDLETHROTTLE);
-		Delay(100);
-		PWMSetN(THROTTLEOFFSET);
-		Delay(33);
-		PWMSetE(THROTTLEOFFSET + IDLETHROTTLE);
-		Delay(100);
-		PWMSetE(THROTTLEOFFSET);
-		Delay(33);
-		PWMSetS(THROTTLEOFFSET + IDLETHROTTLE);
-		Delay(100);
-		PWMSetS(THROTTLEOFFSET);
-		Delay(33);
-		PWMSetW(THROTTLEOFFSET + IDLETHROTTLE);
-		Delay(100);
-		PWMSetW(THROTTLEOFFSET);
-
-		Delay(100);
-	}
-	PWMSetNESW(0, 0, 0, 0);
-	armed = 0;
-	ilink_thalstat.sensorStatus &= ~(0x7); // mask status
-	ilink_thalstat.sensorStatus |= 3; // standby
-}
-
-

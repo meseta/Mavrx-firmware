@@ -1,5 +1,5 @@
 
-void filter_GPS_baro(){
+void filter_gps_baro(){
 
 	//TODO, put in a more appropriate function
 	// GPS Altitude in Metres
@@ -17,7 +17,7 @@ void filter_GPS_baro(){
 	
 }
 
-void AHRS(){
+void a_h_r_s(){
 
 // ****************************************************************************
 // *** ATTITUDE HEADING REFERENCE SYSTEM

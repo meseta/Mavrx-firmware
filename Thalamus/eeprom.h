@@ -5,7 +5,7 @@
 // *** This function loads all parameters from EEPROM.  First it loads the
 // parameters into temporary storage to verify the checksum.  Only if the
 // checksums are correct will the function update the parameters in RAM.
-void EEPROMLoadAll(void) {
+void eeprom_load_all(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
 	unsigned char * ptr;
@@ -33,7 +33,7 @@ void EEPROMLoadAll(void) {
 }
 
 // *** This function saves all parameters to EEPROM.
-void EEPROMSaveAll(void) {
+void eeprom_save_all(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
 	unsigned char * ptr;

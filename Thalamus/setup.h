@@ -25,7 +25,7 @@ void setup() {
 
 	// *** Parameters
 		paramCount = sizeof(paramStorage)/20;
-		EEPROMLoadAll();
+		eeprom_load_all();
 		paramSendCount = paramCount;
 		paramSendSingle = 0;
 	
@@ -58,7 +58,7 @@ void setup() {
 	// *** Calibrate Sensors
 		Delay(500);
 		SensorInit();
-		SensorZero();
+		sensor_zero();
 	
 	// *** quaternion AHRS init
 		q1 = 1;
@@ -88,26 +88,27 @@ void setup() {
 		RM8 = 0;
 		RM9 = 1;
 		
-	// *** Timer for AHRS
-		// Set high confidence in accelerometer/magneto to rotate AHRS to initial heading
+		
+		// Temporarily store drift correction multipliers
 		float tempAccelKp = DRIFT_AccelKp;
 		float tempMagKp = DRIFT_MagKp;
-
-		//TODO: this is SO wrong
-		DRIFT_MagKp = 10;
-		DRIFT_AccelKp = 10;
 		
+		// Set high confidence in accelerometer/magneto to rotate AHRS to initial heading
+		DRIFT_MagKp = 20;
+		DRIFT_AccelKp = 20;
+		
+		//Timer for AHRS
 		Timer0Init(59);
 		Timer0Match0(1200000/FAST_RATE, INTERRUPT | RESET);
 		Delay(1000);
 	   
-	
+		// Now Set them back to their original values
 		DRIFT_MagKp = tempMagKp;
 		DRIFT_AccelKp = tempAccelKp;
 	
 		slowSoftscale = 0;
 	
-	// *** Initialise PWM outputs
+		//Initialise PWM outputs
 		motorN = 0;
 		motorE = 0;
 		motorS = 0;
@@ -122,7 +123,8 @@ void setup() {
 		Gyro.X.error = 0;
 		Gyro.Z.error = 0;
 		
-		throttleHoldOff = 1;
+		// We start with throttle hold on in case the user has forgotten to lower their throttle stick
+		hold_thro_off = 1;
 		
 	// *** Initialise timers and loops
 		//PWMInit(PWM_NESW);
@@ -130,5 +132,7 @@ void setup() {
 		RITInitms(1000/MESSAGE_LOOP_HZ);
 		flashPLED = 0;
 		LEDOff(PLED);
+		
+		gps_valid = 0;
 		
 }

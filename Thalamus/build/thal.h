@@ -946,8 +946,10 @@ static inline void RSTReset(void) { ResetInit(); }
         float headingDemand;
         float altitude;
         float altitudeDemand;
+        float altitudeDemandVel;
         float vAcc;
         float velD;
+        unsigned short flags;
         unsigned short isNew;
     } PACKED ilink_gpsfly_t;
 
