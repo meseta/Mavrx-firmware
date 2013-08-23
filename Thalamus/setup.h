@@ -135,4 +135,20 @@ void setup() {
 		
 		gps_valid = 0;
 		
+		ROLL_SPL_set = ROLL_SPL;
+		PITCH_SPL_set = PITCH_SPL;
+		YAW_SPL_set = YAW_SPL;		
+		
+		// gps.request
+		// 0 = Nothing
+		// 1 = set home
+		// 2 = take off
+		// 3 = hold/ pause
+		// 4 = resume/ go
+		// 5 = land
+		// 6 = go home and land
+		// After the request variable is changed, the sequence variable must be incremented by one to make Hypo read the request
+		ilink_gpsreq.request = 0;
+		ilink_gpsreq.sequence = 0;
+		
 }

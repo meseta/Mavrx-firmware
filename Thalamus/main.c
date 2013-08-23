@@ -105,6 +105,7 @@ void read_batt_voltage(void);
 void read_rx_input(void);
 void eeprom_load_all(void);
 void eeprom_save_all(void);
+void control_throttle(void);
 void control_motors(void);
 void filter_gps_baro(void);
 
@@ -125,6 +126,7 @@ ilink_thalpareq_t ilink_thalpareq;
 ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
 ilink_gpsfly_t ilink_gpsfly;
+ilink_gpsreq_t ilink_gpsreq;
 ilink_debug_t ilink_debug;
 
 
@@ -282,6 +284,25 @@ unsigned char airborne = 0; //boolean
 
 unsigned char gps_valid = 0;
 
+unsigned char thal_throt_cont = 0;
+
+unsigned char thal_motor_off = 0;
+
+unsigned char got_setpoint = 0; //bool
+
+//Altitude PID states
+float GPS_KerrI = 0;
+float ULT_KerrI = 0;
+float targetZ_ult = 0;
+float alt_tkoff = 0;
+float oldUltra = 0;
+
+float ROLL_SPL_set;
+float PITCH_SPL_set;
+float YAW_SPL_set;
+
+
+
 /////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////
 
 struct paramStorage_struct paramStorage[] = {
@@ -336,7 +357,7 @@ struct paramStorage_struct paramStorage[] = {
 	#define YAW_Boost	   paramStorage[21].value 	
 
 	// Mode
-	{"state",	   1.0f},  //used with the #dfine MODE_MANUAL etc
+	{"state",	   disarmed},  //
 	#define state 		paramStorage[22].value
 
 	//Limits
@@ -457,6 +478,9 @@ struct paramStorage_struct paramStorage[] = {
 
     {"Filt_baroK",		 0.0},
 	#define Filt_baroK		paramStorage[67].value
+	
+	{"YAW_SPL",		 0.04},
+	#define YAW_SPL		paramStorage[68].value
 
 	};
 
@@ -466,7 +490,7 @@ struct paramStorage_struct paramStorage[] = {
 #include "filter.h"
 #include "calibrate.h"
 #include "states.h"
-#include "outputs.h"
+#include "control.h"
 #include "inputs.h"
 #include "eeprom.h"
 #include "communication.h"
@@ -569,7 +593,7 @@ void Timer0Interrupt0() {
 	a_h_r_s();
 	
 	state_machine();
-
+	control_throttle();
 	control_motors();
 
 

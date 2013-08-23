@@ -1,19 +1,24 @@
 
 void filter_gps_baro(){
 
-	//TODO, put in a more appropriate function
 	// GPS Altitude in Metres
 	alt.gps = ilink_gpsfly.altitude;
+	
+	if (gps_valid == 1) {
+		Filt_GPS_K = 1; // TODO Temporary as baro isnt used currently
+		Filt_baroK = 0; // TODO Temporary as baro isnt used currently
+	}
+	else {
+		Filt_GPS_K = 0;
+		Filt_baroK = 0; // TODO Temporary as baro isnt used currently
+	}
 	
 	// Merge Barometer and GPS Data
 	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);
 	alt.filtered += Filt_baroK * (alt.baro - alt.filtered);
 
-	//static float oldaltfilt = 0;
-	//TODO: substitute for real vel from gps, not differenced
-	//alt.vel = (float)SLOW_RATE * (alt.filtered - oldaltfilt);
 	alt.vel = -ilink_gpsfly.velD;
-	//oldaltfilt = alt.filtered;
+
 	
 }
 

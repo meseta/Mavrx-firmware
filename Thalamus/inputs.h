@@ -36,35 +36,49 @@ void read_rx_input(void) {
 		
 		// Controller's aux or gear switch (Can be switched permanently either way)
 		if(rcInput[RX_AUX1] > MIDSTICK) {
-            // TEMPORARY FOR TESTING, switches into GPS mode
-            if(auxState != 0) {
-                ilink_thalctrl_tx.command = 0x0091;
-                auxState = 0;
-            }
+			auxState = 0;
 		}
 		else {
-            // TEMPORARY FOR TESTING, switches into GPS mode
-            if(auxState != 1) {
-                ilink_thalctrl_tx.command = 0x0090;
-                auxState = 1;
-            }
+			auxState = 1;
+
 		}
 		
+		static unsigned int flapswitch = 0;
 		
-		// Controller's flap switch/ button (mechanically sprung return)
+		// If the button is pressed, start incrementing a counter
 		if(rcInput[RX_FLAP] > MIDSTICK) {
-			if((flapState == 0) && (flpswitch == 0)) {
-				flapState = 1;
-				flpswitch = 1;
-			}
-			if((flapState == 1) && (flpswitch == 0)) {
-				flapState = 0;
-				flpswitch = 1;
-			}
-			
+			flapswitch++;
+			if (flapswitch > 4000) flapswitch = 4000;
 		}
-		else {
-			flpswitch = 0;
+		// If the button is released and the counter is greater than zero but less than 3 seconds
+		if ((rcInput[RX_FLAP] < MIDSTICK) && (flapswitch > 0)  && (flapswitch <= (SLOW_RATE*3)) ) {
+			// Then reset the counter
+			flapswitch = 0;
+			// There are three states
+			// If the button is pressed in states 2 or 0 then go to state 1
+			if ((flapState == 0) || (flapState == 2)) {
+				flapState = 1;
+				// and request Position Hold/ pause on from Hypo
+                ilink_gpsreq.request = 3;
+				ilink_gpsreq.sequence++;               
+            }
+			// If the button is pressed in state 1 then go to state 0
+			if (flapState == 1) {
+				flapState = 0;
+				// and request resume/ go from Hypo 
+                ilink_gpsreq.request = 4;
+				ilink_gpsreq.sequence++;                
+            }
+
+		}
+		// We set the state to 2 if the button has been released after being held for over three seconds.
+		if ((rcInput[RX_FLAP] < MIDSTICK) && (flapswitch > (SLOW_RATE*3))) {
+			flapswitch = 0;
+			flapState = 2;
+			// and request go home and land from Hypo
+			ilink_gpsreq.request = 6;
+			ilink_gpsreq.sequence++; 
+			
 		}
 			
 			

@@ -21,6 +21,10 @@ void arm(void) {
 	psiAngleinit = psiAngle; 
 	yawtrim = rcInput[RX_RUDD];
 	
+	// Request that Hypo stores Return to Arm location
+	ilink_gpsreq.request = 1;
+	ilink_gpsreq.sequence++;
+	
 	armed = 1;
 	
 	ilink_thalstat.sensorStatus &= ~(0x7); // mask status

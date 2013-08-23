@@ -926,6 +926,7 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ID_ILINK_ATDEMAND   0x7f01
     #define ID_ILINK_MODEMAND   0x7f02
     #define ID_ILINK_GPSFLY     0x7f03
+    #define ID_ILINK_GPSREQ     0x7f04
     #define ID_ILINK_DEBUG      0x00ff
     
     typedef struct ilink_debug_struct {
@@ -939,6 +940,12 @@ static inline void RSTReset(void) { ResetInit(); }
         float debug7;
         unsigned short isNew;
     } PACKED ilink_debug_t;
+    
+    typedef struct ilink_gpsreq_struct {
+        unsigned short request;
+        unsigned short sequence;
+        unsigned short isNew;
+    } PACKED ilink_gpsreq_t;
 
     typedef struct ilink_gpsfly_struct {
         float northDemand;
