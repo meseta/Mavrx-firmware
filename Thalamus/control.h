@@ -166,9 +166,11 @@ void control_motors(){
 	// This part of the code makes the yaw demand loop around and not exceed Pi or -Pi bounds
 	if(attitude_demand_body.yaw > M_PI) {
 		attitude_demand_body.yaw -= M_TWOPI;
+		yawold -= M_TWOPI;
 	}
 	else if(attitude_demand_body.yaw < -M_PI) {
 		attitude_demand_body.yaw += M_TWOPI;
+		yawold += M_TWOPI;
 	}
 			
 			
