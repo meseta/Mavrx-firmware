@@ -50,7 +50,7 @@
 ////////////////////////////////////////// CONFIGURATION PARAMETERS ////////////////////////////////
 
 #define FIRMWARE_VERSION	1		   // Firmware version
-#define MESSAGE_LOOP_HZ	 15		  // Max frequency of messages in Hz (keep this number low, like around 15)
+#define MESSAGE_LOOP_HZ	 	15		  // Max frequency of messages in Hz (keep this number low, like around 15)
 #define RX_PANIC			2		   // Number of seconds after missing RX before craft considered "disconnected"
 
 #define FAST_RATE		   400
@@ -71,12 +71,12 @@
 #define MIDSTICK			512		// Corresponds to input when stick is in middle (approx value).
 #define MAXSTICK			850		// Corresponds to input when stick is at the top
 
-#define MAXTHRESH		   (MAXSTICK+MIDSTICK)/2 - 50
-#define MINTHRESH		   (MIDSTICK+OFFSTICK)/2 + 50
+#define MAXTHRESH		   750 //(MAXSTICK+MIDSTICK)/2 - 50
+#define MINTHRESH		   250 //(MIDSTICK+OFFSTICK)/2 + 50
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	29 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	21 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
@@ -306,7 +306,7 @@ float YAW_SPL_set;
 /////////////////////////////////////////// TUNABLE PARAMETERS ////////////////////////////////////
 
 struct paramStorage_struct paramStorage[] = {
-	{"DRIFT_AKp",		   0.4f},
+	{"DRIFT_AKp",		   0.2f},
 	{"DRIFT_MKp",	  		0.2f},   
 	#define DRIFT_AccelKp   paramStorage[0].value	
 	#define DRIFT_MagKp	 paramStorage[1].value  
@@ -324,7 +324,7 @@ struct paramStorage_struct paramStorage[] = {
 	#define YAW_DEADZONE	paramStorage[6].value 
 	
 	{"PITCH_Kp",	  400.0f},	 
-	{"PITCH_Ki",		5.0f},	
+	{"PITCH_Ki",		2.0f},	
 	{"PITCH_Kd",	  100.0f},	 
 	{"PITCH_Kdd",	1500.0f},
 	{"PITCH_Bst",	 0.0f},	  
@@ -337,7 +337,7 @@ struct paramStorage_struct paramStorage[] = {
 	#define PITCH_De		paramStorage[12].value 
 
 	{"ROLL_Kp",	   400.0f},	   
-	{"ROLL_Ki",		 5.0f},	  
+	{"ROLL_Ki",		 2.0f},	  
 	{"ROLL_Kd",	   100.0f},		
 	{"ROLL_Kdd",	 1500.0f},	 		
 	{"ROLL_Bst",	   0.00f},					
@@ -583,6 +583,7 @@ void Timer0Interrupt0() {
 		read_batt_voltage();
 		filter_gps_baro();
 		gps_status();
+		state_machine();
 			
 	}
 
@@ -592,7 +593,7 @@ void Timer0Interrupt0() {
 	
 	a_h_r_s();
 	
-	state_machine();
+	
 	control_throttle();
 	control_motors();
 

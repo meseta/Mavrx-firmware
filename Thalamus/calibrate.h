@@ -19,7 +19,6 @@ void arm(void) {
 	}
 	
 	psiAngleinit = psiAngle; 
-	yawtrim = rcInput[RX_RUDD];
 	
 	// Request that Hypo stores Return to Arm location
 	ilink_gpsreq.request = 1;

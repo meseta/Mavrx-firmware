@@ -11,39 +11,42 @@ void state_machine()	{
 
 	if (state == disarmed) {
 	
-		///////////////////// STATE SWITCHING ///////////////////////////////
-		
-		// if left stick bottom right, right stick top left and switch = 0 then switch to manual mode with GPS inactive
-		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] > MAXTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 0)) {
-			state = manual;
-			arm();
-		}
-		
-		// if left stick bottom middle, right stick top left, switch = 0 and GPS is active then switch to manual mode with GPS active
-		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
-			state = manual_gps;
-			arm();
-		}
-		
-		// if left stick bottom right, right stick bottom right, switch = 1 and GPS is active  then switch to full auto
-		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] > MAXTHRESH)  &&  (rcInput[RX_ELEV] < MINTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 1)  &&  (gps_valid == 1)) {
-			state = auto;
-			arm();
-		}
-		
-		///////////////////// OPERATION ///////////////////////////////
-		
-		auto_lock = 0;
-		
-		// if left stick bottom and right stick bottom left then calibrate orientation
-		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH) && (rcInput[RX_AILE] < MINTHRESH)) calibrate_ori();
-		
-		// if left stick bottom and right stick bottom right then calibrate magnetometer
-		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH) && (rcInput[RX_AILE] > MAXTHRESH)) calibrate_mag();
-		
-		
-	}
+	
+		if ((rxLoss < 50) && (rxFirst != 0)) {
+	
+			///////////////////// STATE SWITCHING ///////////////////////////////
+			
+			// if left stick bottom right, right stick top left and switch = 0 then switch to manual mode with GPS inactive
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)) {
+				state = manual;
+				arm();
+			}
+			
+			// if left stick bottom middle, right stick top left, switch = 0 and GPS is active then switch to manual mode with GPS active
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
+				state = manual_gps;
+				arm();
+			}
+			
+			// if left stick bottom middle, right stick top right, switch = 1 and GPS is active  then switch to full auto
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 1)  &&  (gps_valid == 1)) {
+				state = auto;
+				arm();
+			}
+			
+			///////////////////// OPERATION ///////////////////////////////
+			
+			auto_lock = 0;
+			
+			// if left stick bottom and right stick bottom left then calibrate orientation
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH) && (rcInput[RX_AILE] > MAXTHRESH)) calibrate_ori();
+			
+			// if left stick bottom and right stick bottom right then calibrate magnetometer
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH) && (rcInput[RX_AILE] < MINTHRESH)) calibrate_mag();
 
+			
+		}
+	}
 
 	
 // ****************************************************************************
@@ -69,11 +72,13 @@ void state_machine()	{
 		
 		ROLL_SPL_set = ROLL_SPL;
 		PITCH_SPL_set = PITCH_SPL;
+		YAW_SPL_set = YAW_SPL;
 		
 		// In manual mode, set pitch and roll demands based on the user commands collected from the rx unit
 		attitude_demand_body.pitch = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
 		attitude_demand_body.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-		float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 						
+		float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 		
+		
 		throttle = rcInput[RX_THRO] - throttletrim;
 		
 		
@@ -81,12 +86,7 @@ void state_machine()	{
 		// This code increments the demanded angle at a rate proportional to the rudder input
 		if(fabsf(tempf) > YAW_DEADZONE) {
 			attitude_demand_body.yaw += tempf;
-			if(attitude_demand_body.yaw > M_PI) {
-				attitude_demand_body.yaw -= M_TWOPI;
-			}
-			else if(attitude_demand_body.yaw < -M_PI) {
-				attitude_demand_body.yaw += M_TWOPI;
-			}
+			
 		}
 		
 		
