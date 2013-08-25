@@ -943,6 +943,7 @@ static inline void RSTReset(void) { ResetInit(); }
     
     typedef struct ilink_gpsreq_struct {
         unsigned short request;
+        unsigned short sequence;
         unsigned short isNew;
     } PACKED ilink_gpsreq_t;
 
@@ -955,7 +956,7 @@ static inline void RSTReset(void) { ResetInit(); }
         float altitudeDemandVel;
         float vAcc;
         float velD;
-        unsigned short allowLand;
+        unsigned short flags;
         unsigned short isNew;
     } PACKED ilink_gpsfly_t;
 

@@ -10,14 +10,22 @@
 #define IDLE_SPRF           0.9         // Some filtering on the CPU load
 #define IDLE_MAX            0x1ff480    // Set this to the number that the idleCounter counts up to every second.  This is used to measure the CPU load - when there are no interrupts (i.e. processor not "busy"), the idleCounter is being incremented
 
-#define MAX_WAYPOINTS       20 // TODO: maybe move waypoints into EEPROM
-#define WAYPOINT_HOME       MAX_WAYPOINTS+1 // there is one waypoint storage location that is never used between Waypoint home and the last waypoint, this is in case I screw up with the waypoint management and accidentally try to send the craft back to home by mistake
-#define WAYPOINT_TEMP       MAX_WAYPOINTS+2
+#define MAX_WAYPOINTS       20
+#define WAYPOINT_HOME       MAX_WAYPOINTS
 #define WAYPOINT_TIMEOUT    500/MESSAGE_LOOP_HZ // value = timeout in ms / message_loop_hz
 #define WAYPOINT_TRIES      5   // number of times to retry waypoint
 #define WAYPOINT_MIN_RADIUS 1
 #define WAYPOINT_SAFE_HEIGHT 2  // altitude above home to use
 
+#define INTMODE_OFF         0 // horizontal is off (maximum), veritcal is off (maximum)
+#define INTMODE_VERTICAL    1 // horizontal is off (maximum), vertical interpolates up to the target
+#define INTMODE_HORIZONTAL  2 // horizontal interpolates, vertical is off (maximum)
+#define INTMODE_3D          3 // horizontal interpolates, vertical interpolates
+#define INTMODE_DOWN        4 // horizontal is off (maximum), vertical decrements indefinately
+#define INTMODE_UP_AND_GO   5 // same as UP, but auto-switches to waypoint on completion
+#define INTMODE_SEQUENCE_UP 6 // same as UP, but auto-switches to SEQUENCE_NORMAL on completion
+#define INTMODE_SEQUENCE_3D 7 // same as 3D, but auto-switches to SEQUENCE_DOWN on completion
+#define INTMODE_SEQUENCE_DOWN   8 // same as DOWN, but with allow_land explicitely set
 
 // *** Status stuff
 volatile unsigned int allowTransmit;
@@ -168,24 +176,28 @@ xbee_transmit_request_t xbee_transmit_request;
 
 // ****** waypoints
 typedef struct {
-
     unsigned char command;
     unsigned char autocontinue;
     float param1;
     float param2;
     float param3;
     float param4;
-    float x;
-    float y;
-    float z;
+    double x;
+    double y;
+    double z;
 } waypointStruct;
 
-waypointStruct waypoint[MAX_WAYPOINTS+3];
+waypointStruct waypoint[MAX_WAYPOINTS];
+double home_X;
+double home_Y;
+double home_Z;
+float home_valid;
+
 
 unsigned short waypointCurrent, waypointCount, waypointReceiveIndex;
-unsigned char waypointTries, waypointValid, waypointHomeValid, waypointGo, waypointReached;
+unsigned char waypointTries, waypointValid, waypointGo, waypointReached;
 unsigned short waypointTimer;
-unsigned int waypointLoiter;
+unsigned int waypointLoiterTimer;
 unsigned char waypointProviderID, waypointProviderComp;
 float waypointPhase;
 
@@ -193,15 +205,18 @@ float lat_diff_i;
 float lon_diff_i;
 
 float GPS_Kp = 0.03f;
-float GPS_Ki = 0.00005f;
+//float GPS_Ki = 0.00005f;
+float GPS_Ki = 0.0000f;
 float GPS_Kd = 0.1f;
 
-unsigned int gpsFixed;
-unsigned int gpsChange;
+unsigned char gpsFixed;
+unsigned char gps_action = 0;
 
-// ****************************************************************************
-// *** Initialiseation
-// ****************************************************************************
+#define GPS_SAFE_ALT    5.0f    // in m
+#define GPS_MAX_ANGLE   0.35f   // in radians
+#define GPS_MAX_SPEED   5.0f    // in m/s
+#define GPS_MAX_ROTATE  1.5f    // in rad/s    
+#define GPS_MAX_ALTDIFF 3.0f    // in m
 
 void setup() {
     // *** LED setup
@@ -241,11 +256,12 @@ void setup() {
     // *** Waypoints
     waypointCurrent = 0;
     waypointGo = 0;
-    waypointHomeValid = 0;
     waypointCount = 0;
     waypointValid = 0;
     waypointTimer = 0;
     waypointReceiveIndex = 0;
+    
+    home_valid = 0;
     
     // *** Establish ILink and Look for Thalamus
     ILinkInit(6000);
@@ -345,7 +361,7 @@ void SysTickInterrupt(void) {
     sysMS ++;
     sysUS += 1000;
     
-    if(waypointLoiter < 0xffffffff) waypointLoiter ++;
+    if(waypointLoiterTimer < 0xffffffff) waypointLoiterTimer ++;
     
     // deal with flashing LEDs
     if(sysMS % 100 == 0) {
@@ -412,10 +428,14 @@ void RITInterrupt(void) {
     if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
         gpsSendCounter = 0;
         
+        
+        // *** Get GPS data
+        double craft_X = 0;
+        double craft_Y = 0;
+        double craft_Z = 0;
+        
         if(gps_nav_status.isNew) {
-            gpsChange = 1;
             gps_nav_status.isNew = 0;
-            gpsWatchdog = 0;
 
             if(gps_nav_status.flags & 0x1) { // fix is valid
                 mavlink_gps_raw_int.fix_type = gps_nav_status.gpsFix;
@@ -429,214 +449,302 @@ void RITInterrupt(void) {
         }
         
         if(gps_nav_posllh.isNew) {
-            gpsChange = 1;
             gps_nav_posllh.isNew = 0;
-            
-            mavlink_gps_raw_int.lat = gps_nav_posllh.lat;
-            mavlink_gps_raw_int.lon = gps_nav_posllh.lon;
-            mavlink_gps_raw_int.alt = gps_nav_posllh.hMSL;
-            mavlink_gps_raw_int.eph = gps_nav_posllh.hAcc / 10;
-            mavlink_gps_raw_int.epv = gps_nav_posllh.vAcc / 10;
+             
+            if(gpsFixed == 1) {
+                gpsWatchdog = 0;
+                mavlink_gps_raw_int.lat = gps_nav_posllh.lat;
+                mavlink_gps_raw_int.lon = gps_nav_posllh.lon;
+                mavlink_gps_raw_int.alt = gps_nav_posllh.hMSL;
+                mavlink_gps_raw_int.eph = gps_nav_posllh.hAcc / 10;
+                mavlink_gps_raw_int.epv = gps_nav_posllh.vAcc / 10;
+                
+                craft_X = gps_nav_posllh.lat / 10000000.0d;
+                craft_Y = gps_nav_posllh.lon / 10000000.0d;
+                craft_Z = (double)gps_nav_posllh.hMSL/ 1000.0d;
+            }
         }
         
         if(gps_nav_velned.isNew) {
-            gpsChange = 1;
             gps_nav_velned.isNew = 0;
             
             mavlink_gps_raw_int.vel = gps_nav_velned.gSpeed;
             mavlink_gps_raw_int.cog = gps_nav_velned.heading / 100; // because GPS assumes cog IS heading.
         }
         
-        // GPS position
-        if(posupdate == 1 && gpsFixed == 1) {
-            posupdate = 0;
-            
-            float craftX;
-            float craftY;
-            float craftZ;
-            
-            static float distX;
-            static float distY;
-            static float distZ;
-            static float distYaw;
-            static float distXY;
-            
-            static float speedXY;
-            static float speedZ;
-            static float speedYaw;
-            static float incrementer;
-            
-            static float targetX;
-            static float targetY;
-            static float targetZ;
-            static float targetYaw;
-            
-            // CRAFT
-            craftX = gps_nav_posllh.lat / 10000000.0f;
-            craftY = gps_nav_posllh.lon / 10000000.0f;
-            craftZ = (float)gps_nav_posllh.hMSL/ 1000.0f;
-            
-            // RETARGETING & WAYPOINT SEQUENCER
-            if(ilink_gpsreq.isNew) {
-                ilink_gpsreq.isNew = 0;
-                switch(ilink_gpsreq.request) {
-                    case 0x0001: // takeoff trigger
-                        gpsState = 1;
-                        break;
-                    case 0x0002: // land trigger
-                        
-                        break;
-                    case 0x0003: // rtl trigger
-                        
-                        break;
-            }
-            
-            switch(gpsState) {
-                case 1: // init takeoff
-                    originX = craftX;
-                    originY = craftY;
-                    originZ = craftZ;
-                    if(targetYaw == 42.0f) {
-                        origin
-                    }
-                    targetX = craftX;
-                    targetY = craftY;
-                    if(waypointCurrent < waypointCount && waypointValid == 1) {
-                        targetZ = waypoint[waypiontCurrent].z;
-                        targetYaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // param4 is yaw angle, degrees to radian conversion M_PI / 180.0f = 0.01745329251994329577...
-                    }
-                    else {
-                        targetZ = craftZ + GPS_DEFAULT_ALT;
-                        targetYaw = 42;
-                    }
-                    
-                    gpsState = 2;
-                    
-                    float lat_diff = (double)(incrementX - craftX) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
-                    float lon_diff = (double)(incrementY - craftY) * (double)111194.92664455873734580834 * fcos((float)((double)craftX*(double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
-                    float alt_diff = (float)(incrementZ - craftZ);
-            
-                    
-                    // fallthrough
-                case 2:
-                    
-            
-            }
-            
-            // INTERPOLATER
-            
-            // check for maxing out attitude
-            if(ilink_gpsfly.northDemand < GPS_MAX_XY && ilink_gpsfly.northDemand > -GPS_MAX_XY &&
-                ilink_gpsfly.eastDemand < GPS_MAX_XY && ilink_gpsfly.eastDemand > -GPS_MAX_XY &&
-                craftX ) {
-                // only increment if demand not maxed out
-                unsigned char sign;
+        // *** Actions
+        static double target_X, target_Y, target_Z, target_yaw;
+        static double interpolator_X, interpolator_Y, interpolator_Z;
+        static unsigned char interpolator_mode = 0;
+        static unsigned char free_yaw = 0;
+        static unsigned char allow_land = 0;
+        
+        switch(gps_action) {
+            case 0:
+            default: // do nothing
+                break;
+            case 1: // store home position
+                home_X = craft_X;
+                home_Y = craft_Y;
+                home_Z = craft_Z;
+                home_valid = 1;
+                gps_action = 0;
+                break;
+            case 2: // take off - sets target to current location
+                target_X = craft_X;
+                target_Y = craft_Y;
+                target_Z = craft_Z + GPS_SAFE_ALT;
+                interpolator_X = craft_X; // reset interpolator
+                interpolator_Y = craft_Y;
+                interpolator_Z = craft_Z;
                 
-                if(lat_diff > 0) sign=1;
-                else sign = 0;
-                lat_speed = lat_diff;
-                lat_diff -= speedX;
-                if((lat_diff < 0 && sign == 1) || (lat_diff > 0 && sign == 0) lat_diff = 0;
-                else lat_speed = speedX;
+                if(waypointValid == 1 && waypointCurrent < waypointCount) { // overwrite Z target with Z of next waypoint if set
+                    if(waypoint[waypointCurrent].z > craft_Z) {
+                        target_Z = waypoint[waypointCurrent].z;
+                        target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
+                    }
+                }
                 
-                if(lon_diff > 0) sign=1;
-                else sign = 0;
-                lon_speed = lon_diff;
-                lon_diff -= speedY;
-                if((lon_diff < 0 && sign == 1) || (lon_diff > 0 && sign == 0) lon_diff = 0;
-                else lon_speed = speedY;
+                interpolator_mode = INTMODE_UP_AND_GO;
+                waypointGo = 0;
+                gps_action = 0;
+                break;
+            case 3: // hold/pause - sets target to current craft location
+                target_X = craft_X;
+                target_Y = craft_Y;
+                target_Z = craft_Z;
+                interpolator_X = craft_X; // reset interpolator
+                interpolator_Y = craft_Y;
+                interpolator_Z = craft_Z;
+                
+                interpolator_mode = INTMODE_OFF;
+                waypointGo = 0;
+                gps_action = 0;
+                break;
+            case 4: // resume - resume current waypoint
+                if(waypointValid == 1 && waypointCurrent < waypointCount) {
+                    // if we're already going, check if we're stuck at a LOITER_UNLIM position, and break out of it
+                    if(waypointGo == 1 && waypointReached == 1 && waypoint[waypointCurrent].command == MAV_CMD_NAV_LOITER_UNLIM) {
+                        waypointCurrent++;
+                    }
+                    waypointGo = 1;
+                    waypointReached = 0;
+                
+                    target_X = waypoint[waypointCurrent].x;
+                    target_Y = waypoint[waypointCurrent].y;
+                    target_Z = waypoint[waypointCurrent].z;
+                    target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
+                    interpolator_mode = INTMODE_3D; // two for normal interploator
+                    waypointGo = 1;
+                }
+                else {
+                    target_X = craft_X;
+                    target_Y = craft_Y;
+                    target_Z = craft_Z;
+                    
+                    interpolator_mode = INTMODE_OFF; // zero for hold/max
+                    waypointGo = 0;
+                }
+                interpolator_X = craft_X; // reset interpolator
+                interpolator_Y = craft_Y;
+                interpolator_Z = craft_Z;
+                gps_action = 0;
+                break;
+            case 5: // unscheduled land - sets target to current location, and sets the incrementer mode to "landing"
+                target_X = craft_X;
+                target_Y = craft_Y;
+                target_Z = craft_Z;
+                interpolator_X = craft_X; // reset interpolator
+                interpolator_Y = craft_Y;
+                interpolator_Z = craft_Z;
+                interpolator_mode = INTMODE_DOWN; // three for landing
+                waypointGo = 0;
+                gps_action = 0;
+                break;
+            case 6: // return to home - sets waypoint to home, unsets the "land when reached" flag
+                if(home_valid == 1) {
+                    target_X = home_X;
+                    target_Y = home_Y;
+                    target_Z = home_Z + GPS_SAFE_ALT;
+                    interpolator_mode = INTMODE_SEQUENCE_UP; // this sets the interpolator onto the RTL sequence: rise to target altitude, fly to home position, then land
+                }
+                else { // no home waypoint set, land here
+                    target_X = craft_X;
+                    target_Y = craft_Y;
+                    target_Z = craft_Z;
+                    interpolator_mode = INTMODE_DOWN;
+                }
+                
+                if(craft_Z > target_Z) target_Z = craft_Z; // if craft is heigher than target, don't bother flying to target altitude first since craft is already above it, just fly to position and land.
+                
+                interpolator_X = craft_X; // reset interpolator
+                interpolator_Y = craft_Y;
+                interpolator_Z = craft_Z;
+                waypointGo = 0;
+                gps_action = 0;
+                break;
+        }
+        
+        if(gpsFixed) {
+            // *** Interpolator
+            // work out whether to move or not based on whether pitch/roll is maxed out (horizontal), or vertical distance
+            // TODO: replace vertical distance check with thrust maxed out check (involves Thalamus sending throttle value
+            float zdiff;
+            float target_speed_X = 0;
+            float target_speed_Y = 0;
+            float target_speed_Z = 0;
+            
+            switch(interpolator_mode) {
+                case INTMODE_OFF:
+                default:
+                    interpolator_X = target_X;
+                    interpolator_Y = target_Y;
+                    interpolator_Z = target_Z;
+                    allow_land = 0;
+                    break;
+                    
+                case INTMODE_SEQUENCE_UP:
+                case INTMODE_UP_AND_GO:
+                case INTMODE_VERTICAL:
+                    zdiff = craft_Z - interpolator_Z;
+                    // check that we're not maxed out height
+                    if(zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
+                        float vector_Z = target_Y - interpolator_Z;
+                    
+                        // normalise vector
+                        float sumsqu = finvSqrt(vector_Z*vector_Z);
+                        
+                        // check to see if we'd overshoot the waypoint
+                        sumsqu *= (GPS_MAX_SPEED/5.0f); // TODO: replace "5" with actual GPS rate
+                        if(sumsqu < 1) { // equivalent to if mag > speed, but we're working with 1/mag here, so mess with inequality maths.
+                            vector_Z *= sumsqu;
+                        }
+                        else if(interpolator_mode == INTMODE_SEQUENCE_UP) {
+                            // entering this means that mag < speed, so the next interpolator target should be right on the target.
+                            // if that's the case, we've arrived at target, and if we're in SEQUENCE, set interpolator mode to 3D for next time
+                            interpolator_mode = INTMODE_SEQUENCE_3D;
+                        }
+                        else if(interpolator_mode == INTMODE_UP_AND_GO) {
+                            if(waypointValid == 1 && waypointCurrent < waypointCount) { // overwrite Z target with Z of next waypoint if set
+                                gps_action = 4;
+                            }
+                            else {
+                                gps_action = 3;
+                            }
+                        }
+                        interpolator_Z += vector_Z;
+                        target_speed_Z = vector_Z * 5;
+                    }
+                    allow_land = 0;
+                    break;
+                    
+                case INTMODE_HORIZONTAL:
+                     // check that we're not maxed out on the angles
+                    if(ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE &&
+                    ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE) {
+                        
+                        float vector_X = target_X - interpolator_X; // yes, convert a double to a float to make use of faster float functions. After subtraction, a float has enough accuracy for this
+                        float vector_Y = target_Y - interpolator_Z;
+                    
+                        // normalise vector
+                        float sumsqu = finvSqrt(vector_X*vector_X + vector_Y*vector_Y);
+                        
+                        // check to see if we'd overshoot the waypoint
+                        sumsqu *= GPS_MAX_SPEED/5.0f;
+                        if(sumsqu < 1) { // equivalent to if mag > speed, but we're working with 1/mag here, so mess with inequality maths.
+                            vector_X *= sumsqu;
+                            vector_Y *= sumsqu;
+                        }
+                        
+                        interpolator_X += vector_X;
+                        interpolator_Y += vector_Y;
+                        target_speed_X = vector_X * 5;
+                        target_speed_Y = vector_Y * 5;
+                    }
+                    allow_land = 0;
+                    break;
+                    
+                case INTMODE_SEQUENCE_3D:
+                case INTMODE_3D:
+                    zdiff = craft_Z - interpolator_Z;
+                    
+                    // check that we're not maxed out on the angles or height
+                    if(ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE &&
+                    ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE &&
+                    zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
+                        
+                        float vector_X = target_X - interpolator_X; // yes, convert a double to a float to make use of faster float functions. After subtraction, a float has enough accuracy for this
+                        float vector_Y = target_Y - interpolator_Z;
+                        float vector_Z = target_Y - interpolator_Z;
+                    
+                        // normalise vector
+                        float sumsqu = finvSqrt(vector_X*vector_X + vector_Y*vector_Y + vector_Z*vector_Z);
+                        
+                        // check to see if we'd overshoot the waypoint
+                        sumsqu *= GPS_MAX_SPEED/5.0f;
+                        if(sumsqu < 1) { // equivalent to if mag > speed, but we're working with 1/mag here, so mess with inequality maths.
+                            vector_X *= sumsqu;
+                            vector_Y *= sumsqu;
+                            vector_Z *= sumsqu;
+                        }
+                        else if(interpolator_mode == INTMODE_SEQUENCE_3D) {
+                            // entering this means that mag < speed, so the next interpolator target should be right on the target.
+                            // if that's the case, we've arrived at target, and if we're in SEQUENCE, set interpolator mode to land for next time
+                            interpolator_mode = INTMODE_SEQUENCE_DOWN;
+                        }
+                        
+                        interpolator_X += vector_X;
+                        interpolator_Y += vector_Y;
+                        interpolator_Z += vector_Z;
+                        target_speed_X = vector_X * 5;
+                        target_speed_Y = vector_Y * 5;
+                        target_speed_Z = vector_Z * 5;
+                    }
+                    allow_land = 0;
+                    break;
+                    
+                case INTMODE_SEQUENCE_DOWN:
+                case INTMODE_DOWN:
+                    zdiff = craft_Z - interpolator_Z;
+                    // check that we're not maxed out height
+                    if(zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
+                        interpolator_Z += -GPS_MAX_SPEED/5.0f;
+                        target_speed_Z = -GPS_MAX_SPEED;
+                    }
+                    allow_land = 1;
+                    break;
+                    
             }
+
+            // *** PID & Output
+            float lat_diff = (double)(interpolator_X - craft_X) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
+            float lon_diff = (double)(interpolator_Y - craft_Y) * (double)111194.92664455873734580834 * fcos((float)((double)craft_X*(double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
+            float alt_diff = (float)(interpolator_Z - craft_Z);
             
-            // check for altitude maxing
-                if(alt_diff > 0) sign=1;
-                else sign = 0;
-                alt_speed = alt_diff;
-                alt_diff -= speedZ;
-                if((alt_diff < 0 && sign == 1) || (alt_diff > 0 && sign == 0) alt_diff = 0;
-                else alt_speed = speedZ;
-            }
-            
-            
-            // PID
             lat_diff_i += lat_diff;
             lon_diff_i += lon_diff;
 
-            ilink_gpsfly.northDemand = GPS_Kp*lat_diff /*+ GPS_Ki*lat_diff_i*/ + GPS_Kd*(lat_speed - gps_nav_velned.velN / 100.0f);
-            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff /*+ GPS_Ki*lon_diff_i*/ + GPS_Kd*(lon_speed - gps_nav_velned.velE / 100.0f);
-            ilink_gpsfly.altitudeDemand = targetZ - ald_diff;
-            ilink_gpsfly.altitudeDemantVel = alt_speed;
-            ilink_gpsfly.headingDemand = yawDemand;
-            
-            // GPS stuff
-            ilink_gpsfly.altitude = craftZ;
+            ilink_gpsfly.northDemand = GPS_Kp*lat_diff + GPS_Ki*lat_diff_i + GPS_Kd*(target_speed_X - gps_nav_velned.velN / 100.0f);
+            ilink_gpsfly.eastDemand = GPS_Kp*lon_diff + GPS_Ki*lon_diff_i + GPS_Kd*(target_speed_Y - gps_nav_velned.velE / 100.0f);
+            ilink_gpsfly.altitudeDemand = interpolator_Z;
+            ilink_gpsfly.altitudeDemandVel = target_speed_Z;
+            ilink_gpsfly.headingDemand = target_yaw; // TODO: tween headings
+            ilink_gpsfly.altitude = craft_Z;
             ilink_gpsfly.vAcc = (float)gps_nav_posllh.vAcc / 1000.0f; // we think this is 1 sigma
             ilink_gpsfly.velD = (float)gps_nav_velned.velD / 100.0f;
+            ilink_gpsfly.flags = ((free_yaw & 0x1) << 2) | ((allow_land & 0x1) << 1);
 
             XBeeInhibit();
             ILinkSendMessage(ID_ILINK_GPSFLY, (unsigned short *) & ilink_gpsfly, sizeof(ilink_gpsfly)/2-1);
             ILinkPoll(ID_ILINK_GPSREQ);
             XBeeAllow();
-            
-            /*
-            
-            static float targetX;
-            static float targetY;
-            static float targetZ;
-            static float targetYaw;
-            
-            float incrementX;
-            float incrementY;
-            float incrementZ;
-            
-            // incrementer
-            switch(gpsState) {
-                default:
-                case 0: // undefined state, drift aimlessly
-                    targetX = craftX;
-                    targetY = craftY;
-                    targetZ = craftZ;
-                    targetYaw = 42.0f;
-                    break;
-                    
-                case 1: // horizontal lock (increment toward target)
-                
-                case 2: // 3D lock
-                    break;
-            
-            }
-            
-            
-            
-            if(horizontalHold == 1) { // request horizontal hold
-                horizontalHoldLat = craftX;
-                horizontalHoldLon = craftY;
-                horizontalHold = 2; // now in hold
-            }
-            
-            if(horizontalHold == 2) { // with hold
-                targetX = horizontalHoldLat;
-                targetY = horizontalHoldLon;
-                targetZ = craftZ;
-                targetYaw = 42.0f;
-            }
-            else if((waypointCurrent == WAYPOINT_HOME && waypointHomeValid == 1) || (waypointCurrent < waypointCount && waypointValid == 1)) { // with 
-                targetX = waypoint[waypointCurrent].x;
-                targetY = waypoint[waypointCurrent].y;
-                targetZ = waypoint[waypointCurrent].z;
-                }
-            else {
-                targetX = craftX;
-                targetY = craftY;
-                targetZ = craftZ;
-                targetYaw = 42.0f;
-            }*/
-                
-            
-            
-            /*
-            if(((waypointCurrent == WAYPOINT_HOME && waypointHomeValid == 1) || (waypointCurrent < waypointCount && waypointValid == 1))) {
+        
+        
+            // *** Check targeting rules for waypoints
+            if(waypointGo == 1 && waypointValid == 1 && waypointCurrent < waypointCount) {
+                free_yaw = 0;
                 float radius = waypoint[waypointCurrent].param2; // param2 is radius in QGroumdcontrol 1.0.1
-                if(radius < 1) radius = 1;
+                if(radius < 1) radius = 1; // minimum radis
                 
                 //float lat_diff2 = lat_diff; // for orbit phase calculation
                 //float lon_diff2 = lon_diff;
@@ -646,79 +754,63 @@ void RITInterrupt(void) {
                 if(lon_diff < 0) lon_diff = -lon_diff;
                 if(alt_diff < 0) alt_diff = -alt_diff;
                 
-                if(lat_diff < radius && lon_diff < radius && alt_diff < radius) {
-                
-                    // target reached
-                    if(waypointReached == 0) {
-                        waypointReached = 1;
-                        waypointLoiter = 0;
-                        
-                        mavlink_mission_item_reached.seq = waypointCurrent;
-
-                        mavlink_msg_mission_item_reached_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_mission_item_reached);
-                        mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                        XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-                        XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-                        XBeeAllow();
-                        
-                        // waypointPhase = fatan2(-lon_diff2, -lat_diff2);
-                        
-                    }
+                if(waypointReached == 0 && lat_diff < radius && lon_diff < radius && alt_diff < radius) { // target reached
+                    waypointReached = 1;
+                    waypointLoiterTimer = 0;
+                    
+                    // report waypoint reached to GCS
+                    mavlink_mission_item_reached.seq = waypointCurrent;
+                    mavlink_msg_mission_item_reached_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_mission_item_reached);
+                    mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+                    XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+                    XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+                    XBeeAllow();
+                    
+                    // waypointPhase = fatan2(-lon_diff2, -lat_diff2);
                 }
                 
                 if(waypointReached == 1) {
                     switch(waypoint[waypointCurrent].command) {
+                        case MAV_CMD_NAV_LOITER_UNLIM:
+                        default:
+                            // do nothing (i.e. get stuck here until user requests to resume)
+                            break;
+                        case MAV_CMD_NAV_LOITER_TIME:
                         case MAV_CMD_NAV_WAYPOINT:
-                            if(waypointLoiter >= waypoint[waypointCurrent].param1) { // Param1 in this case is wait time
+                            if(waypointLoiterTimer >= waypoint[waypointCurrent].param1) { // Param1 in this case is wait time (in milliseconds, waypointLoiterTimer incremented by SysTick)
                                 if(waypointCurrent < waypointCount) {
                                     waypointCurrent ++;
+                                    gps_action = 4; // loads up new waypoint
                                     waypointReached = 0;
-                                    waypointLoiter = 0;
+                                    waypointLoiterTimer = 0;
                                 }
                             }
-                            
-                            /*ilink_payldctrl.camRoll = 0;
-                            ilink_payldctrl.camPitch = 0;
-                            ilink_payldctrl.camYaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // param4 is yaw angle, degrees to radian conversion M_PI / 180.0f = 0.01745329251994329577...;
-                            ilink_payldctrl.controlMask = 0b100;
-                            XBeeInhibit();
-                            ILinkSendMessage(ID_ILINK_PAYLDCTRL, (unsigned short *) & ilink_payldctrl, sizeof(ilink_payldctrl)/2-1);
-                            XBeeAllow();
-                            
-                            // TODO: tween yaw between waypoints
-                            
                             break;
-                        
-                        case MAV_CMD_NAV_LOITER_UNLIM:
-                        case MAV_CMD_NAV_LOITER_TIME:
                         case MAV_CMD_NAV_LOITER_TURNS:
-                            // attempting to achieve a speed of 3m/s
-                            //waypointPhase += 0.1;
-                            
-                            // don't need to do anything to hold position
-                            // TODO: loiter radius/time/turns
-                            
-                            /*ilink_payldctrl.camRoll = 0;
-                            ilink_payldctrl.camPitch = 0;
-                            ilink_payldctrl.camYaw = waypoint[waypointCurrent].param4 * M_PI / 180.0f;
-                            ilink_payldctrl.controlMask = 0b100;
-                            XBeeInhibit();
-                            ILinkSendMessage(ID_ILINK_PAYLDCTRL, (unsigned short *) & ilink_payldctrl, sizeof(ilink_payldctrl)/2-1);
-                            XBeeAllow();
+                            // TODO: deal with loiter radius/time/turns
                             break;
-                            
-                            
                         case MAV_CMD_NAV_RETURN_TO_LAUNCH:
-                            waypointCurrent = WAYPOINT_HOME;
-                            waypointReached = 0;
+                            gps_action = 6;
                             break;
                             
                         case MAV_CMD_NAV_LAND:
-                            //ilink_position.state = 0; // LAND NOW
+                            gps_action = 5;
                             break;
                     }
                 }
-            }*/
+            }
+            else {
+                free_yaw = 0;
+            }
+        }
+        else {
+            ilink_gpsfly.flags = 0; // GPS not valid
+
+            XBeeInhibit();
+            ILinkSendMessage(ID_ILINK_GPSFLY, (unsigned short *) & ilink_gpsfly, sizeof(ilink_gpsfly)/2-1);
+            ILinkPoll(ID_ILINK_GPSREQ);
+            XBeeAllow();
+        
         }
     }
 
@@ -995,15 +1087,13 @@ void RITInterrupt(void) {
         else if(dataRate[MAV_DATA_STREAM_POSITION] && positionStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_POSITION]) {
             positionStreamCounter= 0;
 
-            if(gpsChange) {
-                mavlink_gps_raw_int.time_usec = sysUS;
-                
-                mavlink_msg_gps_raw_int_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_gps_raw_int);
-                mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-                XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-                XBeeAllow();
-            }
+            mavlink_gps_raw_int.time_usec = sysUS;
+            
+            mavlink_msg_gps_raw_int_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_gps_raw_int);
+            mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+            XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+            XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+            XBeeAllow();
         }
         else if(dataRate[MAV_DATA_STREAM_EXTRA1] && extra1ChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA1]) {
             extra1ChannelCounter = 0;
@@ -1295,16 +1385,10 @@ void MAVLinkParse(unsigned char UARTData) {
                         
                         case MAV_CMD_OVERRIDE_GOTO:
                             if(mavlink_command_long.param1 == MAV_GOTO_DO_HOLD) {
-                                waypointGo = 0;
+                                gps_action = 3;
                             }
                             else if(mavlink_command_long.param1 == MAV_GOTO_DO_CONTINUE) {
-                                if(waypointGo == 1) {
-                                    if(waypoint[waypointCurrent].command == MAV_CMD_NAV_LOITER_UNLIM && waypointCurrent < waypointCount) {
-                                        waypointCurrent++;
-                                    }
-                                }
-                                waypointGo = 1;
-                                waypointReached = 0;
+                                gps_action = 4;
                             }
                             break;
                         
@@ -1358,16 +1442,10 @@ void MAVLinkParse(unsigned char UARTData) {
             case MAVLINK_MSG_ID_SET_GPS_GLOBAL_ORIGIN:
                 mavlink_msg_set_gps_global_origin_decode(&mavlink_rx_msg, &mavlink_set_gps_global_origin);
                 if (mavlink_set_gps_global_origin.target_system == mavlinkID) {
-                        waypoint[WAYPOINT_HOME].command = MAV_CMD_NAV_LAND;
-                        waypoint[WAYPOINT_HOME].autocontinue = 0;
-                        waypoint[WAYPOINT_HOME].param1 = 0;
-                        waypoint[WAYPOINT_HOME].param2 = 0;
-                        waypoint[WAYPOINT_HOME].param3 = 0;
-                        waypoint[WAYPOINT_HOME].param4 = 0;
-                        waypoint[WAYPOINT_HOME].x = (float)mavlink_set_gps_global_origin.latitude / 10000000.0f;
-                        waypoint[WAYPOINT_HOME].y = (float)mavlink_set_gps_global_origin.longitude / 10000000.0f;
-                        waypoint[WAYPOINT_HOME].z = (float)mavlink_set_gps_global_origin.altitude / 1000.0f;
-                        waypointHomeValid = 1;
+                        home_X = (double)mavlink_set_gps_global_origin.latitude / 10000000.0d;
+                        home_Y = (double)mavlink_set_gps_global_origin.longitude / 10000000.0d;
+                        home_Z = (double)mavlink_set_gps_global_origin.altitude / 1000.0d;
+                        home_valid = 1;
                 }
             case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:
                 mavlink_msg_mission_clear_all_decode(&mavlink_rx_msg, &mavlink_mission_clear_all);
@@ -1575,8 +1653,31 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
             ptr[j] = buffer[j];
         }
         ptr[j] = 1; // this is the "isNew" byte
-        
         switch(id) {
+        
+            case ID_ILINK_GPSREQ:
+                __NOP(); // this fixes some weird compiler bug tha occurs when putting a static after a case
+                static unsigned short gpsreq_lastsequence = 0;
+                if(ilink_gpsreq.sequence > gpsreq_lastsequence) { 
+                    gpsreq_lastsequence = ilink_gpsreq.sequence;
+                    
+                    if(ilink_gpsreq.request == 0xffff) { // reset sequence number
+                        gpsreq_lastsequence = 0;
+                    }
+                    else if(ilink_gpsreq.request < 0x8000) { // standard commands are < 0x8000
+                        gps_action = ilink_gpsreq.request;
+                    }
+                    else { // sequence commands, explicitely set waypoint number
+                        if((ilink_gpsreq.request & 0x7fff) < waypointCount) {
+                            waypointCurrent = ilink_gpsreq.request & 0x7fff;
+                        }
+                        else {
+                            waypointCurrent = waypointCount - 1;
+                        }
+                        gps_action = 4;
+                    }
+                }
+                break;
             case ID_ILINK_THALPARAM: // store parameters in buffer
                 if(paramPointer > 0) {
                     paramPointer--;
