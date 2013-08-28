@@ -46,42 +46,52 @@ void read_rx_input(void) {
 		
 		static unsigned int flapswitch = 0;
 		
-		// If the button is pressed, start incrementing a counter
-		if(rcInput[RX_FLAP] > MIDSTICK) {
-			flapswitch++;
-			if (flapswitch > 4000) flapswitch = 4000;
-		}
-		// If the button is released and the counter is greater than zero but less than 3 seconds
-		if ((rcInput[RX_FLAP] < MIDSTICK) && (flapswitch > 0)  && (flapswitch <= (SLOW_RATE*3)) ) {
-			// Then reset the counter
-			flapswitch = 0;
-			// There are three states
-			// If the button is pressed in states 2 or 0 then go to state 1
-			if ((flapState == 0) || (flapState == 2)) {
-				flapState = 1;
-				// and request Position Hold/ pause on from Hypo
-                ilink_gpsreq.request = 3;
-				ilink_gpsreq.sequence++;               
-            }
-			// If the button is pressed in state 1 then go to state 0
-			else {
-				flapState = 0;
-				// and request resume/ go from Hypo 
-                ilink_gpsreq.request = 4;
-				ilink_gpsreq.sequence++;                
-            }
+		// if the throttle is greater than 0
+		if (throttle > 0) {	
+		
+			// If the button is pressed, start incrementing a counter
+			if(rcInput[RX_FLAP] > MIDSTICK) {
+				flapswitch++;
+				if (flapswitch > 4000) flapswitch = 4000;
+			}
+			// If the button is released and the counter is greater than zero but less than 3 seconds
+			if ((rcInput[RX_FLAP] < MIDSTICK) && (flapswitch > 0)  && (flapswitch <= (SLOW_RATE*3)) ) {
+				// Then reset the counter
+				flapswitch = 0;
+				// There are three states
+				// If the button is pressed in states 2 or 0 then go to state 1
+				if ((flapState == 0) || (flapState == 2)) {
+					flapState = 1;
+					// and request Position Hold/ pause on from Hypo
+					ilink_gpsreq.request = 3;
+					ilink_gpsreq.sequence++;               
+				}
+				// If the button is pressed in state 1 then go to state 0
+				else {
+					flapState = 0;
+					if (state == auto) {
+						// and request resume/ go from Hypo if we are in Auto MODE
+						ilink_gpsreq.request = 4;
+						ilink_gpsreq.sequence++; 
+					}
+					else {
+						// else set idle mode on Hypo if we are in Manual MODE
+						ilink_gpsreq.request = 7;
+						ilink_gpsreq.sequence++;
+					}
+				}
 
-		}
-		// We set the state to 2 if the button has been released after being held for over three seconds.
-		if ((rcInput[RX_FLAP] < MIDSTICK) && (flapswitch > (SLOW_RATE*3))) {
-			flapswitch = 0;
-			flapState = 2;
-			// and request go home and land from Hypo
-			ilink_gpsreq.request = 6;
-			ilink_gpsreq.sequence++; 
-			
-		}
-			
+			}
+			// We set the state to 2 if the button has been released after being held for over three seconds.
+			if ((rcInput[RX_FLAP] < MIDSTICK) && (flapswitch > (SLOW_RATE*3))) {
+				flapswitch = 0;
+				flapState = 2;
+				// and request go home and land from Hypo
+				ilink_gpsreq.request = 6;
+				ilink_gpsreq.sequence++; 
+				
+			}
+		}	
 			
 		flashVLED = 0;
 		LEDOff(VLED);
