@@ -65,18 +65,28 @@ void disarm(void) {
 unsigned char detect_ori(void) {
     signed short data[3];
     signed short x_axis, y_axis, z_axis;
+    unsigned int x_mag, y_mag, z_mag;
     
     if(GetAccel(data)) {
         x_axis = data[0];
         y_axis = data[1];
         z_axis = data[2];
+        x_mag = (signed int)x_axis * (signed int)x_axis;
+        y_mag = (signed int)y_axis * (signed int)y_axis;
+        z_mag = (signed int)z_axis * (signed int)z_axis;
         
-        if     (x_axis > y_axis && x_axis > z_axis) return 1; // x is down
-        else if(x_axis < y_axis && x_axis < z_axis) return 2; // x is up
-        else if(y_axis > x_axis && y_axis > z_axis) return 3; // y is down; NAVY EDITION
-        else if(y_axis < x_axis && y_axis < z_axis) return 4; // y is up
-        else if(z_axis > y_axis && z_axis > x_axis) return 5; // z is down
-        else if(z_axis < y_axis && z_axis < x_axis) return 6; // z is up
+        if(x_mag > y_mag && x_mag > z_mag) {
+            if(x_axis > 0)  return 1;    // x is down
+            else            return 2;    // x is up
+        }
+        else if(y_mag > x_mag && y_mag > z_mag) {
+            if(y_axis > 0)  return 3;   // y is down: NAVY
+            else            return 4;   // y is up
+        }
+        else if(z_mag > y_mag && z_mag > x_mag) {
+            if(z_axis > 0)  return 5;   // z is down: R10
+            else            return 6;   // z is up
+        }
     }
 
     return 7; // orientation not detected - this will happen if two of the highest axes are equal
