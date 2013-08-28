@@ -732,8 +732,9 @@ void RITInterrupt(void) {
             ilink_gpsfly.altitude = craft_Z;
             ilink_gpsfly.vAcc = (float)gps_nav_posllh.vAcc / 1000.0f; // we think this is 1 sigma
             ilink_gpsfly.velD = (float)gps_nav_velned.velD / 100.0f;
-            ilink_gpsfly.flags = ((free_yaw & 0x1) << 2) | ((allow_land & 0x1) << 1);
-
+            ilink_gpsfly.flags = ((free_yaw & 0x1) << 2) | ((allow_land & 0x1) << 1) | 1;
+			
+			
             XBeeInhibit();
             ILinkSendMessage(ID_ILINK_GPSFLY, (unsigned short *) & ilink_gpsfly, sizeof(ilink_gpsfly)/2-1);
             ILinkPoll(ID_ILINK_GPSREQ);
@@ -805,6 +806,7 @@ void RITInterrupt(void) {
         }
         else {
             ilink_gpsfly.flags = 0; // GPS not valid
+			
 
             XBeeInhibit();
             ILinkSendMessage(ID_ILINK_GPSFLY, (unsigned short *) & ilink_gpsfly, sizeof(ilink_gpsfly)/2-1);

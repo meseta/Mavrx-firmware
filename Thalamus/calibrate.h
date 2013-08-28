@@ -64,6 +64,39 @@ void disarm(void) {
 
 void calibrate_ori(void) {
 
+	// signed short data[4];  
+	// got_horiz = 0;
+	
+    // while 	
+		// if(GetAccel(data)) {
+			//// Get raw Accelerometer data
+			// x_axis = data[0];
+			// y_axis = data[2];
+			// z_axis = -data[1];
+		// }
+		// if (got_horiz == 0) {
+			// if ((z_axis*z_axis) > ((x_axis*x_axis) + (y_axis*y_axis))) {
+				// if (z_axis <
+			// }
+			// if ((x_axis*x_axis) > ((z_axis*z_axis) + (y_axis*y_axis))) {
+				// x_axis_horiz = z_axis;
+				// y_axis_horiz = y_axis;
+				// z_axis_horiz = x_axis;
+			// }
+			// else {
+				// x_axis_horiz = x_axis;
+				// y_axis_horiz = z_axis;
+				// z_axis_horiz = y_axis;
+			// }
+// +
+
+			// got_horiz = 1;
+		// }
+		// if z_axis < 0.05 * 
+		
+	
+	
+		
 }
 
 void calibrate_mag(void) {

@@ -191,7 +191,8 @@ void a_h_r_s(){
 		psiAngle = fatan2((2*(q1 * q4 + q2 * q3)), (1 - 2*(q33 + q44)));  
 	}
 	// Output angles over telemetry
-	ilink_attitude.roll = phiAngle; 
-	ilink_attitude.pitch = thetaAngle;
-	ilink_attitude.yaw = psiAngle;
+	// TODO: Temporarily stolen
+	// ilink_attitude.roll = phiAngle; 
+	// ilink_attitude.pitch = thetaAngle;
+	// ilink_attitude.yaw = psiAngle;
 }

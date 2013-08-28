@@ -81,6 +81,17 @@ void control_throttle()	{
 			throttle = gpsThrottle;			
 		}
 	}
+	
+			//debug
+		ilink_debug.debug1 = ilink_gpsfly.isNew;
+		//debug
+		ilink_debug.debug2 = ilink_gpsfly.flags;
+		
+		// Output angles over telemetry
+		// TODO: Temporarily stolen
+		ilink_attitude.roll = ilink_gpsfly.altitudeDemand; 
+		ilink_attitude.pitch = ilink_gpsfly.northDemand;
+		ilink_attitude.yaw = ilink_gpsfly.eastDemand;
 
 	// If Thalamus is allowed to shut off the motors
 	if (thal_motor_off == 1) {

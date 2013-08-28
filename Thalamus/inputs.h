@@ -1,8 +1,9 @@
 void gps_status(void) {	
-	static unsigned char loss_counter = 0;
+	static unsigned int loss_counter = 0;
 	
+
 	// check if GPS data is present and valid
-	if(ilink_gpsfly.isNew && (ilink_gpsfly.flags & 0x1)) {
+	if((ilink_gpsfly.isNew) && (ilink_gpsfly.flags & 0x1)) {
 		ilink_gpsfly.isNew = 0;
 		loss_counter = 0;
 		gps_valid = 1;
@@ -10,11 +11,11 @@ void gps_status(void) {
 	}
 	else {
 		// if GPS data is invalid or missing increment loss counter
-		if(loss_counter < 0xff) loss_counter++;
-		if(loss_counter > SLOW_RATE*0.4) { // if no GPS for 0.4 seconds GPS is considered lost
+		if(loss_counter < 10000) loss_counter++;
+		if(loss_counter > SLOW_RATE*2) { // if no GPS for 2 seconds GPS is considered lost
 			gps_valid = 0;
 		}
-	}
+	} 
 }
 
 void read_rx_input(void) {			
@@ -63,7 +64,7 @@ void read_rx_input(void) {
 				ilink_gpsreq.sequence++;               
             }
 			// If the button is pressed in state 1 then go to state 0
-			if (flapState == 1) {
+			else {
 				flapState = 0;
 				// and request resume/ go from Hypo 
                 ilink_gpsreq.request = 4;
