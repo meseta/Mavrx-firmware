@@ -3777,7 +3777,9 @@ unsigned char PRGPoll(void) {
     // ****************************************************************************
     // *** IMU Functions (Thalamus)
     // ****************************************************************************
-
+	volatile unsigned short FUNCBaro_C1, FUNCBaro_C2, FUNCBaro_C3,FUNCBaro_C4, FUNCBaro_C5, FUNCBaro_C6;
+	volatile signed long long FUNCBaro_sensitivity, FUNCBaro_offset;
+	volatile unsigned char FUNCBaro_type;
     void SensorInit(void) {
         unsigned char I2CBuffer[5];
         
@@ -3830,22 +3832,125 @@ unsigned char PRGPoll(void) {
         I2CMaster(I2CBuffer, 5, 0, 0);
         
         // *** Barometer
-        I2CBuffer[0] = BARO_ADDR;
-        I2CBuffer[1] = 0x10;     // Pressure resolution mode
-        I2CBuffer[2] = ((BARO_TEMP_AVERAGING & 0x7) << 4) | (BARO_PRES_AVERAGING & 0xf); // oversampling settings
-        I2CMaster(I2CBuffer, 3, 0, 0);
+		// detect which barometer is available
+		FUNCBaro_type = 0;
+		
+		I2CBuffer[0] = BARO_LPS_ADDR;
+        I2CBuffer[1] = 0x0f;     // WHOAMI register
+		I2CBuffer[2] = BARO_LPS_ADDR | 0x1;
+        if(I2CMaster(I2CBuffer, 2, I2CBuffer, 1)) {
+			if(I2CBuffer[0] == 0xbb) {
+				I2CBuffer[0] = BARO_LPS_ADDR;
+				I2CBuffer[1] = 0x10;     // Pressure resolution mode
+				I2CBuffer[2] = ((BARO_LPS_TEMP_AVERAGING & 0x7) << 4) | (BARO_LPS_PRES_AVERAGING & 0xf); // oversampling settings
+				I2CMaster(I2CBuffer, 3, 0, 0);
 
-        I2CBuffer[0] = BARO_ADDR;
-        I2CBuffer[1] = 0x20;
-        I2CBuffer[2] = ((BARO_RATE & 0x7) << 4) | 0x04; // Output data rate, and block data update
-        I2CMaster(I2CBuffer, 3, 0, 0);
-        
-        I2CBuffer[0] = BARO_ADDR;
-        I2CBuffer[1] = 0x20 + 0x80;    // Ctrl register start location
-        I2CBuffer[2] = 0x80 | ((BARO_RATE & 0x7) << 4) | 0x04; // Power on on separate operation
-        I2CMaster(I2CBuffer, 3, 0, 0);
+				I2CBuffer[0] = BARO_LPS_ADDR;
+				I2CBuffer[1] = 0x20;
+				I2CBuffer[2] = ((BARO_LPS_RATE & 0x7) << 4) | 0x04; // Output data rate, and block data update
+				I2CMaster(I2CBuffer, 3, 0, 0);
+				
+				I2CBuffer[0] = BARO_LPS_ADDR;
+				I2CBuffer[1] = 0x20 + 0x80;    // Ctrl register start location
+				I2CBuffer[2] = 0x80 | ((BARO_LPS_RATE & 0x7) << 4) | 0x04; // Power on on separate operation
+				I2CMaster(I2CBuffer, 3, 0, 0);
+				
+				FUNCBaro_type = 1;
+			}
+		}
+		
+		I2CBuffer[0] = BARO_MS_ADDR;
+		I2CBuffer[1] = 0x1e;     // factory reset
+		I2CMaster(I2CBuffer, 2, 0, 0);
+		
+		Delay(3);
+		
+		I2CBuffer[0] = BARO_MS_ADDR;
+		I2CBuffer[1] = 0xa0;     // PROM byte
+		I2CBuffer[2] = BARO_MS_ADDR | 1;
+		if(I2CMaster(I2CBuffer, 2, I2CBuffer, 2)) {
+			if(I2CBuffer[0] == 0x00 && I2CBuffer[1] == 0x1c) {
+				unsigned int n_rem = 0;
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+				
+				I2CBuffer[0] = BARO_MS_ADDR;
+				I2CBuffer[1] = 0xa2;     // PROM bye
+				I2CBuffer[2] = BARO_MS_ADDR | 1;
+				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+				FUNCBaro_C1 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+				
+				I2CBuffer[0] = BARO_MS_ADDR;
+				I2CBuffer[1] = 0xa4;     // PROM bye
+				I2CBuffer[2] = BARO_MS_ADDR | 1;
+				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+				FUNCBaro_C2 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+				
+				I2CBuffer[0] = BARO_MS_ADDR;
+				I2CBuffer[1] = 0xa6;     // PROM bye
+				I2CBuffer[2] = BARO_MS_ADDR | 1;
+				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+				FUNCBaro_C3 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+				
+				I2CBuffer[0] = BARO_MS_ADDR;
+				I2CBuffer[1] = 0xa8;     // PROM bye
+				I2CBuffer[2] = BARO_MS_ADDR | 1;
+				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+				FUNCBaro_C4 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+				
+				I2CBuffer[0] = BARO_MS_ADDR;
+				I2CBuffer[1] = 0xaa;     // PROM bye
+				I2CBuffer[2] = BARO_MS_ADDR | 1;
+				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+				FUNCBaro_C5 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+				
+				I2CBuffer[0] = BARO_MS_ADDR;
+				I2CBuffer[1] = 0xac;     // PROM bye
+				I2CBuffer[2] = BARO_MS_ADDR | 1;
+				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+				FUNCBaro_C6 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+				
+				I2CBuffer[0] = BARO_MS_ADDR;
+				I2CBuffer[1] = 0xae;     // PROM bye
+				I2CBuffer[2] = BARO_MS_ADDR | 1;
+				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+				n_rem = BaroCrc4(n_rem, 0);
+				
+				n_rem = (0x000F & (n_rem >> 12)); // // final 4-bit reminder is CRC code
+				if(n_rem == (I2CBuffer[1] & 0x0f)) {
+					FUNCBaro_type = 2;
+				}
+			}
+		}
     }
 
+	unsigned int BaroCrc4(unsigned int n_rem, unsigned char byte) {
+		unsigned char i;
+		n_rem ^= (unsigned short) byte;
+		for (i=0; i<8; i++){
+			if (n_rem & 0x8000) {
+				n_rem = (n_rem << 1) ^ 0x3000;
+			}
+			else {
+				n_rem = (n_rem << 1);
+			}
+		}
+		return n_rem;
+	}
+	
     unsigned char GetAccel(signed short * data) {
         unsigned char I2CBuffer[6];
         unsigned char * ptr; // mess with pointers to shoehorn chars into signed short array
@@ -3947,9 +4052,6 @@ unsigned char PRGPoll(void) {
             ptr[4] = I2CBuffer[5]; // Seraphim Z LSB
             ptr[5] = I2CBuffer[4]; // Seraphim Z MSB
             data[2] = -data[2];
-
-            
-            
             
             return 1;
         }
@@ -3961,40 +4063,122 @@ unsigned char PRGPoll(void) {
         #endif
     }
     
+	void TrigBaro(void) {
+		unsigned char I2CBuffer[5];
+		
+		if(FUNCBaro_type == 2) {
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0x40 | ((BARO_MS_OSR & 0x7) << 1);     // trigger D1
+			I2CMaster(I2CBuffer, 2, 0, 0);
+		}
+	}
+
+	void TrigBaroTemp(void) {
+		unsigned char I2CBuffer[5];
+		
+		if(FUNCBaro_type == 2) {
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0x50 | ((BARO_MS_OSR & 0x7) << 1);     // trigger D2
+			I2CMaster(I2CBuffer, 2, 0, 0);
+		}
+	}
+	
     unsigned int GetBaro(void) {
         unsigned char I2CBuffer[5];
-        I2CBuffer[0] = BARO_ADDR;
-        I2CBuffer[1] = 0x28 + 0x80;    // Temperature data
-        I2CBuffer[2] = BARO_ADDR | 1;
-        if(I2CMaster(I2CBuffer, 2, I2CBuffer, 3)) {
-            return (unsigned int) ((I2CBuffer[2] << 16) | (I2CBuffer[1] << 8) | I2CBuffer[0]);
-        }
-        else return 0;
+		
+		if(FUNCBaro_type == 1) {
+			I2CBuffer[0] = BARO_LPS_ADDR;
+			I2CBuffer[1] = 0x28 + 0x80;    // Temperature data
+			I2CBuffer[2] = BARO_LPS_ADDR | 1;
+			if(I2CMaster(I2CBuffer, 2, I2CBuffer, 3)) {
+				return (unsigned int) ((I2CBuffer[2] << 16) | (I2CBuffer[1] << 8) | I2CBuffer[0]);
+			}
+			else return 0;
+		}
+		else if(FUNCBaro_type == 2) {
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0x00;    // ADC data
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			if(I2CMaster(I2CBuffer, 2, I2CBuffer, 3)) {
+				return (unsigned int) ((I2CBuffer[0] << 16) | (I2CBuffer[1] << 8) | I2CBuffer[2]);
+			}
+			else return 0;
+		}
+		else return 0;
     }
     
     float GetBaroPressure(void) { // in Pa
         unsigned int reading;
-        reading = GetBaro();
-        if(((reading & 0x800000) == 1) || (reading == 0)) return 0; // bit numer 24 is the sign bit, shouldn't be 1 (signifying negative value) because we're not using delta pressure
-        else return (float)reading/40.96f;
+		
+		if(FUNCBaro_type == 1) {
+			reading = GetBaro();
+			if(((reading & 0x800000) == 1) || (reading == 0)) return 0; // bit numer 24 is the sign bit, shouldn't be 1 (signifying negative value) because we're not using delta pressure
+			else return (float)reading/40.96f;
+		}
+		else if(FUNCBaro_type == 2) {
+			reading = GetBaro();
+			if(reading == 0) return 0;
+			else {
+				float P = ((((signed long long)reading * FUNCBaro_sensitivity ) >> 21) - FUNCBaro_offset) / (float) (1 << 15);
+				return P;
+			}
+		}
+		
+		return 0;
     }
     
     float Pressure2Alt(float pressure) { // in m
-        return (pressure - (float)101325) * 83254.6913138f; // max error around 25m, linearise around sea level
+        return ((float)101325-pressure) * 0.0832546913138f; // max error around 25m, linearise around sea level
     }
     
     float GetBaroTemp(void) { // in degrees C
         unsigned char I2CBuffer[5];
         signed short reading;
         
-        I2CBuffer[0] = BARO_ADDR;
-        I2CBuffer[1] = 0x2B + 0x80;    // Temperature data
-        I2CBuffer[2] = BARO_ADDR | 1;
-        I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-        
-        reading = (signed short) ((I2CBuffer[1] << 8) | I2CBuffer[0]);
-        
-        return (float)42.5 + (float)reading/(float)480;
+		if(FUNCBaro_type == 1) {
+			I2CBuffer[0] = BARO_LPS_ADDR;
+			I2CBuffer[1] = 0x2B + 0x80;    // Temperature data
+			I2CBuffer[2] = BARO_LPS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			
+			reading = (signed short) ((I2CBuffer[1] << 8) | I2CBuffer[0]);
+			
+			return (float)42.5 + (float)reading/(float)480;
+		}
+		else if(FUNCBaro_type == 2) {
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0x00;    // ADC data
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			if(I2CMaster(I2CBuffer, 2, I2CBuffer, 3)) {
+				unsigned int D2 = ((I2CBuffer[0] << 16) | (I2CBuffer[1] << 8) | I2CBuffer[2]);
+				signed long long dT = D2 - ((unsigned long long)FUNCBaro_C5 << 8);
+				float T = (2000 + (((unsigned long long)dT * FUNCBaro_C6) / (float)(1 << 23))) / 100;
+				
+				FUNCBaro_offset = ((unsigned int)FUNCBaro_C2 << 16) + ((dT * (FUNCBaro_C4) >> 7));
+				FUNCBaro_sensitivity = ((unsigned int)FUNCBaro_C1 << 15) + ((dT * (FUNCBaro_C3) >> 8));
+			 /*
+				if(T < 20) {
+					signed int TEMP = 2000 + (signed long)dT * (signed long)FUNCBaro_C6 / (signed long)(1 << 23);
+					float T2 = (TEMP - 2000) * (TEMP - 2000);
+					signed long OFF2  = (5 * T2) / 2;
+					signed long SENS2 = (5 * T2) / 4;
+			 
+					if(T < -15) { // if temperature lower than -15 Celsius
+						T2 = (TEMP + 1500) * (TEMP + 1500);
+						OFF2  += 7 * T2;
+						SENS2 += 11 * T2 / 2;
+					} 
+					FUNCBaro_offset -= OFF2;
+					FUNCBaro_sensitivity -= SENS2;
+					T = (float)TEMP / 100; 
+				}*/
+
+				return T;
+			}
+			else return 0;
+		}
+		
+		return 0;
     }
     
     void SensorSleep(void) {
@@ -4016,10 +4200,12 @@ unsigned char PRGPoll(void) {
         I2CBuffer[2] = 0x02;    // Idle mode
         I2CMaster(I2CBuffer, 3, 0, 0);
         
-        I2CBuffer[0] = BARO_ADDR;
-        I2CBuffer[1] = 0x20;    // CTRL_REG1
-        I2CBuffer[2] = 0x00;    // Power down
-        I2CMaster(I2CBuffer, 3, 0, 0);
+		if(FUNCBaro_type == 1) {
+			I2CBuffer[0] = BARO_LPS_ADDR;
+			I2CBuffer[1] = 0x20;    // CTRL_REG1
+			I2CBuffer[2] = 0x00;    // Power down
+			I2CMaster(I2CBuffer, 3, 0, 0);
+		}
     }
 
 #endif
