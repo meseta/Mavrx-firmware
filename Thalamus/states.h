@@ -81,8 +81,8 @@ void state_machine()	{
 		YAW_SPL_set = YAW_SPL;
 		
 		// In manual mode, set pitch and roll demands based on the user commands collected from the rx unit
-		attitude_demand_body.pitch = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-		attitude_demand_body.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
+		user.pitch = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
+		user.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
 		float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 		
 		
 		throttle = rcInput[RX_THRO] - throttletrim;
@@ -150,8 +150,8 @@ void state_machine()	{
 		
 		// We always set pitch, roll and throttle from manual demands, but they can be overwritten in other situations
 		// In manual mode, set pitch and roll demands based on the user commands collected from the rx unit
-		attitude_demand_body.pitch = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
-		attitude_demand_body.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
+		user.pitch = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
+		user.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
 		throttle = rcInput[RX_THRO] - throttletrim;	
 		
 		// The pilot has control of yaw		
@@ -165,10 +165,15 @@ void state_machine()	{
 		
 		// and if we are position holding or flying home, Hypo has control
 		if ((flapState == 2) || (flapState == 1)) {
-					
+			
+			// We make the craft change attitude slower when flying autonomously
+			ROLL_SPL_set = ROLL_SPL/2;
+			PITCH_SPL_set = PITCH_SPL/2;
+			YAW_SPL_set = YAW_SPL/2;
+			
 			// then Hypo controls attitude.
-			attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
-			attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
+			user.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
+			user.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
 			
 			// And Thalamus controls the throttle
 			thal_throt_cont = 1;
@@ -248,8 +253,8 @@ void state_machine()	{
 				
 
 				// then Hypo controls attitude.
-				attitude_demand_body.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
-				attitude_demand_body.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
+				user.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
+				user.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
 				
 				// The pilot has control of yaw		
 				float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 									

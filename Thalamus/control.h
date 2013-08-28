@@ -150,12 +150,21 @@ void control_throttle()	{
 
 
 void control_motors(){	
-    // TODO: add orientation-spicific heading reference adjustment in here
-    // switch((unsigned char)ORI) {
-        // default:
-        // case 3: // NAVY EDITION
-            // break;
-    // }
+    // Orientation Referencing
+    switch((unsigned char)ORI) {
+        default:
+		case 3: // NAVY EDITION passes the pitch and roll demands straight through unchanged
+			attitude_demand_body.pitch = user.pitch;
+			attitude_demand_body.roll =  user.roll;
+			break;
+		case 5:	// R10 Kickstarter
+			
+			// We have to rotate the 
+			attitude_demand_body.pitch = fsin(0.78539816339744830962+M_PI_2) * user.pitch - fsin(0.78539816339744830962) * user.roll;
+			attitude_demand_body.roll = fsin(0.78539816339744830962) * user.pitch + fsin(0.78539816339744830962+M_PI_2) * user.roll;
+			break;
+		
+    }
 
 	// This section of code applies some throttle increase with high tilt angles to help reduce descent on angle increase
 	float M9temp;
@@ -304,6 +313,16 @@ void control_motors(){
             motorE = pitchcorrection - rollcorrection;
             motorS = -pitchcorrection - rollcorrection;
             motorW = -pitchcorrection + rollcorrection;
+            motorN -= yawcorrection;
+            motorE += yawcorrection;
+            motorS -= yawcorrection;
+            motorW += yawcorrection;
+            break;
+		case 5: // R10
+            motorN = pitchcorrection;
+            motorE = -rollcorrection;
+            motorS = -pitchcorrection;
+            motorW = rollcorrection;
             motorN -= yawcorrection;
             motorE += yawcorrection;
             motorS -= yawcorrection;
