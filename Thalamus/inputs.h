@@ -178,15 +178,10 @@ void read_batt_voltage(void) {
 void convert_ori(volatile signed short * X, volatile signed short * Y, volatile signed short * Z, signed short * data) {
     switch((unsigned char)ORI) {
         default:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
+        case 3: // NAVY EDITION
             *X = data[0]; // Navy config
-            *Y = data[2];
-            *Z = -data[1];
+            *Y = -data[2];
+            *Z = data[1];
             break;
     }
 }

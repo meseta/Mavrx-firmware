@@ -73,7 +73,7 @@ unsigned char detect_ori(void) {
         
         if     (x_axis > y_axis && x_axis > z_axis) return 1; // x is down
         else if(x_axis < y_axis && x_axis < z_axis) return 2; // x is up
-        else if(y_axis > x_axis && y_axis > z_axis) return 3; // y is down
+        else if(y_axis > x_axis && y_axis > z_axis) return 3; // y is down; NAVY EDITION
         else if(y_axis < x_axis && y_axis < z_axis) return 4; // y is up
         else if(z_axis > y_axis && z_axis > x_axis) return 5; // z is down
         else if(z_axis < y_axis && z_axis < x_axis) return 6; // z is up

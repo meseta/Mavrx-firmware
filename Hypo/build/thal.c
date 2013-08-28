@@ -3890,6 +3890,7 @@ unsigned char PRGPoll(void) {
             
             ptr[4] = I2CBuffer[4]; // Thalamus Z LSB
             ptr[5] = I2CBuffer[5]; // Thalamus Z MSB
+            
             data[2] = -data[2];
             
             temp = I2CBuffer[0]; // Temperature
@@ -3946,6 +3947,7 @@ unsigned char PRGPoll(void) {
             
             ptr[4] = I2CBuffer[5]; // Seraphim Z LSB
             ptr[5] = I2CBuffer[4]; // Seraphim Z MSB
+            
             data[2] = -data[2];
 
             

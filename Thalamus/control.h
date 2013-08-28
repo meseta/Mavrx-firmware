@@ -153,12 +153,7 @@ void control_motors(){
     // TODO: add orientation-spicific heading reference adjustment in here
     // switch((unsigned char)ORI) {
         // default:
-        // case 1:
-        // case 2:
-        // case 3:
-        // case 4:
-        // case 5:
-        // case 6:
+        // case 3: // NAVY EDITION
             // break;
     // }
 
@@ -304,12 +299,7 @@ void control_motors(){
 	// TODO: fill these in properly
     switch((unsigned char)ORI) {
         default:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
+        case 3: // NAVY EDITION
             motorN = pitchcorrection + rollcorrection;
             motorE = pitchcorrection - rollcorrection;
             motorS = -pitchcorrection - rollcorrection;
