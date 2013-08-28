@@ -69,7 +69,7 @@ void read_rx_input(void) {
 				// If the button is pressed in state 1 then go to state 0
 				else {
 					flapState = 0;
-					if (state == auto) {
+					if (state == STATE_AUTO) {
 						// and request resume/ go from Hypo if we are in Auto MODE
 						ilink_gpsreq.request = 4;
 						ilink_gpsreq.sequence++; 
@@ -174,15 +174,28 @@ void read_batt_voltage(void) {
 
 }
 			
-			
+
+void convert_ori(volatile signed short * X, volatile signed short * Y, volatile signed short * Z, signed short * data) {
+    switch((unsigned char)ORI) {
+        default:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+            *X = data[0]; // Navy config
+            *Y = data[2];
+            *Z = -data[1];
+            break;
+    }
+}
 			
 void read_gyr_sensors(void) {
 	signed short data[4];
 	if(GetGyro(data)) {
 		// Read raw Gyro data
-		Gyro.X.raw = data[0];
-		Gyro.Y.raw = data[2];
-		Gyro.Z.raw = -data[1];
+        convert_ori(&Gyro.X.raw, &Gyro.Y.raw, &Gyro.Z.raw, data);
 		// Output raw data over telemetry
 		ilink_rawimu.xGyro = Gyro.X.raw;
 		ilink_rawimu.yGyro = Gyro.Y.raw;
@@ -219,9 +232,7 @@ void read_acc_sensors(void) {
     
     if(GetAccel(data)) {
         // Get raw Accelerometer data
-        Accel.X.raw = data[0];
-        Accel.Y.raw = data[2];
-        Accel.Z.raw = -data[1];
+        convert_ori(&Accel.X.raw, &Accel.Y.raw, &Accel.Z.raw, data);
         // Perform Running Average
         Accel.X.total -= Accel.X.history[Accel.count];
         Accel.Y.total -= Accel.Y.history[Accel.count];
@@ -259,9 +270,7 @@ void read_mag_sensors(void) {
 	signed short data[4];
 	if(GetMagneto(data)) {
 		// Get raw magnetometer data
-		Mag.X.raw = data[0];
-		Mag.Y.raw = data[2];
-		Mag.Z.raw = -data[1];
+        convert_ori(&Mag.X.raw, &Mag.Y.raw, &Mag.Z.raw, data);
 		// Output raw data over telemetry
 		ilink_rawimu.xMag = Mag.X.raw;
 		ilink_rawimu.yMag = Mag.Y.raw;

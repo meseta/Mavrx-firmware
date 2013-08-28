@@ -211,7 +211,6 @@ float GPS_Kd = 0.1f;
 
 unsigned char gpsFixed;
 unsigned char gps_action = 0;
-unsigned short gpsreq_lastsequence = 0;
 
 #define GPS_SAFE_ALT    5.0f    // in m
 #define GPS_MAX_ANGLE   0.35f   // in radians
@@ -1694,8 +1693,8 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
         switch(id) {
         
             case ID_ILINK_GPSREQ:
-                //__NOP(); // this fixes some weird compiler bug that occurs when putting a static after a case
-                //static unsigned short gpsreq_lastsequence = 0;
+                __NOP(); // this fixes some weird compiler bug that occurs when putting a static after a case
+                static unsigned short gpsreq_lastsequence = 0;
                 if(ilink_gpsreq.sequence > gpsreq_lastsequence) { 
                     gpsreq_lastsequence = ilink_gpsreq.sequence;
                     

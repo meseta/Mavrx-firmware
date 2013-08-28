@@ -150,7 +150,17 @@ void control_throttle()	{
 
 
 void control_motors(){	
-
+    // TODO: add orientation-spicific heading reference adjustment in here
+    // switch((unsigned char)ORI) {
+        // default:
+        // case 1:
+        // case 2:
+        // case 3:
+        // case 4:
+        // case 5:
+        // case 6:
+            // break;
+    // }
 
 	// This section of code applies some throttle increase with high tilt angles to help reduce descent on angle increase
 	float M9temp;
@@ -291,15 +301,25 @@ void control_motors(){
 	oldGyroValueRoll = (float)Gyro.X.value;
    
 	//Assigning the PID results to the correct motors
-	// TODO: add support for multiple orientations here
-	motorN = pitchcorrection + rollcorrection;
-	motorE = pitchcorrection - rollcorrection;
-	motorS = -pitchcorrection - rollcorrection;
-	motorW = -pitchcorrection + rollcorrection;
-	motorN -= yawcorrection;
-	motorE += yawcorrection;
-	motorS -= yawcorrection;
-	motorW += yawcorrection;
+	// TODO: fill these in properly
+    switch((unsigned char)ORI) {
+        default:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+            motorN = pitchcorrection + rollcorrection;
+            motorE = pitchcorrection - rollcorrection;
+            motorS = -pitchcorrection - rollcorrection;
+            motorW = -pitchcorrection + rollcorrection;
+            motorN -= yawcorrection;
+            motorE += yawcorrection;
+            motorS -= yawcorrection;
+            motorW += yawcorrection;
+            break;
+    }
 	
 	// We run an LPF filter on the outputs to ensure they aren't too noisey and don't demand changes too quickly
 	// This seems to reduce power consumption a little and ESC heating a little also

@@ -62,41 +62,29 @@ void disarm(void) {
 	ilink_thalstat.sensorStatus |= 3; // standby
 }
 
+unsigned char detect_ori(void) {
+    signed short data[3];
+    signed short x_axis, y_axis, z_axis;
+    
+    if(GetAccel(data)) {
+        x_axis = data[0];
+        y_axis = data[1];
+        z_axis = data[2];
+        
+        if     (x_axis > y_axis && x_axis > z_axis) return 1; // x is down
+        else if(x_axis < y_axis && x_axis < z_axis) return 2; // x is up
+        else if(y_axis > x_axis && y_axis > z_axis) return 3; // y is down
+        else if(y_axis < x_axis && y_axis < z_axis) return 4; // y is up
+        else if(z_axis > y_axis && z_axis > x_axis) return 5; // z is down
+        else if(z_axis < y_axis && z_axis < x_axis) return 6; // z is up
+    }
+
+    return 7; // orientation not detected - this will happen if two of the highest axes are equal
+}
+
 void calibrate_ori(void) {
-
-	// signed short data[4];  
-	// got_horiz = 0;
-	
-    // while 	
-		// if(GetAccel(data)) {
-			//// Get raw Accelerometer data
-			// x_axis = data[0];
-			// y_axis = data[2];
-			// z_axis = -data[1];
-		// }
-		// if (got_horiz == 0) {
-			// if ((z_axis*z_axis) > ((x_axis*x_axis) + (y_axis*y_axis))) {
-				// if (z_axis <
-			// }
-			// if ((x_axis*x_axis) > ((z_axis*z_axis) + (y_axis*y_axis))) {
-				// x_axis_horiz = z_axis;
-				// y_axis_horiz = y_axis;
-				// z_axis_horiz = x_axis;
-			// }
-			// else {
-				// x_axis_horiz = x_axis;
-				// y_axis_horiz = z_axis;
-				// z_axis_horiz = y_axis;
-			// }
-// +
-
-			// got_horiz = 1;
-		// }
-		// if z_axis < 0.05 * 
-		
-	
-	
-		
+    ORI = detect_ori();
+    eeprom_save_all();
 }
 
 void calibrate_mag(void) {

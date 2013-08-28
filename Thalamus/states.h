@@ -9,7 +9,7 @@ void state_machine()	{
 // ****************************************************************************
 
 
-	if (state == disarmed) {
+	if (state == STATE_DISARMED) {
 	
 	
 		if ((rxLoss < 50) && (rxFirst != 0)) {
@@ -18,20 +18,26 @@ void state_machine()	{
 			
 			// if left stick bottom right, right stick top left and switch = 0 then switch to manual mode with GPS inactive
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)) {
-				state = manual;
-				arm();
+				if(ORI == detect_ori()) {
+                    state = STATE_MANUAL;
+                    arm();
+                }
 			}
 			
 			// if left stick bottom middle, right stick top left, switch = 0 and GPS is active then switch to manual mode with GPS active
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
-				state = manual_gps;
-				arm();
+				if(ORI == detect_ori()) {
+                    state = STATE_MANUAL_GPS;
+                    arm();
+                }
 			}
 			
 			// if left stick bottom middle, right stick top right, switch = 1 and GPS is active  then switch to full auto
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 1)  &&  (gps_valid == 1)) {
-				state = auto;
-				arm();
+				if(ORI == detect_ori()) {
+                    state = STATE_AUTO;
+                    arm();
+                }
 			}
 			
 			///////////////////// OPERATION ///////////////////////////////
@@ -55,13 +61,13 @@ void state_machine()	{
 // ****************************************************************************
 // ****************************************************************************
 
-	if (state == manual) {
+	if (state == STATE_MANUAL) {
 			
 		///////////////////// STATE SWITCHING ///////////////////////////////
 		
 		// if left stick bottom and right stick bottom then switch to Disarmed
 		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH)) {
-			state = disarmed;
+			state = STATE_DISARMED;
 			disarm();
 		}
 		
@@ -101,18 +107,18 @@ void state_machine()	{
 // ****************************************************************************
 
 
-	if (state == manual_gps) {
+	if (state == STATE_MANUAL_GPS) {
 			
 		///////////////////// STATE SWITCHING ///////////////////////////////
 		
 		// if left stick bottom and right stick bottom then switch to Disarmed
 		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH)) {
-			state = disarmed;
+			state = STATE_DISARMED;
 			disarm();
 		}
 		
 		// if we loose gps validity then switch into full manual mode
-		if (gps_valid == 0) state = manual;
+		if (gps_valid == 0) state = STATE_MANUAL;
 
 		
 		///////////////////// OPERATION ///////////////////////////////
@@ -183,14 +189,14 @@ void state_machine()	{
 // ****************************************************************************
 
 
-	if (state == auto) {
+	if (state == STATE_AUTO) {
 		
 		
 		///////////////////// STATE SWITCHING ///////////////////////////////
 		
 		// if left stick bottom and right stick bottom then switch to Disarmed
 		if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH)) {
-			state = disarmed;
+			state = STATE_DISARMED;
 			disarm();
 		}
 		
@@ -202,7 +208,7 @@ void state_machine()	{
 		
 		// if the switch is put to zero, switch into manual_gps mode and lock out the auto code loop
 		if (auxState == 0) {
-			state = manual_gps;
+			state = STATE_MANUAL_GPS;
 			auto_lock = 1;
 		}
 		

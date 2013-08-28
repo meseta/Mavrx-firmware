@@ -76,7 +76,7 @@
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	21 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	22 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
@@ -84,10 +84,10 @@
 #define MAV_LEN 30
 
 //This is used with mode
-#define disarmed 1
-#define manual 2
-#define manual_gps 3
-#define auto 5
+#define STATE_DISARMED 1
+#define STATE_MANUAL 2
+#define STATE_MANUAL_GPS 3
+#define STATE_AUTO 5
 
 
 /////////////////////////////// FUNCTIONS //////////////////////////////////////
@@ -357,7 +357,7 @@ struct paramStorage_struct paramStorage[] = {
 	#define YAW_Boost	   paramStorage[21].value 	
 
 	// Mode
-	{"state",	   disarmed},  //
+	{"state",	   STATE_DISARMED},  //
 	#define state 		paramStorage[22].value
 
 	//Limits
@@ -481,6 +481,9 @@ struct paramStorage_struct paramStorage[] = {
 	
 	{"YAW_SPL",		 0.04},
 	#define YAW_SPL		paramStorage[68].value
+    
+	{"ORI",		 0.00},
+	#define ORI		paramStorage[69].value
 
 	};
 
