@@ -32,9 +32,6 @@
 // TODO: Add GPS_Confidence Code, use ilink_gpsfly.isNew to check for new data, use a timer, add autoland code.
 
 
-
-
-
 /////////////////////// Libraries to include /////////////
 #include "thal.h"
 #include "mavlink.h"
@@ -94,7 +91,7 @@
 /////////////////////////////// FUNCTIONS //////////////////////////////////////
 void sensor_zero(void);
 void calibrate_gyr(void);
-void calibrate_gyr_temperature(unsigned int seconds);
+void calibrate_gyr_temporary(unsigned int seconds);
 void calibrate_mag(void);
 void arm(void);
 void disarm(void);
