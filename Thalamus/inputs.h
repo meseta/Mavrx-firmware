@@ -43,9 +43,7 @@ void read_rx_input(void) {
 			auxState = 1;
 
 		}
-		
-		static unsigned int flapswitch = 0;
-		
+				
 			
 		
 		// If the button is pressed, start incrementing a counter
@@ -69,7 +67,7 @@ void read_rx_input(void) {
 			else {
 				flapState = 0;
 				if (state == STATE_AUTO) {
-					// and request resume/ go from Hypo if we are in Auto MODE
+					// and request resume/ go from Hypo if we are in Auto
 					ilink_gpsreq.request = 4;
 					ilink_gpsreq.sequence++; 
 				}
@@ -181,6 +179,10 @@ void convert_ori(volatile signed short * X, volatile signed short * Y, volatile 
             *X = data[0]; // Navy config
             *Y = -data[2];
             *Z = data[1];
+        case 5: // R10
+            *X = data[0];
+            *Y = data[1];
+            *Z = data[2];
             break;
     }
 }
@@ -188,7 +190,7 @@ void convert_ori(volatile signed short * X, volatile signed short * Y, volatile 
 void read_gyr_sensors(void) {
 	signed short data[4];
 	if(GetGyro(data)) {
-		// Read raw Gyro data
+		// Read raw Gyro data and assign it to the correct axes based on calibrated orientation
         convert_ori(&Gyro.X.raw, &Gyro.Y.raw, &Gyro.Z.raw, data);
 		// Output raw data over telemetry
 		ilink_rawimu.xGyro = Gyro.X.raw;
@@ -225,7 +227,7 @@ void read_acc_sensors(void) {
 	signed short data[4];
     
     if(GetAccel(data)) {
-        // Get raw Accelerometer data
+        // Get raw Accelerometer data and assign it to the correct axes based on calibrated orientation
         convert_ori(&Accel.X.raw, &Accel.Y.raw, &Accel.Z.raw, data);
         // Perform Running Average
         Accel.X.total -= Accel.X.history[Accel.count];
@@ -262,8 +264,9 @@ void read_acc_sensors(void) {
 void read_mag_sensors(void) {
 	float sumsqu, temp1, temp2, temp3;
 	signed short data[4];
+	
 	if(GetMagneto(data)) {
-		// Get raw magnetometer data
+		// Get raw magnetometer data and assign it to the correct axes based on calibrated orientation
         convert_ori(&Mag.X.raw, &Mag.Y.raw, &Mag.Z.raw, data);
 		// Output raw data over telemetry
 		ilink_rawimu.xMag = Mag.X.raw;
@@ -283,7 +286,7 @@ void read_mag_sensors(void) {
 		Mag.Y.av = (float)Mag.Y.total/(float)MAV_LEN;
 		Mag.Z.av = (float)Mag.Z.total/(float)MAV_LEN;
 		if(++Mag.count >= MAV_LEN) Mag.count = 0;
-		
+				
 		// Correcting Elipsoid Centre Point (These values are found during Magneto Calibration)
 		temp1 = Mag.X.av - MAGCOR_M1;
 		temp2 = Mag.Y.av - MAGCOR_M2;
@@ -292,8 +295,8 @@ void read_mag_sensors(void) {
 		// Reshaping Elipsoid to Sphere (These values are set the same for all Thalamus Units)
 		temp1 = MAGCOR_N1 * temp1 + MAGCOR_N2 * temp2 + MAGCOR_N3 * temp3;
 		temp2 = MAGCOR_N5 * temp2 + MAGCOR_N6 * temp3;
-		temp3 = MAGCOR_N9 * temp3;				
-
+		temp3 = MAGCOR_N9 * temp3;		
+				
 		// Normalize magneto into unit vector
 		sumsqu = finvSqrt((float)temp1*(float)temp1 + (float)temp2*(float)temp2 + (float)temp3*(float)temp3); // Magnetoerometr data is normalised so no need to convert units.
 		Mag.X.value = (float)temp1 * sumsqu;

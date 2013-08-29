@@ -139,7 +139,7 @@ void calibrate_mag(void) {
 				
 				if(started == 0) {
 					// before starting, wait for gyro to move around
-					if(distance > 2000) {
+					if(distance > 4000) {
 						// high-movement, increment good counter and add average value.
 						good++;
 						if(good >= 10) {
@@ -161,7 +161,7 @@ void calibrate_mag(void) {
 					if(Mag.Z.raw > Zmax) Zmax = Mag.Z.raw;
 					else if(Mag.Z.raw < Zmin) Zmin = Mag.Z.raw;
 					
-					if(distance < 2000) {
+					if(distance < 4000) {
 						// high-movement, increment good counter and add average value.
 						good++;
 						if(good >= 200) break; // if enough movement readings, escape loop
@@ -312,7 +312,7 @@ void calibrate_gyr_temperature(unsigned int seconds) {
 			Zav += 0.05f * (float)Gyro.Z.raw; 
 
 			//TODO: This distnace was never small enough on the ICRS Quad. Double check
-			if(distance < 2000) {
+			if(distance < 4000) {
 				// low-movement, increment good counter and add average value.
 				good++;
 				if(good >= 333) break; // if enough good readings, escape loop

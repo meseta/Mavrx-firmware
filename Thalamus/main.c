@@ -90,6 +90,7 @@
 #define STATE_AUTO 5
 
 
+
 /////////////////////////////// FUNCTIONS //////////////////////////////////////
 void sensor_zero(void);
 void calibrate_gyr(void);
@@ -250,6 +251,7 @@ float throttle;
 float throttle_angle;
 int hold_thro_off;
 unsigned int auxState, flapState;
+unsigned int flapswitch = 0;
 float pitchDemandSpin = 0;
 float rollDemandSpin = 0;
 float pitchDemandSpinold = 0;
@@ -484,7 +486,7 @@ struct paramStorage_struct paramStorage[] = {
     
 	{"ORI",		 0.00},
 	#define ORI		paramStorage[69].value
-
+	
 	};
 
 

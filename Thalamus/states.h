@@ -16,6 +16,7 @@ void state_machine()	{
 	
 			///////////////////// STATE SWITCHING ///////////////////////////////
 			
+			
 			// if left stick bottom right, right stick top left and switch = 0 then switch to manual mode with GPS inactive
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)) {
 				if(ORI == detect_ori()) {
@@ -23,6 +24,7 @@ void state_machine()	{
                     arm();
                 }
 			}
+			
 			
 			// if left stick bottom middle, right stick top left, switch = 0 and GPS is active then switch to manual mode with GPS active
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
@@ -54,10 +56,13 @@ void state_machine()	{
 		}
 	}
 
+
+
+
 	
 // ****************************************************************************
 // ****************************************************************************
-// *** manual
+// *** manual without GPS
 // ****************************************************************************
 // ****************************************************************************
 

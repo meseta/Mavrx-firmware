@@ -42,6 +42,8 @@ void setup() {
 		auxState = 0;
 		RXInit();
 		
+		state = STATE_DISARMED;
+		
 		
 	// *** Initialise Ultrasound
 		UltraInit();

@@ -156,10 +156,16 @@ void control_motors(){
 		case 3: // NAVY EDITION passes the pitch and roll demands straight through unchanged
 			attitude_demand_body.pitch = user.pitch;
 			attitude_demand_body.roll =  user.roll;
+			
+			
+			
 			break;
 		case 5:	// R10 Kickstarter
+		
+			// Stops yawing on slippery ground to ensure magneto compensation is correct.
+			if (throttle < 380) attitude_demand_body.yaw = -psiAngle;
 			
-			// We have to rotate the 
+			// We have to rotate the frame of reference as Thalamus is mounted at 45 degrees.
 			attitude_demand_body.pitch = fsin(0.78539816339744830962+M_PI_2) * user.pitch - fsin(0.78539816339744830962) * user.roll;
 			attitude_demand_body.roll = fsin(0.78539816339744830962) * user.pitch + fsin(0.78539816339744830962+M_PI_2) * user.roll;
 			break;
@@ -323,6 +329,7 @@ void control_motors(){
             motorE = -rollcorrection;
             motorS = -pitchcorrection;
             motorW = rollcorrection;
+			
             motorN -= yawcorrection;
             motorE += yawcorrection;
             motorS -= yawcorrection;
