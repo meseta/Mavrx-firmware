@@ -58,7 +58,7 @@
 #define WDT_CLK             1           // WDT clock (0=WDT OSC, 1=IRC)
 
 #define RIT_RESET           1           // Repetitive Interrupt Timer reset (0=don't reset, 1=reset on match)
-#define RIT_PRIORITY        4           // Repetitive Interrupt Timer priority (note to self: this needs to be <3 in some circumstances, can't work out why...)
+#define RIT_PRIORITY        5           // Repetitive Interrupt Timer priority (note to self: this needs to be <3 in some circumstances, can't work out why...)
 
 // ****************************************************************************
 // *** Power mode Config
