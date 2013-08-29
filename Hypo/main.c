@@ -440,7 +440,7 @@ void RITInterrupt(void) {
         if(gps_nav_status.isNew) {
             gps_nav_status.isNew = 0;
 
-            if(gps_nav_status.flags & 0x1) { // fix is valid
+            if((gps_nav_status.gpsFix == 0x03 || gps_nav_status.gpsFix == 0x04) && gps_nav_status.flags & 0x1) { // fix is 3D and valid
                 mavlink_gps_raw_int.fix_type = gps_nav_status.gpsFix;
                 gpsFixed = 1;
             }

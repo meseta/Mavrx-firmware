@@ -15,7 +15,7 @@ void gps_status(void) {
 		if(loss_counter > SLOW_RATE*2) { // if no GPS for 2 seconds GPS is considered lost
 			gps_valid = 0;
 		}
-	} 
+	}
 }
 
 void read_rx_input(void) {			

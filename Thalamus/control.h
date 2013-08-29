@@ -353,10 +353,10 @@ void control_motors(){
 	tempE = (signed short)motorEav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
 	tempS = (signed short)motorSav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
 	tempW = (signed short)motorWav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-		
+	
 		
 	// TODO: Add Auto Land on rxLoss!
-	if (rcInput[RX_THRO] - throttletrim <  OFFSTICK || hold_thro_off > 0) {
+	if (rcInput[RX_THRO] - throttletrim  <  OFFSTICK || hold_thro_off > 0) {
 		
 		// Set Airborne = 0
 		airborne = 0;
