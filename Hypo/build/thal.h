@@ -1215,13 +1215,21 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ACCEL_ADDR	0x30
     #define GYRO_ADDR	0xd0
     #define MAGNETO_ADDR	0x3c
-    #define BARO_ADDR	0xb8
-
+    #define BARO_LPS_ADDR	0xb8
+	#define BARO_MS_ADDR 0xee
+	
+	extern volatile unsigned char FUNCBaro_type;
+	extern volatile unsigned short FUNCBaro_C1, FUNCBaro_C2, FUNCBaro_C3,FUNCBaro_C4, FUNCBaro_C5, FUNCBaro_C6;
+	extern volatile signed long long FUNCBaro_sensitivity, FUNCBaro_offset;
+	unsigned int BaroCrc4(unsigned int n_rem, unsigned char byte);
+	
     void SensorInit(void);
     unsigned char GetAccel(signed short * data);
     unsigned char GetGyro(signed short * data);
     unsigned char GetMagneto(signed short * data);
     unsigned int GetBaro(void);
+	void TrigBaroTemp(void);
+	void TrigBaro(void);
     float GetBaroPressure(void);
     float Pressure2Alt(float pressure);
     float GetBaroTemp(void);

@@ -241,9 +241,14 @@
     #define MAGNETO_TRIES_MAX   5           // When in single-measurement mode, how many tries to read data from the stream before giving up?
     #define MAGNETO_TRIES_DELAY 1           // Millisecond delay between trying to read data from the magneto
 
-    #define BARO_PRES_AVERAGING 9           // Pressure oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128, 8=256, 9=384, 10=512 (512/128 not available on ODR=25/25Hz)
-    #define BARO_TEMP_AVERAGING 4           // Temperature oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128 (512/128 not available on ODR=25Hz)
-    #define BARO_RATE           7           // Sets the output data rate (pressure/temperature): 0=one shot, 1=1/1Hz, 2=7/1Hz, 3=12.5/1Hz, 4=25/1Hz,  5=7/7Hz, 6=12.5/12.5Hz, 7=25Hz/25Hz
+	// Two versions of Thalamus exist, using different barometer chips
+	// The LPS331 barometer options
+	#define BARO_LPS_PRES_AVERAGING 9           // Pressure oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128, 8=256, 9=384, 10=512 (512/128 not available on ODR=25/25Hz)
+    #define BARO_LPS_TEMP_AVERAGING 4           // Temperature oversampling internal averages: 0=1, 1=2, 2=4, 3=8, 4=16, 5=32, 6=64, 7=128 (512/128 not available on ODR=25Hz)
+    #define BARO_LPS_RATE           7           // Sets the output data rate (pressure/temperature): 0=one shot, 1=1/1Hz, 2=7/1Hz, 3=12.5/1Hz, 4=25/1Hz,  5=7/7Hz, 6=12.5/12.5Hz, 7=25Hz/25Hz
+
+	// The MS5661-01BA03 barometer options
+	#define BARO_MS_OSR				4			// Oversampling option, 0=256, 1=512, 2=1024, 3=2048, 4=4096		
 #endif
 
 #if WHO_AM_I == I_AM_HYPO

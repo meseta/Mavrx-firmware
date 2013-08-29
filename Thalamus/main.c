@@ -151,7 +151,8 @@ attitude_demand_body_struct attitude_demand_body = {0};
 
 typedef struct 
 {
-	float baro;
+	float pressure;
+    float baro;
 	float gps;
 	float filtered;
 	float ultra;

@@ -112,20 +112,40 @@ void read_rx_input(void) {
 
 
 void read_barometer(void) {
-	// Get raw barometric pressure reading in Pascals, when it reads 0
-	float baro = GetBaroPressure();	
-	// There is an I2C or sensor error if 0 is returned, so only update altitude when pressure is greater than 0
-	if(baro > 0) {	
-		// Run an LPF filter on the barometer data
-		alt.baro *= LPF_BARO;
-		alt.baro += (1-LPF_BARO) * baro;
-		// Linearise around Sea Level
-		
-		//Scale to Metres
-		alt.baro = alt.baro/1.0;
-		// Output processed data over telemetry
-		ilink_altitude.baro = alt.baro;
-	}
+    // There are two versions of Thalamus, one with a barometer chip that needs to be
+    // manually triggered, and temperature compensated, another with a barometer chip
+    // that does all this internally.
+    // The Thalamus library auto-detects which is in use, but the user code must
+    // perform the trigering.  The library is set up so that the barometer chip that
+    // doesn't need triggering simply ignores the trigering.  This makes it safe to
+    // write code that supports both barometers
+    
+    static unsigned char temperature_counter = 0; // used to count the number of samples before updating the temperature compensation
+	 
+    if(temperature_counter++ < 50) { // note: temperature_counter is incremented AFTER it is compared with 50
+        // Get raw barometric pressure reading in Pascals, when it reads 0
+        float pressure = GetBaroPressure();
+        // There is an I2C or sensor error if 0 is returned, so only update altitude when pressure is greater than 0
+        if(pressure > 0) {	
+            // Run an LPF filter on the barometer data
+            alt.pressure *= LPF_BARO;
+            alt.pressure += (1-LPF_BARO) * pressure;
+            
+            //Scale to Metres
+            alt.baro = Pressure2Alt(alt.pressure);
+            
+            // Output processed data over telemetry
+            ilink_altitude.baro = alt.baro;
+        }
+        
+        // trigger new reading, unless temperature_counter is equal to 50, in which case trigger new temperature reading (note: this is only used on Thalamus with barometr chips that need this, the rest of the time, this does nothing, so it is safe to leave this in the code
+        if(temperature_counter < 50) TrigBaro();
+        else TrigBaroTemp();
+    }
+    else {
+        GetBaroTemp();
+        temperature_counter = 0;
+    }
 }
 
 void read_ultrasound(void) {			
