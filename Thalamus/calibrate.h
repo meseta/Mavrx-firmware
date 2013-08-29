@@ -1,7 +1,7 @@
 void arm(void) {
 
 	if(CAL_AUTO > 0) {
-		calibrate_gyr_temperature(1);
+		calibrate_gyr_temporary(1);
 	}
 	
 	PWMInit(PWM_NESW);
@@ -162,8 +162,8 @@ void calibrate_mag(void) {
 				
 				if(started == 0) {
 					// before starting, wait for gyro to move around
-					if(distance > 4000) {
-						// high-movement, increment good counter and add average value.
+					if(distance > 6000) {
+						// high-movement, increment good counter (which is used to detect the craft moving) and add average value.
 						good++;
 						if(good >= 10) {
 							started = 1; // if enough movement readings, escape loop
@@ -184,8 +184,8 @@ void calibrate_mag(void) {
 					if(Mag.Z.raw > Zmax) Zmax = Mag.Z.raw;
 					else if(Mag.Z.raw < Zmin) Zmin = Mag.Z.raw;
 					
-					if(distance < 4000) {
-						// high-movement, increment good counter and add average value.
+					if(distance < 6000) {
+						// low-movement, increment good counter (which is used to detect the craft being still) and add average value.
 						good++;
 						if(good >= 200) break; // if enough movement readings, escape loop
 					}
@@ -287,7 +287,7 @@ void sensor_zero(void) {
 
 
 void calibrate_gyr(void) {
-	calibrate_gyr_temperature(6);
+	calibrate_gyr_temporary(6);
 	CAL_GYROX = Gyro.X.offset;
 	CAL_GYROY = Gyro.Y.offset;
 	CAL_GYROZ = Gyro.Z.offset;
@@ -296,7 +296,7 @@ void calibrate_gyr(void) {
 
 
 
-void calibrate_gyr_temperature(unsigned int seconds) {
+void calibrate_gyr_temporary(unsigned int seconds) {
 	unsigned int i;
 	// *** Calibrate Gyro
 	unsigned int  good;
@@ -334,8 +334,7 @@ void calibrate_gyr_temperature(unsigned int seconds) {
 			Zav *= 0.95f;
 			Zav += 0.05f * (float)Gyro.Z.raw; 
 
-			//TODO: This distnace was never small enough on the ICRS Quad. Double check
-			if(distance < 4000) {
+			if(distance < 6000) {
 				// low-movement, increment good counter and add average value.
 				good++;
 				if(good >= 333) break; // if enough good readings, escape loop

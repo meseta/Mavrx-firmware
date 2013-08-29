@@ -190,7 +190,6 @@ void read_batt_voltage(void) {
 	batteryVoltage += 0.01f * (float)battV;
 	ilink_thalstat.battVoltage = battV;
 	ADCTrigger(CHN7);
-
 }
 			
 
