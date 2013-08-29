@@ -95,6 +95,29 @@ unsigned char detect_ori(void) {
 void calibrate_ori(void) {
     ORI = detect_ori();
     eeprom_save_all();
+	
+	// play disarm animation
+	PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+	Delay(100);
+	
+	PWMSetN(THROTTLEOFFSET + IDLETHROTTLE);
+	Delay(100);
+	PWMSetN(THROTTLEOFFSET);
+	Delay(33);
+	PWMSetE(THROTTLEOFFSET + IDLETHROTTLE);
+	Delay(100);
+	PWMSetE(THROTTLEOFFSET);
+	Delay(33);
+	PWMSetS(THROTTLEOFFSET + IDLETHROTTLE);
+	Delay(100);
+	PWMSetS(THROTTLEOFFSET);
+	Delay(33);
+	PWMSetW(THROTTLEOFFSET + IDLETHROTTLE);
+	Delay(100);
+	PWMSetW(THROTTLEOFFSET);
+
+	Delay(100);
+	PWMSetNESW(0, 0, 0, 0);
 }
 
 void calibrate_mag(void) {

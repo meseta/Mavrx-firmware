@@ -2,6 +2,12 @@
 void setup() {	
 	
 	throttle_angle = 0;
+	// *** Startup PWM
+		// the ESC will beep when it doesn not receive a PWM signal, we use this to indicate that the craft is powered but disarmed
+		// however, the ESC will not beep the first time it is powered, so we start up the PWM here and turn it off quickly so that
+		// under ALL circumstances the ESC will beep when the craft is disarmed.
+		PWMInit(PWM_NESW);
+		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
 	
 	// *** LED setup
 		LEDInit(PLED | VLED);
@@ -41,15 +47,11 @@ void setup() {
 		rxFirst = 0;
 		auxState = 0;
 		RXInit();
-		
 		state = STATE_DISARMED;
-		
-		
+				
 	// *** Initialise Ultrasound
 		UltraInit();
 
-
-		
 	// *** Battery sensor
 		ADCInit(CHN7);
 		ADCTrigger(CHN7);
@@ -129,7 +131,7 @@ void setup() {
 		hold_thro_off = 1;
 		
 	// *** Initialise timers and loops
-		//PWMInit(PWM_NESW);
+		PWMSetNESW(0, 0, 0, 0);
 		PWMInit(PWM_X | PWM_Y);
 		RITInitms(1000/MESSAGE_LOOP_HZ);
 		flashPLED = 0;
