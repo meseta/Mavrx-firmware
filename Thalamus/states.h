@@ -17,6 +17,8 @@ void state_machine()	{
 		auto_lock = 0;
 		airborne = 0;
 		throttle = 0;
+		throttle_off_count = 0;
+		throttle_on_count = 0;
 	
 		if ((rxLoss < 50) && (rxFirst != 0)) {
 		
@@ -48,8 +50,9 @@ void state_machine()	{
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
 				if(ORI == detect_ori()) {                    
                     arm();
-					Delay(500);
 					state = STATE_MANUAL_GPS;
+					// We hold the throttle off in case someone knocks it up after arming, the motors won't start until they have reduced the stick to zero and put it up again	
+					hold_thro_off = 1;
                 }
 			}
 			
@@ -57,8 +60,9 @@ void state_machine()	{
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 1)  &&  (gps_valid == 1)) {
 				if(ORI == detect_ori()) {                   
                     arm();
-					Delay(500);
 					state = STATE_AUTO;
+					// We hold the throttle off in case someone knocks it up after arming, the motors won't start until they have reduced the stick to zero and put it up again	
+					hold_thro_off = 1;
                 }
 			}
 			

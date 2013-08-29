@@ -581,7 +581,7 @@ void Timer0Interrupt0() {
 	if(++slowSoftscale >= SLOW_DIVIDER) {
 		slowSoftscale = 0;
 
-		// These run at SLOW_RATE
+		// These run at SLOW_RATE - The order they run in matters
 		read_mag_sensors();
 		read_rx_input();		
 		read_ultrasound();
@@ -590,10 +590,12 @@ void Timer0Interrupt0() {
 		filter_gps_baro();
 		gps_status();
 		state_machine();
+		// We have to reread everytime transmitted data is used
+		read_rx_input();
 			
 	}
 
-	// These run at FAST_RATE
+	// These run at FAST_RATE  - The order they run in matters
 	read_acc_sensors();
 	read_gyr_sensors();
 	

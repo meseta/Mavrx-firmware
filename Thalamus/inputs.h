@@ -33,6 +33,8 @@ void read_rx_input(void) {
 		if(rxFirst < 25) {
 			throttletrim = rcInput[RX_THRO];
 			rxFirst++;
+			// Make sure that the current yaw stick location is trimmed to zero.
+			yawtrim = rcInput[RX_RUDD];
 		}
 		
 		// Controller's aux or gear switch (Can be switched permanently either way)

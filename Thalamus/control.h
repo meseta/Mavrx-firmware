@@ -356,7 +356,7 @@ void control_motors(){
 	
 		
 	// TODO: Add Auto Land on rxLoss!
-	if (rcInput[RX_THRO] - throttletrim  <  OFFSTICK || hold_thro_off > 0) {
+	if (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK) || (hold_thro_off > 0)) {
 		
 		// Set Airborne = 0
 		airborne = 0;
@@ -378,15 +378,11 @@ void control_motors(){
 		motorWav = 0;
 		// Reseting the yaw demand to the actual yaw angle continuously helps stop yawing happening on takeoff
 		attitude_demand_body.yaw = -psiAngle;
-		
-		// Make sure that the current yaw stick location is trimmed to zero.
-		yawtrim = rcInput[RX_RUDD];
-
 
 		
 		// Reset the throttle hold variable, this prevents reactivation of the throttle until 
 		// the input is dropped and re-applied
-		if ((rcInput[RX_THRO] - throttletrim <  (OFFSTICK - 5)) && (state != STATE_DISARMED)) hold_thro_off = 0;
+		if (rcInput[RX_THRO] - throttletrim  < OFFSTICK) hold_thro_off = 0;
 		
 		// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
 		if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
@@ -432,7 +428,7 @@ void control_motors(){
 		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
 		PWMSetW(temp);
 		ilink_outputs0.channel[3] = temp;
-		ilink_outputs0.isNew = 1;
+		ilink_outputs0.isNew = 1; 
 
 	}
 }
