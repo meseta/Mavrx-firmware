@@ -86,6 +86,7 @@
 #define STATE_MANUAL_GPS 3
 #define STATE_AUTO 5
 
+#define STILL_THRESH	6000 // this value is used to detect whether the craft is still or not for the purpose of calibration, it's the square of the euclidian distance of the maximum expected gyro noise in raw values
 
 
 /////////////////////////////// FUNCTIONS //////////////////////////////////////

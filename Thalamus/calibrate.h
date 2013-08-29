@@ -161,7 +161,7 @@ void calibrate_mag(void) {
 				
 				if(started == 0) {
 					// before starting, wait for gyro to move around
-					if(distance > 6000) {
+					if(distance > STILL_THRESH) {
 						// high-movement, increment good counter (which is used to detect the craft moving) and add average value.
 						good++;
 						if(good >= 10) {
@@ -183,7 +183,7 @@ void calibrate_mag(void) {
 					if(Mag.Z.raw > Zmax) Zmax = Mag.Z.raw;
 					else if(Mag.Z.raw < Zmin) Zmin = Mag.Z.raw;
 					
-					if(distance < 6000) {
+					if(distance < STILL_THRESH) {
 						// low-movement, increment good counter (which is used to detect the craft being still) and add average value.
 						good++;
 						if(good >= 200) break; // if enough movement readings, escape loop
@@ -333,7 +333,7 @@ void calibrate_gyr_temporary(unsigned int seconds) {
 			Zav *= 0.95f;
 			Zav += 0.05f * (float)Gyro.Z.raw; 
 
-			if(distance < 6000) {
+			if(distance < STILL_THRESH) {
 				// low-movement, increment good counter and add average value.
 				good++;
 				if(good >= 333) break; // if enough good readings, escape loop
