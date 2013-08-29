@@ -76,7 +76,7 @@
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	43 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	92 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
@@ -394,8 +394,8 @@ struct paramStorage_struct paramStorage[] = {
 	{"ULTRA_Kd",		0.1f},
 	{"ULTRA_Ki",		0.00001f},
 	{"ULTRA_De",	  	0.9999f},
-	{"ULTRA_TKOFF",   	150.0f}, 
-	{"ULTRA_LND",   	100.0f}, 
+	{"ULTRA_TKOFF",   	200.0f}, 
+	{"ULTRA_LND",   	150.0f}, 
 	#define ULTRA_Kp		paramStorage[34].value 
 	#define ULTRA_Kd		paramStorage[35].value 
 	#define ULTRA_Ki		paramStorage[36].value 
