@@ -87,14 +87,13 @@ void control_throttle()	{
 		//debug
 		ilink_debug.debug2 = ilink_gpsfly.flags;
 		
-		// Output angles over telemetry
-		// TODO: Temporarily stolen
-		ilink_attitude.roll = ilink_gpsfly.altitudeDemand; 
-		ilink_attitude.pitch = ilink_gpsfly.northDemand;
-		ilink_attitude.yaw = ilink_gpsfly.eastDemand;
 
 	// If Thalamus is allowed to shut off the motors
 	if (thal_motor_off == 1) {
+	
+		///////////// Set Airborne if takeoff value is read/////////////////
+		if (alt.ultra > ULTRA_TKOFF) airborne = 1;
+		
 		///////////////////////////////// LANDING MOTOR SHUT OFF, 1-Ultrasound Driven  2-GPS Driven ////////////////////////
 		//1 - Ultrasound driven
 		// If ultrasound reading is valid and less than landing threshold (ULTRA_LD_TD) and we are airborne
@@ -354,10 +353,10 @@ void control_motors(){
 	tempE = (signed short)motorEav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
 	tempS = (signed short)motorSav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
 	tempW = (signed short)motorWav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-
-
+		
+		
 	// TODO: Add Auto Land on rxLoss!
-	if (rcInput[RX_THRO] - throttletrim <  OFFSTICK || hold_thro_off > 0 || rxLoss > 25) {
+	if (rcInput[RX_THRO] - throttletrim <  OFFSTICK || hold_thro_off > 0) {
 		
 		// Set Airborne = 0
 		airborne = 0;
@@ -387,7 +386,7 @@ void control_motors(){
 		
 		// Reset the throttle hold variable, this prevents reactivation of the throttle until 
 		// the input is dropped and re-applied
-		if(rcInput[RX_THRO] - throttletrim <  OFFSTICK) hold_thro_off = 0;
+		if ((rcInput[RX_THRO] - throttletrim <  (OFFSTICK - 5)) && (state != STATE_DISARMED)) hold_thro_off = 0;
 		
 		// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
 		if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);

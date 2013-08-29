@@ -1,6 +1,8 @@
 void state_machine()	{
 
 	static unsigned char auto_lock = 0;
+	static unsigned int throttle_on_count = 0;
+	static unsigned int throttle_off_count = 0;
 	
 // ****************************************************************************
 // ****************************************************************************
@@ -11,40 +13,14 @@ void state_machine()	{
 
 	if (state == STATE_DISARMED) {
 	
+		// Key Parameters that need resetting/ setting whilst Disarmed
+		auto_lock = 0;
+		airborne = 0;
+		throttle = 0;
 	
 		if ((rxLoss < 50) && (rxFirst != 0)) {
-	
-			///////////////////// STATE SWITCHING ///////////////////////////////
-			
-			
-			// if left stick bottom right, right stick top left and switch = 0 then switch to manual mode with GPS inactive
-			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)) {
-				if(ORI == detect_ori()) {
-                    state = STATE_MANUAL;
-                    arm();
-                }
-			}
-			
-			
-			// if left stick bottom middle, right stick top left, switch = 0 and GPS is active then switch to manual mode with GPS active
-			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
-				if(ORI == detect_ori()) {
-                    state = STATE_MANUAL_GPS;
-                    arm();
-                }
-			}
-			
-			// if left stick bottom middle, right stick top right, switch = 1 and GPS is active  then switch to full auto
-			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 1)  &&  (gps_valid == 1)) {
-				if(ORI == detect_ori()) {
-                    state = STATE_AUTO;
-                    arm();
-                }
-			}
-			
-			///////////////////// OPERATION ///////////////////////////////
-			
-			auto_lock = 0;
+		
+			///////////////////// OPERATION ///////////////////////////////			
 			
 			// if left stick bottom and right stick bottom left then calibrate orientation
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH) && (rcInput[RX_AILE] > MAXTHRESH)) calibrate_ori();
@@ -52,6 +28,41 @@ void state_machine()	{
 			// if left stick bottom and right stick bottom right then calibrate magnetometer
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  &&  (rcInput[RX_ELEV] < MINTHRESH) && (rcInput[RX_AILE] < MINTHRESH)) calibrate_mag();
 
+		
+	
+			///////////////////// STATE SWITCHING ///////////////////////////////
+			
+			
+			// if left stick bottom right, right stick top left and switch = 0 then switch to manual mode with GPS inactive
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)) {
+				if(ORI == detect_ori()) { 
+                    arm();
+					state = STATE_MANUAL;
+					// We hold the throttle off in case someone knocks it up after arming, the motors won't start until they have reduced the stick to zero and put it up again	
+					hold_thro_off = 1;
+                }
+			}
+			
+			
+			// if left stick bottom middle, right stick top left, switch = 0 and GPS is active then switch to manual mode with GPS active
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
+				if(ORI == detect_ori()) {                    
+                    arm();
+					Delay(500);
+					state = STATE_MANUAL_GPS;
+                }
+			}
+			
+			// if left stick bottom middle, right stick top right, switch = 1 and GPS is active  then switch to full auto
+			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 1)  &&  (gps_valid == 1)) {
+				if(ORI == detect_ori()) {                   
+                    arm();
+					Delay(500);
+					state = STATE_AUTO;
+                }
+			}
+			
+			
 			
 		}
 	}
@@ -76,8 +87,35 @@ void state_machine()	{
 			disarm();
 		}
 		
+		// Auto Disarm
+		if (throttle == 0) {
+			throttle_off_count++;
+			// If throttle is off for 15 seconds
+			if (throttle_off_count > (SLOW_RATE*15)) {
+				throttle_off_count = 0;
+				throttle_on_count = 0;
+				state = STATE_DISARMED;
+				disarm();
+				
+			}
+		}
 		
 		///////////////////// OPERATION ///////////////////////////////
+		
+		// Airborne timer to enable auto land. Airborne must be set else autoland will not work.
+		// Note that this code will auto throttle off/ "land" if you stay on the ground too long with the motors spinning and with an ultrasound module plugged in.
+		if (throttle > 0) {
+			throttle_off_count = 0;
+			throttle_on_count++;
+			// If throttle is on for 6 seconds
+			if (throttle_on_count > (SLOW_RATE*6)) {
+				throttle_on_count = 0;
+				airborne = 1;
+			}
+		}	
+		
+		// Thalamus is allowed to turn the motors off
+		thal_motor_off = 1;
 		
 		auto_lock = 0;
 		
@@ -125,16 +163,41 @@ void state_machine()	{
 		// if we loose gps validity then switch into full manual mode
 		if (gps_valid == 0) state = STATE_MANUAL;
 
+		// Auto Disarm
+		if (throttle == 0) {
+			throttle_off_count++;
+			// If throttle is off for 15 seconds
+			if (throttle_off_count > (SLOW_RATE*15)) {
+				throttle_off_count = 0;
+				throttle_on_count = 0;
+				state = STATE_DISARMED;
+				disarm();
+				
+			}
+		}
 		
 		///////////////////// OPERATION ///////////////////////////////
 		
+		// Airborne timer to enable auto land. Airborne must be set else autoland will not work.
+		// Note that this code will auto throttle off/ "land" if you stay on the ground too long with the motors spinning and with an ultrasound module plugged in.
+		if (throttle > 0) {
+			throttle_off_count = 0;
+			throttle_on_count++;
+			// If throttle is on for 6 seconds
+			if (throttle_on_count > (SLOW_RATE*6)) {
+				throttle_on_count = 0;
+				airborne = 1;
+			}
+		}
+		
+		// Flap State determines whether we are free manual flying (0) Position Hold (1) or Heading Home (2)
 		if (flapState == 0) {
 		
 			auto_lock = 0;
 			// And Thalamus can't control the throttle
 			thal_throt_cont = 0;				
-			// And Thalamus isn't allowed to turn the motors off
-			thal_motor_off = 0;
+			// Thalamus is allowed to turn the motors off
+			thal_motor_off = 1;
 			
 			//We store key variables to ensure a stepless transition into other states
 			// For both the GPS
@@ -159,6 +222,8 @@ void state_machine()	{
 		user.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
 		throttle = rcInput[RX_THRO] - throttletrim;	
 		
+		
+			
 		// The pilot has control of yaw		
 		float tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 									
 		// A yaw rate is demanded by the rudder input, not an absolute angle.
@@ -172,8 +237,8 @@ void state_machine()	{
 		if ((flapState == 2) || (flapState == 1)) {
 			
 			// We make the craft change attitude slower when flying autonomously
-			ROLL_SPL_set = ROLL_SPL/2;
-			PITCH_SPL_set = PITCH_SPL/2;
+			ROLL_SPL_set = 0.002;
+			PITCH_SPL_set = 0.002;
 			YAW_SPL_set = YAW_SPL/2;
 			
 			// then Hypo controls attitude.

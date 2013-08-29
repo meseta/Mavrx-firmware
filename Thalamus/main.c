@@ -76,7 +76,7 @@
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	22 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	43 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
@@ -453,9 +453,9 @@ struct paramStorage_struct paramStorage[] = {
 	{"ULTRA_OFFSET",		 350},
 	#define ULTRA_OFFSET		paramStorage[56].value
 	
-	{"ROLL_SPL",		 0.04},
+	{"ROLL_SPL",		 0.02},
 	#define ROLL_SPL		paramStorage[57].value
-	{"PITCH_SPL",		 0.04},
+	{"PITCH_SPL",		 0.02},
 	#define PITCH_SPL		paramStorage[58].value
 	
 	// TODO: Tune Yaw integral
@@ -470,7 +470,7 @@ struct paramStorage_struct paramStorage[] = {
 	{"LPF_BARO",   1.0},
 	 #define LPF_BARO  paramStorage[62].value
 
-	{"GPS_ALTKp", 10.0f},
+	{"GPS_ALTKp", 5.0f},
     {"GPS_ALTKi", 0.0001f},
     {"GPS_ALTDe", 1.0f},
     {"GPS_ALTKd", 20.0f},

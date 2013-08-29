@@ -199,6 +199,7 @@ void convert_ori(volatile signed short * X, volatile signed short * Y, volatile 
             *X = data[0]; // Navy config
             *Y = -data[2];
             *Z = data[1];
+			break;
         case 5: // R10
             *X = data[0];
             *Y = data[1];
