@@ -6,7 +6,7 @@ void setup() {
 		// the ESC will beep when it doesn not receive a PWM signal, we use this to indicate that the craft is powered but disarmed
 		// however, the ESC will not beep the first time it is powered, so we start up the PWM here and turn it off quickly so that
 		// under ALL circumstances the ESC will beep when the craft is disarmed.
-		PWMInit(PWM_NESW);
+		PWMInit(PWM_ALL);
 		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
 	
 	// *** LED setup
@@ -132,7 +132,6 @@ void setup() {
 		
 	// *** Initialise timers and loops
 		PWMSetNESW(0, 0, 0, 0);
-		PWMInit(PWM_X | PWM_Y);
 		RITInitms(1000/MESSAGE_LOOP_HZ);
 		flashPLED = 0;
 		LEDOff(PLED);

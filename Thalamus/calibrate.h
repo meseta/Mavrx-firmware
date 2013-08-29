@@ -4,7 +4,6 @@ void arm(void) {
 		calibrate_gyr_temporary(1);
 	}
 	
-	PWMInit(PWM_NESW);
 	PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
 	//TODO: inline Delays cause system hang.
 	if(armed == 0) {
