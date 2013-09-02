@@ -64,6 +64,7 @@ void control_throttle()	{
 	//TODO: Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus
 	// float GPS_errP = ilink_gpsfly.altitudeDemand + (alt_tkoff + 0.8) - alt.filtered;
 	float GPS_errP = ilink_gpsfly.altitudeDemand - alt.filtered;
+	// float GPS_errP = alt_tkoff - alt.filtered;
 	GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
 	// float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel; TODO: Set this back when COde finished
 	float GPS_errD = 0.0 - alt.vel;
@@ -134,7 +135,6 @@ void control_throttle()	{
 			got_setpoint = 0;
 		}
 		
-		// TODO: Consider accelerometer based shutdown on landing if GPS driven landing causes too much bounce
 	}	
 	
 		

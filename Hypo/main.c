@@ -205,6 +205,7 @@ float lat_diff_i;
 float lon_diff_i;
 
 float GPS_Kp = 0.03f;
+//TODO: Work out what the problem is with the I Gain
 //float GPS_Ki = 0.00005f;
 float GPS_Ki = 0.0000f;
 float GPS_Kd = 0.1f;
@@ -212,7 +213,7 @@ float GPS_Kd = 0.1f;
 unsigned char gpsFixed;
 unsigned char gps_action = 0;
 
-#define GPS_SAFE_ALT    5.0f    // in m
+#define GPS_SAFE_ALT    10.0f    // in m
 #define GPS_MAX_ANGLE   0.35f   // in radians
 #define GPS_MAX_SPEED   5.0f    // in m/s
 #define GPS_MAX_ROTATE  1.5f    // in rad/s    
@@ -484,6 +485,14 @@ void RITInterrupt(void) {
             static unsigned char allow_land = 0;
             static unsigned char target_set = 0;
             
+			// 0:	do nothing
+			// 1:	store home position - Thalamus requests this everytime it arms into MANUAL_GPS or AUTO mode
+			// 2:	take off - sets target to GPS_SAFE_ALT above current location
+			// 3:	hold/pause - sets target to current craft location
+			// 4:	resume current waypoint
+			// 5: 	unscheduled land - sets target to current location, and sets the incrementer mode to "landing"
+			// 6: 	return to home - sets waypoint to home, unsets the "land when reached" flag
+			// 7:
             switch(gps_action) {
                 case 0:
                 default: // do nothing
@@ -495,7 +504,7 @@ void RITInterrupt(void) {
                     home_valid = 1;
                     gps_action = 0;
                     break;
-                case 2: // take off - sets target to current location
+                case 2: // take off - sets target to GPS_SAFE_ALT above current location 
                     target_X = craft_X;
                     target_Y = craft_Y;
                     target_Z = craft_Z + GPS_SAFE_ALT;
@@ -635,7 +644,7 @@ void RITInterrupt(void) {
                     
                     // check that we're not maxed out height
                     if(zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
-                        float vector_Z = target_Y - interpolator_Z;
+                        float vector_Z = target_Z - interpolator_Z;
                     
                         // normalise vector
                         float sumsqu = finvSqrt(vector_Z*vector_Z);

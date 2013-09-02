@@ -50,6 +50,10 @@ void state_machine()	{
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] > MAXTHRESH) && (auxState == 0)  &&  (gps_valid == 1)) {
 				if(ORI == detect_ori()) {                    
                     arm();
+					// Request that Hypo stores Return to Arm location
+					ilink_gpsreq.request = 1;
+					ilink_gpsreq.sequence++;
+					// Set the New State
 					state = STATE_MANUAL_GPS;
 					// We hold the throttle off in case someone knocks it up after arming, the motors won't start until they have reduced the stick to zero and put it up again	
 					hold_thro_off = 1;
@@ -60,6 +64,10 @@ void state_machine()	{
 			if  (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK)  && (rcInput[RX_RUDD] < MAXTHRESH)  && (rcInput[RX_RUDD] > MINTHRESH)  &&  (rcInput[RX_ELEV] > MAXTHRESH) && (rcInput[RX_AILE] < MINTHRESH) && (auxState == 1)  &&  (gps_valid == 1)) {
 				if(ORI == detect_ori()) {                   
                     arm();
+					// Request that Hypo stores Return to Arm location
+					ilink_gpsreq.request = 1;
+					ilink_gpsreq.sequence++;
+					// Set the New State
 					state = STATE_AUTO;
 					// We hold the throttle off in case someone knocks it up after arming, the motors won't start until they have reduced the stick to zero and put it up again	
 					hold_thro_off = 1;
@@ -166,6 +174,9 @@ void state_machine()	{
 		
 		// if we loose gps validity then switch into full manual mode
 		if (gps_valid == 0) state = STATE_MANUAL;
+		
+		// If the switch is flicked, we go into AUTO mode
+		if (auxState == 1) state = STATE_AUTO;
 
 		// Auto Disarm
 		if (throttle == 0) {
@@ -279,9 +290,9 @@ void state_machine()	{
 			disarm();
 		}
 		
-		// if we loose gps validity then immediately drop throttle level to indicate user should switch to manual mode and lock out the auto code loop
+		// if we loose gps validity then immediately switch to manual without GPS mode
 		if (gps_valid == 0) {
-			throttle -= 200;
+			state = STATE_MANUAL;
 			auto_lock = 1;
 		}
 		
@@ -291,24 +302,55 @@ void state_machine()	{
 			auto_lock = 1;
 		}
 		
+		// Auto Disarm
+		if (throttle == 0) {
+			throttle_off_count++;
+			// If throttle is off for 20 seconds
+			if (throttle_off_count > (SLOW_RATE*20)) {
+				throttle_off_count = 0;
+				throttle_on_count = 0;
+				state = STATE_DISARMED;
+				disarm();
+				
+			}
+		}
+		
+		// TODO: TEMPORARILY REPURPOSED
+		// Output angles over telemetry
+		ilink_attitude.roll = airborne; 
+		ilink_attitude.pitch = throttle;
+		ilink_attitude.yaw = psiAngle;
+	
 		///////////////////// OPERATION ///////////////////////////////
 		if (auto_lock == 0) {
 			//When not airborne
 			if (airborne == 0) {
+			
+				// Demand 0 radians pitch and roll
+				user.pitch = 0;
+				user.roll = 0;
+			
+				// Launch proceedure is scripted, don't let Thalamus interfere with the throttle levels.
+				thal_throt_cont = 0;
+				thal_motor_off = 0;
+				
+				
 				////////////////// TAKEOFF CONTROL  ///////////////////////
 				// If gps valid
 				if ((gps_valid == 1)
 				// and throttlestick in middle
-				&& ((rcInput[RX_THRO] - throttletrim) > 320) && ((rcInput[RX_THRO] - throttletrim) < 420))	{
+				&& ((rcInput[RX_THRO] - throttletrim) > 350) && ((rcInput[RX_THRO] - throttletrim) < 450))	{
 					//If still on the ground (throttle zero), record altitude
-					if (throttle == 0) {				
+					if ((throttle > 0) && (throttle < 200)) {				
 						alt_tkoff = alt.filtered;
-						throttle += 200;
+						throttle += 300;
 					}
 					// Increase throttle
-					throttle += 0.2;
-
-					if ((alt.filtered > alt_tkoff + 0.5 ) || (alt.ultra > ULTRA_TKOFF)) { 
+					throttle += 0.4;
+					
+					//TODO: Test GPS airborne setter again
+					// if ((alt.filtered > alt_tkoff + 1 ) || (alt.ultra > ULTRA_TKOFF)) { 
+					if ((alt.ultra > ULTRA_TKOFF)) { 
 						// just taken off, set airborne to 1 and remember takeoff throttle
 						airborne = 1;
 						ULT_KerrI = throttle;
@@ -336,16 +378,15 @@ void state_machine()	{
 				// This code increments the demanded angle at a rate proportional to the rudder input
 				if(fabsf(tempf) > YAW_DEADZONE) {
 					attitude_demand_body.yaw += tempf;
-					if(attitude_demand_body.yaw > M_PI) {
-						attitude_demand_body.yaw -= M_TWOPI;
-					}
-					else if(attitude_demand_body.yaw < -M_PI) {
-						attitude_demand_body.yaw += M_TWOPI;
-					}
 				}
 		
 				// If Hypo is transmitting yaw demands we allow it to overwrite the pilots yaw demands
-				if (!(ilink_gpsfly.flags & 0x04)) attitude_demand_body.yaw =  ilink_gpsfly.headingDemand;
+				//if (!(ilink_gpsfly.flags & 0x04)) attitude_demand_body.yaw =  ilink_gpsfly.headingDemand;
+				
+				// We make the craft change attitude slower when flying autonomously
+				ROLL_SPL_set = 0.002;
+				PITCH_SPL_set = 0.002;
+				YAW_SPL_set = YAW_SPL/2;
 					
 				
 				// And Thalamus controls the throttle

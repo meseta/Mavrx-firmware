@@ -73,7 +73,7 @@
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	92 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	11 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
