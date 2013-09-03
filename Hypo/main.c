@@ -213,7 +213,7 @@ float GPS_Kd = 0.1f;
 unsigned char gpsFixed;
 unsigned char gps_action = 0;
 
-#define GPS_SAFE_ALT    10.0f    // in m
+#define GPS_SAFE_ALT    1.0f    // in m
 #define GPS_MAX_ANGLE   0.35f   // in radians
 #define GPS_MAX_SPEED   5.0f    // in m/s
 #define GPS_MAX_ROTATE  1.5f    // in rad/s    
@@ -682,7 +682,7 @@ void RITInterrupt(void) {
                     ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE) {
                         
                         float vector_X = target_X - interpolator_X; // yes, convert a double to a float to make use of faster float functions. After subtraction, a float has enough accuracy for this
-                        float vector_Y = target_Y - interpolator_Z;
+                        float vector_Y = target_Y - interpolator_Y;
                     
                         // normalise vector
                         float sumsqu = finvSqrt(vector_X*vector_X + vector_Y*vector_Y);
@@ -715,8 +715,8 @@ void RITInterrupt(void) {
                     zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
                         
                         float vector_X = target_X - interpolator_X; // yes, convert a double to a float to make use of faster float functions. After subtraction, a float has enough accuracy for this
-                        float vector_Y = target_Y - interpolator_Z;
-                        float vector_Z = target_Y - interpolator_Z;
+                        float vector_Y = target_Y - interpolator_Y;
+                        float vector_Z = target_Z - interpolator_Z;
                     
                         // normalise vector
                         float sumsqu = finvSqrt(vector_X*vector_X + vector_Y*vector_Y + vector_Z*vector_Z);

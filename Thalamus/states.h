@@ -341,7 +341,7 @@ void state_machine()	{
 				// and throttlestick in middle
 				&& ((rcInput[RX_THRO] - throttletrim) > 350) && ((rcInput[RX_THRO] - throttletrim) < 450))	{
 					//If still on the ground (throttle zero), record altitude
-					if ((throttle > 0) && (throttle < 200)) {				
+					if ((throttle >= 0) && (throttle < 200)) {				
 						alt_tkoff = alt.filtered;
 						throttle += 300;
 					}
@@ -380,6 +380,7 @@ void state_machine()	{
 					attitude_demand_body.yaw += tempf;
 				}
 		
+				// TODO: Prevent Hypo from transmitting yaw demands when no waypoints set.
 				// If Hypo is transmitting yaw demands we allow it to overwrite the pilots yaw demands
 				//if (!(ilink_gpsfly.flags & 0x04)) attitude_demand_body.yaw =  ilink_gpsfly.headingDemand;
 				
