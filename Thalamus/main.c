@@ -9,6 +9,10 @@
 //Possible causes are Yuan's Max throttle stuff, my roll angle prioritisation (less likely as wasn't in the backers code), ROLL/ PITCH SPL (spin limit). Or other!
 // Have done some test flights and witnessed the loss of control at high throttles, it only does it when applying a high throttle and a large attitude demand, it inverts then enters a continual spin at high throttle
 // Have added code on line 51 of control.h to try and solve this problem
+//Rescues craft if error gets too large at high throttles by detecting roll and pitch error getting too large and reducing the throttle.
+	// TODO: Test to see if this code solves the problem
+	// Tried this: if (((pitcherror > 0.08) || (pitcherror < -0.08) || (rollerror > 0.08) || (rollerror < -0.08)) && (throttle > 600)) throttle -= 200;
+// Should really be able to solve with better PID tuning.
 
 //TODO: check all integrators for decoupling, and make sure they are locked in this case
 

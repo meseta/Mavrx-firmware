@@ -149,10 +149,7 @@ void control_motors(){
         default:
 		case 3: // NAVY EDITION passes the pitch and roll demands straight through unchanged
 			attitude_demand_body.pitch = user.pitch;
-			attitude_demand_body.roll =  user.roll;
-			
-			
-			
+			attitude_demand_body.roll =  user.roll;			
 			break;
 		case 5:	// R10 Kickstarter
 		
@@ -229,11 +226,7 @@ void control_motors(){
 	// Use the Current and demanded angles to create the error for the proportional part of the PID loop
 	float pitcherror = attitude_demand_body.pitch + thetaAngle;
 	float rollerror = attitude_demand_body.roll - phiAngle;
-	float yawerror = attitude_demand_body.yaw + psiAngle; 
-	
-	//Rescues craft if error gets too large at high throttles by detecting roll and pitch error getting too large and reducing the throttle.
-	// TODO: Test to see if this code solves the problem
-	if (((pitcherror > 0.08) || (pitcherror < -0.08) || (rollerror > 0.08) || (rollerror < -0.08)) && (throttle > 600)) throttle -= 200;
+	float yawerror = attitude_demand_body.yaw + psiAngle; 	
 	
 	// This section ensures that on swapping between -PI and PI, 
 	// the craft always takes the shortest route to the desired angle
