@@ -577,6 +577,7 @@ void Timer0Interrupt0() {
 		slowSoftscale = 0;
 
 		// These run at SLOW_RATE - The order they run in matters
+        trig_batt_voltage();
 		read_mag_sensors();
 		read_rx_input();		
 		read_ultrasound();
@@ -595,7 +596,6 @@ void Timer0Interrupt0() {
 	read_gyr_sensors();
 	
 	a_h_r_s();
-	
 	
 	control_throttle();
 	control_motors();

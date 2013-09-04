@@ -124,10 +124,6 @@ void state_machine()	{
                 throttle_on_count++;
             }
 		}	
-		
-        
-        ilink_debug.debug0 = throttle_off_count;
-        ilink_debug.debug1 = throttle_on_count;
         
 		// Thalamus is allowed to turn the motors off
 		thal_motor_off = 1;
