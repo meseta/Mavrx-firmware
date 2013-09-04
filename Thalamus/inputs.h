@@ -38,16 +38,25 @@ void read_rx_input(void) {
 		}
 		
 		// Controller's aux or gear switch (Can be switched permanently either way)
-		if(rcInput[RX_AUX1] > MIDSTICK) {
-			auxState = 0;
-		}
-		else {
-			auxState = 1;
+        // detect for Mavrx DX4e MOD
+        if((rcInput[RX_AUX1] & 0x0EF) == 0) { // these specific bits zero means it's a DX4e mod controller
+            if((rcInput[RX_AUX1] & 0x200) == 0x200) auxState = 0;
+            else auxState = 1;
+            
+            if((rcInput[RX_AUX1] & 0x010) == 0x010) rateState = 1;
+            else rateState = 0;
+        }
+        else {  // regular DX4e controller   
+            if(rcInput[RX_AUX1] > MIDSTICK) {
+                auxState = 0;
+            }
+            else {
+                auxState = 1;
 
-		}
-				
+            }
+        }
 			
-		
+		// TODO: support DX4e MOD on bind button, clean out this state code
 		// If the button is pressed, start incrementing a counter
 		if(rcInput[RX_FLAP] > MIDSTICK) {
 			flapswitch++;
@@ -197,10 +206,15 @@ void convert_ori(volatile signed short * X, volatile signed short * Y, volatile 
     switch((unsigned char)ORI) {
         default:
         case 3: // NAVY EDITION
-            *X = data[0]; // Navy config
+            *X = data[0];
             *Y = -data[2];
             *Z = data[1];
 			break;
+        case 4: // R10+ or Navy uside down
+            *X = data[0];
+            *Y = data[2];
+            *Z = -data[1];
+            break;
         case 5: // R10
             *X = data[0];
             *Y = data[1];

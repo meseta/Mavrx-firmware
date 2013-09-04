@@ -76,7 +76,7 @@ unsigned char detect_ori(void) {
         }
         else if(y_mag > x_mag && y_mag > z_mag) {
             if(y_axis > 0)  return 3;   // y is down: NAVY
-            else            return 4;   // y is up
+            else            return 4;   // y is up: R10+ or NAVY upside down
         }
         else if(z_mag > y_mag && z_mag > x_mag) {
             if(z_axis > 0)  return 5;   // z is down: R10

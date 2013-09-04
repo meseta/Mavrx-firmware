@@ -242,7 +242,7 @@ signed short throttletrim;
 float throttle;
 float throttle_angle;
 int hold_thro_off;
-unsigned int auxState, flapState;
+unsigned char auxState, flapState, rateState, throState, aileState, elevState, ruddState;
 unsigned int flapswitch = 0;
 float pitchDemandSpin = 0;
 float rollDemandSpin = 0;

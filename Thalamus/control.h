@@ -82,11 +82,6 @@ void control_throttle()	{
 			throttle = gpsThrottle;			
 		}
 	}
-	
-			//debug
-		ilink_debug.debug1 = ilink_gpsfly.isNew;
-		//debug
-		ilink_debug.debug2 = ilink_gpsfly.flags;
 		
 
 	// If Thalamus is allowed to shut off the motors

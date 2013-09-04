@@ -101,14 +101,12 @@ void state_machine()	{
 		
 		// Auto Disarm
 		if (throttle == 0) {
+			throttle_on_count = 0;
 			throttle_off_count++;
 			// If throttle is off for 15 seconds
 			if (throttle_off_count > (SLOW_RATE*15)) {
-				throttle_off_count = 0;
-				throttle_on_count = 0;
 				state = STATE_DISARMED;
 				disarm();
-				
 			}
 		}
 		
@@ -118,14 +116,19 @@ void state_machine()	{
 		// Note that this code will auto throttle off/ "land" if you stay on the ground too long with the motors spinning and with an ultrasound module plugged in.
 		if (throttle > 0) {
 			throttle_off_count = 0;
-			throttle_on_count++;
 			// If throttle is on for 6 seconds
 			if (throttle_on_count > (SLOW_RATE*6)) {
-				throttle_on_count = 0;
 				airborne = 1;
 			}
+            else {
+                throttle_on_count++;
+            }
 		}	
 		
+        
+        ilink_debug.debug0 = throttle_off_count;
+        ilink_debug.debug1 = throttle_on_count;
+        
 		// Thalamus is allowed to turn the motors off
 		thal_motor_off = 1;
 		
