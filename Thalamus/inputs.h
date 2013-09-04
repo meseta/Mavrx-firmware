@@ -189,8 +189,12 @@ void read_ultrasound(void) {
 
 	
 			
-}			
-		
+}
+
+void trig_batt_voltage(void) {
+	ADCTrigger(CHN7);
+}
+
 void read_batt_voltage(void) {
 	// Because the factor is 6325/1024, we can do this in integer maths by right-shifting 10 bits instead of dividing by 1024.
 	unsigned short battV = (ADCGet() * 6325) >> 10; 
@@ -198,9 +202,7 @@ void read_batt_voltage(void) {
 	batteryVoltage *= 0.99f;
 	batteryVoltage += 0.01f * (float)battV;
 	ilink_thalstat.battVoltage = battV;
-	ADCTrigger(CHN7);
 }
-			
 
 void convert_ori(volatile signed short * X, volatile signed short * Y, volatile signed short * Z, signed short * data) {
     switch((unsigned char)ORI) {
