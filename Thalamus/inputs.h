@@ -38,25 +38,14 @@ void read_rx_input(void) {
 		}
 		
 		// Controller's aux or gear switch (Can be switched permanently either way)
-        // detect for Mavrx DX4e MOD
-        if((rcInput[RX_AUX1] & 0x0EF) == 0) { // these specific bits zero means it's a DX4e mod controller
-            if((rcInput[RX_AUX1] & 0x200) == 0x200) auxState = 0;
-            else auxState = 1;
-            
-            if((rcInput[RX_AUX1] & 0x010) == 0x010) rateState = 1;
-            else rateState = 0;
+        if(rcInput[RX_AUX1] > MIDSTICK) {
+            auxState = 0;
         }
-        else {  // regular DX4e controller   
-            if(rcInput[RX_AUX1] > MIDSTICK) {
-                auxState = 0;
-            }
-            else {
-                auxState = 1;
+        else {
+            auxState = 1;
 
-            }
         }
-			
-		// TODO: support DX4e MOD on bind button, clean out this state code
+
 		// If the button is pressed, start incrementing a counter
 		if(rcInput[RX_FLAP] > MIDSTICK) {
 			flapswitch++;
@@ -88,7 +77,6 @@ void read_rx_input(void) {
 					ilink_gpsreq.sequence++;
 				}
 			}
-
 		}
 		// We set the state to 2 if the button has been released after being held for over three seconds.
 		if ((rcInput[RX_FLAP] < MIDSTICK) && (flapswitch > (SLOW_RATE*3))) {
@@ -100,7 +88,19 @@ void read_rx_input(void) {
 			
 		}
 			
-			
+            
+                
+        // MODIFIED DX4e ONLY: Controller's rate switch (can be switched permanently either way
+        if((rcInput[RX_AUX1] & 0x00F) == 0 && (rcInput[RX_FLAP] & 0x00f) == 0) { // Detect if this is a modified controller
+            rateState = (rcInput[RX_AUX1] >> 4) & 0x01;
+            throState = (rcInput[RX_FLAP] >> 7) & 0x01;
+            aileState = (rcInput[RX_FLAP] >> 6) & 0x01;
+            elevState = (rcInput[RX_FLAP] >> 5) & 0x01;
+            ruddState = (rcInput[RX_FLAP] >> 4) & 0x01;
+        }
+        
+            ilink_debug.debug0 = rateState;
+            ilink_debug.debug1 = throState;
 		flashVLED = 0;
 		LEDOff(VLED);
 	}
