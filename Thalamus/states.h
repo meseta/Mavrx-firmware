@@ -175,7 +175,12 @@ void state_machine()	{
 		if (gps_valid == 0) state = STATE_MANUAL;
 		
 		// If the switch is flicked, we go into AUTO mode
-		if (auxState == 1) state = STATE_AUTO;
+		if (auxState == 1) {
+			state = STATE_AUTO;
+			// and request resume/ go from Hypo
+			ilink_gpsreq.request = 4;
+			ilink_gpsreq.sequence++;
+		}
 
 		// Auto Disarm
 		if (throttle == 0) {
@@ -298,6 +303,12 @@ void state_machine()	{
 		// if the switch is put to zero, switch into manual_gps mode and lock out the auto code loop
 		if (auxState == 0) {
 			state = STATE_MANUAL_GPS;
+			// ensure full manual control is engaged
+			flapState = 0;
+			//set idle mode on Hypo if we are in Manual MODE
+			ilink_gpsreq.request = 7;
+			ilink_gpsreq.sequence++;
+			// and lock out the auto code loop
 			auto_lock = 1;
 		}
 		
@@ -314,11 +325,6 @@ void state_machine()	{
 			}
 		}
 		
-		// TODO: TEMPORARILY REPURPOSED
-		// Output angles over telemetry
-		ilink_attitude.roll = airborne; 
-		ilink_attitude.pitch = throttle;
-		ilink_attitude.yaw = psiAngle;
 	
 		///////////////////// OPERATION ///////////////////////////////
 		if (auto_lock == 0) {
@@ -347,9 +353,7 @@ void state_machine()	{
 					// Increase throttle
 					throttle += 0.4;
 					
-					//TODO: Test GPS airborne setter again
-					// if ((alt.filtered > alt_tkoff + 1 ) || (alt.ultra > ULTRA_TKOFF)) { 
-					if ((alt.ultra > ULTRA_TKOFF)) { 
+					if ((alt.filtered > (alt_tkoff + 3)) || (alt.ultra > ULTRA_TKOFF)) { 
 						// just taken off, set airborne to 1 and remember takeoff throttle
 						airborne = 1;
 						ULT_KerrI = throttle;

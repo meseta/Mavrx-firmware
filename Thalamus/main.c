@@ -20,12 +20,14 @@
 // Key areas to investigate are integral gain on takeoff
 // Accelerometer feedback gain
 // Accelerometer feedback method - additional filtering needed?
+// Landing Gear separation seems to play a large part, it causes undesired integral wind-up before the craft is in the air
+// Landing gear would need switches or be sprung and damped with longish travel
 
 // TODO: Measure loop rates instead of just assuming it
 // The control needs to know how fast they're going, right now we assume the loops are going at their specified rate
 // however, it would be better to just time instead.  Use one of the hardware timers to get sub-ms resolution.
 
-// TODO: Check for three discontinuities in flight
+// TODO: Check for some discontinuities in flight
 // Throttle and attitude blips when flying under GPS
 // Throttle blips when flying normally
 

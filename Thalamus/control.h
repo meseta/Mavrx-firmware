@@ -71,6 +71,13 @@ void control_throttle()	{
 	// Collecting the PID terms
 	gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
 
+	// TODO: Diagnose throttle jumps while in GPS hold mode.
+	// This section of code limits the rate at which the craft is allowed to change the throttle according to GPS and Barometer Demands
+	// if ((gpsThrottle - gpsThrottleold) > LIM_THRO) gpsThrottle = gpsThrottleold + LIM_THRO;
+	// if ((gpsThrottle - gpsThrottleold) < -LIM_THRO) gpsThrottle = gpsThrottleold - LIM_THRO;
+	// gpsThrottleold = gpsThrottle;
+	
+	
 	// If Thalamus is allowed to overwrite throttle
 	if (thal_throt_cont == 1) {
 		//Use largest throttle output, and cross-feed the integrals for step free transition
@@ -82,8 +89,8 @@ void control_throttle()	{
 			throttle = gpsThrottle;			
 		}
 	}
-		
-
+	
+	
 	// If Thalamus is allowed to shut off the motors
 	if (thal_motor_off == 1) {
 	
