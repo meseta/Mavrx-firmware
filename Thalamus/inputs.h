@@ -156,6 +156,7 @@ void read_barometer(void) {
     else {
         GetBaroTemp();
         temperature_counter = 0;
+		TrigBaro();
     }
 }
 

@@ -63,6 +63,10 @@ void setup() {
 		Delay(500);
 		SensorInit();
 		sensor_zero();
+		
+		TrigBaroTemp(); // get parometer temperature for temperature compensation.
+		Delay(15);
+		GetBaroTemp();
 	
 	// *** quaternion AHRS init
 		q1 = 1;
