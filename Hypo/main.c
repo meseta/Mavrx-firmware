@@ -213,11 +213,13 @@ float GPS_Kd = 0.1f;
 unsigned char gpsFixed;
 unsigned char gps_action = 0;
 
-#define GPS_SAFE_ALT    1.0f    // in m
-#define GPS_MAX_ANGLE   0.35f   // in radians
-#define GPS_MAX_SPEED   5.0f    // in m/s
-#define GPS_MAX_ROTATE  1.5f    // in rad/s    
-#define GPS_MAX_ALTDIFF 3.0f    // in m
+#define GPS_SAFE_ALT    1.0f    // Minimum safe altitude above home position in m
+#define GPS_MAX_ANGLE   0.35f   // Maximum attitude demanded in radians
+#define GPS_MAX_SPEED   1.0f    // Maximum travel speed in m/s
+#define GPS_MAX_ROTATE  1.5f    // Maximum rotation rate in rad/s    
+#define GPS_MAX_ALTDIFF 3.0f    // Maximum altitude demanded in m
+
+#define GPS_MIN_RADIUS	2.0f	// Default (minimum) detection radius for waypoint in meters
 
 void setup() {
     // *** LED setup
@@ -790,7 +792,7 @@ void RITInterrupt(void) {
             if(waypointGo == 1 && waypointValid == 1 && waypointCurrent < waypointCount) {
                 free_yaw = 0;
                 float radius = waypoint[waypointCurrent].param2; // param2 is radius in QGroumdcontrol 1.0.1
-                if(radius < 1) radius = 1; // minimum radis
+                if(radius < GPS_MIN_RADIUS) radius = GPS_MIN_RADIUS; // minimum radis
                 
                 //float lat_diff2 = lat_diff; // for orbit phase calculation
                 //float lon_diff2 = lon_diff;
