@@ -136,21 +136,16 @@ void read_barometer(void) {
         // Get raw barometric pressure reading in Pascals, when it reads 0
         float pressure = GetBaroPressure();
 		
-		ilink_debug.debug0 = pressure;
-            
+		ilink_debug.debug1 = FUNCBaro_type;
 			
         // There is an I2C or sensor error if 0 is returned, so only update altitude when pressure is greater than 0
         if(pressure > 0) {	
             // Run an LPF filter on the barometer data
-            alt.pressure *= LPF_BARO;
-            alt.pressure += (1-LPF_BARO) * pressure;
-            
-			ilink_debug.debug1 = alt.pressure;
+            alt.pressure *= (1-LPF_BARO);
+            alt.pressure +=  LPF_BARO * pressure;									
 			
             //Scale to Metres
             alt.baro = Pressure2Alt(alt.pressure);
-			
-			
             
             // Output processed data over telemetry
             ilink_altitude.baro = alt.baro;
@@ -177,8 +172,8 @@ void read_ultrasound(void) {
 		ultraLoss = 0;
 		
 		// We run an LPF filter on the ultrasound readings
-		alt.ultra *= LPF_ULTRA;
-		alt.ultra += (1-LPF_ULTRA) * ultra;
+		alt.ultra *= (1-LPF_ULTRA);
+		alt.ultra += LPF_ULTRA * ultra;
 		
 		// Output the ultrasound altitude
 		ilink_altitude.ultra = alt.ultra;

@@ -16,7 +16,8 @@ void filter_gps_baro(){
 	// Merge Barometer and GPS Data
 	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);
 	alt.filtered += Filt_baroK * (alt.baro - alt.filtered);
-
+	
+	ilink_debug.debug0 = alt.filtered;
 	alt.vel = -ilink_gpsfly.velD;
 
 	

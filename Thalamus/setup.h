@@ -68,6 +68,9 @@ void setup() {
 		Delay(15);
 		GetBaroTemp();
 	
+		FUNCBaro_type = 2;
+		
+		
 	// *** quaternion AHRS init
 		q1 = 1;
 		q2 = 0;
