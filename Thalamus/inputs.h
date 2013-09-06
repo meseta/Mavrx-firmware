@@ -99,8 +99,7 @@ void read_rx_input(void) {
             ruddState = (rcInput[RX_FLAP] >> 4) & 0x01;
         }
         
-            ilink_debug.debug0 = rateState;
-            ilink_debug.debug1 = throState;
+            
 		flashVLED = 0;
 		LEDOff(VLED);
 	}
@@ -136,14 +135,22 @@ void read_barometer(void) {
     if(temperature_counter++ < 50) { // note: temperature_counter is incremented AFTER it is compared with 50
         // Get raw barometric pressure reading in Pascals, when it reads 0
         float pressure = GetBaroPressure();
+		
+		ilink_debug.debug0 = pressure;
+            
+			
         // There is an I2C or sensor error if 0 is returned, so only update altitude when pressure is greater than 0
         if(pressure > 0) {	
             // Run an LPF filter on the barometer data
             alt.pressure *= LPF_BARO;
             alt.pressure += (1-LPF_BARO) * pressure;
             
+			ilink_debug.debug1 = alt.pressure;
+			
             //Scale to Metres
             alt.baro = Pressure2Alt(alt.pressure);
+			
+			
             
             // Output processed data over telemetry
             ilink_altitude.baro = alt.baro;
