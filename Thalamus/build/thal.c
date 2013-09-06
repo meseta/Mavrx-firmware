@@ -3825,70 +3825,68 @@ unsigned char PRGPoll(void) {
 		I2CBuffer[1] = 0xa0;     // PROM byte
 		I2CBuffer[2] = BARO_MS_ADDR | 1;
 		if(I2CMaster(I2CBuffer, 2, I2CBuffer, 2)) {
-			if(I2CBuffer[0] == 0x00 && I2CBuffer[1] == 0x1c) {
-				unsigned int n_rem = 0;
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
-				
-				I2CBuffer[0] = BARO_MS_ADDR;
-				I2CBuffer[1] = 0xa2;     // PROM bye
-				I2CBuffer[2] = BARO_MS_ADDR | 1;
-				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-				FUNCBaro_C1 = (I2CBuffer[0] << 8) | I2CBuffer[1];
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
-				
-				I2CBuffer[0] = BARO_MS_ADDR;
-				I2CBuffer[1] = 0xa4;     // PROM bye
-				I2CBuffer[2] = BARO_MS_ADDR | 1;
-				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-				FUNCBaro_C2 = (I2CBuffer[0] << 8) | I2CBuffer[1];
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
-				
-				I2CBuffer[0] = BARO_MS_ADDR;
-				I2CBuffer[1] = 0xa6;     // PROM bye
-				I2CBuffer[2] = BARO_MS_ADDR | 1;
-				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-				FUNCBaro_C3 = (I2CBuffer[0] << 8) | I2CBuffer[1];
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
-				
-				I2CBuffer[0] = BARO_MS_ADDR;
-				I2CBuffer[1] = 0xa8;     // PROM bye
-				I2CBuffer[2] = BARO_MS_ADDR | 1;
-				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-				FUNCBaro_C4 = (I2CBuffer[0] << 8) | I2CBuffer[1];
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
-				
-				I2CBuffer[0] = BARO_MS_ADDR;
-				I2CBuffer[1] = 0xaa;     // PROM bye
-				I2CBuffer[2] = BARO_MS_ADDR | 1;
-				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-				FUNCBaro_C5 = (I2CBuffer[0] << 8) | I2CBuffer[1];
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
-				
-				I2CBuffer[0] = BARO_MS_ADDR;
-				I2CBuffer[1] = 0xac;     // PROM bye
-				I2CBuffer[2] = BARO_MS_ADDR | 1;
-				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-				FUNCBaro_C6 = (I2CBuffer[0] << 8) | I2CBuffer[1];
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
-				
-				I2CBuffer[0] = BARO_MS_ADDR;
-				I2CBuffer[1] = 0xae;     // PROM bye
-				I2CBuffer[2] = BARO_MS_ADDR | 1;
-				I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
-				n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
-				n_rem = BaroCrc4(n_rem, 0);
-				
-				n_rem = (0x000F & (n_rem >> 12)); // // final 4-bit reminder is CRC code
-				if(n_rem == (I2CBuffer[1] & 0x0f)) {
-					FUNCBaro_type = 2;
-				}
+			unsigned int n_rem = 0;
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+			
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0xa2;     // PROM bye
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			FUNCBaro_C1 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+			
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0xa4;     // PROM bye
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			FUNCBaro_C2 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+			
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0xa6;     // PROM bye
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			FUNCBaro_C3 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+			
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0xa8;     // PROM bye
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			FUNCBaro_C4 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+			
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0xaa;     // PROM bye
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			FUNCBaro_C5 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+			
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0xac;     // PROM bye
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			FUNCBaro_C6 = (I2CBuffer[0] << 8) | I2CBuffer[1];
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[1]);
+			
+			I2CBuffer[0] = BARO_MS_ADDR;
+			I2CBuffer[1] = 0xae;     // PROM bye
+			I2CBuffer[2] = BARO_MS_ADDR | 1;
+			I2CMaster(I2CBuffer, 2, I2CBuffer, 2);
+			n_rem = BaroCrc4(n_rem, I2CBuffer[0]);
+			n_rem = BaroCrc4(n_rem, 0);
+			
+			n_rem = (0x000F & (n_rem >> 12)); // // final 4-bit reminder is CRC code
+			if(n_rem == (I2CBuffer[1] & 0x0f)) {
+				FUNCBaro_type = 2;
 			}
 		}
 		
