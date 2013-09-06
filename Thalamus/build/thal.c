@@ -3784,55 +3784,11 @@ unsigned char PRGPoll(void) {
         unsigned char I2CBuffer[5];
         
         I2CInit(400);
-        // *** Accelerometer
-        I2CBuffer[0] = ACCEL_ADDR;
-        I2CBuffer[1] = 0x20 + 0x80; // Control Register CTRL_REG1_A
-        I2CBuffer[2] = ((ACCEL_RATE & 0xf) << 4) | ((ACCEL_LOW_POWER & 0x1) << 3) | 0x7; // XYZ axis enable
-        I2CMaster(I2CBuffer, 3, 0, 0);
-      
-        I2CBuffer[0] = ACCEL_ADDR;
-        I2CBuffer[1] = 0x23 + 0x80; // Control Register CTRL_REG4_A
-        I2CBuffer[2] = 0x80 | ((ACCEL_RANGE & 0x3) << 4) | (((~ACCEL_LOW_POWER) & 0x1) << 3);
-        I2CMaster(I2CBuffer, 3, 0, 0);
-        
-		#if ACCEL_FIFO_EN
-			I2CBuffer[0] = ACCEL_ADDR;
-			I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_A
-			I2CBuffer[2] = 0x40; // FIFO enable
-			I2CMaster(I2CBuffer, 3, 0, 0);
-			
-			I2CBuffer[0] = ACCEL_ADDR;
-			I2CBuffer[1] = 0x2e + 0x80; // Control Register FIFO_CTRL_REG_A
-			I2CBuffer[2] = 0x40; // FIFO mode
-			I2CMaster(I2CBuffer, 3, 0, 0);
-		#endif
-        
-        // *** Gyroscope
-        I2CBuffer[0] = GYRO_ADDR;
-        I2CBuffer[1] = 0x20 + 0x80; // Control Register CTRL_REG1_G
-        I2CBuffer[2] = ((GYRO_RATE & 0x3) << 6) | ((GYRO_BANDWIDTH & 0x3) << 4) | 0xf; // XYZ axis enable
-        I2CMaster(I2CBuffer, 3, 0, 0);
-
-        I2CBuffer[0] = GYRO_ADDR;
-        I2CBuffer[1] = 0x23 + 0x80; // Control Register CTRL_REG4_G
-        I2CBuffer[2] = 0x80 | ((GYRO_RANGE & 0x3) << 4); // Set dynamic range
-        I2CMaster(I2CBuffer, 3, 0, 0);
-        
-        I2CBuffer[0] = GYRO_ADDR;
-        I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_G
-        I2CBuffer[2] = ((GYRO_LPF & 0x1) << 1) ; // Set the secondary low pass filter
-        I2CMaster(I2CBuffer, 3, 0, 0);
-        
-        // *** Magneto
-        I2CBuffer[0] = MAGNETO_ADDR;
-        I2CBuffer[1] = 0x00;    // Config address start location
-        I2CBuffer[2] = ((MAGNETO_AVERAGING & 0x3) << 5) | ((MAGNETO_RATE & 0x7) << 2) | (MAGNETO_BIAS & 0x3); // Configuration Register A
-        I2CBuffer[3] = (MAGNETO_GAIN & 0x7) << 5; // Configuration Register B
-        I2CBuffer[4] = MAGNETO_MODE & 0x3; // Mode Register
-        I2CMaster(I2CBuffer, 5, 0, 0);
-        
+       
+	   
         // *** Barometer
 		// detect which barometer is available
+		// NOTE: seems to be that you need to reset the MEAS baro early on otherwise it just doesn't work.
 		FUNCBaro_type = 0;
 		
 		I2CBuffer[0] = BARO_LPS_ADDR;
@@ -3935,6 +3891,55 @@ unsigned char PRGPoll(void) {
 				}
 			}
 		}
+		
+		
+		 // *** Accelerometer
+        I2CBuffer[0] = ACCEL_ADDR;
+        I2CBuffer[1] = 0x20 + 0x80; // Control Register CTRL_REG1_A
+        I2CBuffer[2] = ((ACCEL_RATE & 0xf) << 4) | ((ACCEL_LOW_POWER & 0x1) << 3) | 0x7; // XYZ axis enable
+        I2CMaster(I2CBuffer, 3, 0, 0);
+      
+        I2CBuffer[0] = ACCEL_ADDR;
+        I2CBuffer[1] = 0x23 + 0x80; // Control Register CTRL_REG4_A
+        I2CBuffer[2] = 0x80 | ((ACCEL_RANGE & 0x3) << 4) | (((~ACCEL_LOW_POWER) & 0x1) << 3);
+        I2CMaster(I2CBuffer, 3, 0, 0);
+        
+		#if ACCEL_FIFO_EN
+			I2CBuffer[0] = ACCEL_ADDR;
+			I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_A
+			I2CBuffer[2] = 0x40; // FIFO enable
+			I2CMaster(I2CBuffer, 3, 0, 0);
+			
+			I2CBuffer[0] = ACCEL_ADDR;
+			I2CBuffer[1] = 0x2e + 0x80; // Control Register FIFO_CTRL_REG_A
+			I2CBuffer[2] = 0x40; // FIFO mode
+			I2CMaster(I2CBuffer, 3, 0, 0);
+		#endif
+        
+        // *** Gyroscope
+        I2CBuffer[0] = GYRO_ADDR;
+        I2CBuffer[1] = 0x20 + 0x80; // Control Register CTRL_REG1_G
+        I2CBuffer[2] = ((GYRO_RATE & 0x3) << 6) | ((GYRO_BANDWIDTH & 0x3) << 4) | 0xf; // XYZ axis enable
+        I2CMaster(I2CBuffer, 3, 0, 0);
+
+        I2CBuffer[0] = GYRO_ADDR;
+        I2CBuffer[1] = 0x23 + 0x80; // Control Register CTRL_REG4_G
+        I2CBuffer[2] = 0x80 | ((GYRO_RANGE & 0x3) << 4); // Set dynamic range
+        I2CMaster(I2CBuffer, 3, 0, 0);
+        
+        I2CBuffer[0] = GYRO_ADDR;
+        I2CBuffer[1] = 0x24 + 0x80; // Control Register CTRL_REG5_G
+        I2CBuffer[2] = ((GYRO_LPF & 0x1) << 1) ; // Set the secondary low pass filter
+        I2CMaster(I2CBuffer, 3, 0, 0);
+        
+        // *** Magneto
+        I2CBuffer[0] = MAGNETO_ADDR;
+        I2CBuffer[1] = 0x00;    // Config address start location
+        I2CBuffer[2] = ((MAGNETO_AVERAGING & 0x3) << 5) | ((MAGNETO_RATE & 0x7) << 2) | (MAGNETO_BIAS & 0x3); // Configuration Register A
+        I2CBuffer[3] = (MAGNETO_GAIN & 0x7) << 5; // Configuration Register B
+        I2CBuffer[4] = MAGNETO_MODE & 0x3; // Mode Register
+        I2CMaster(I2CBuffer, 5, 0, 0);
+		
     }
 
 	unsigned int BaroCrc4(unsigned int n_rem, unsigned char byte) {

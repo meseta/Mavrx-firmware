@@ -67,8 +67,6 @@ void setup() {
 		TrigBaroTemp(); // get parometer temperature for temperature compensation.
 		Delay(15);
 		GetBaroTemp();
-	
-		FUNCBaro_type = 2;
 		
 		
 	// *** quaternion AHRS init
