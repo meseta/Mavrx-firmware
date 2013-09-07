@@ -108,7 +108,17 @@ void setup () {
     LEDOn(PLED);
     flashVLED = 0;
     
+    // Initialise virtual serial port
+	
+	Delay(100);
+    CDCInit(VIRTUAL);
+    CDCCount = 0;
+	
+	Delay(200);
+	
     XBeeInit();
+	
+	
     addressListCount = 0;
     
     // Check to see if we should go into bypass mode
@@ -120,9 +130,6 @@ void setup () {
         XBeeBypassMode = 0;
     }
     
-    // Initialise virtual serial port
-    CDCInit(VIRTUAL);
-    CDCCount = 0;
     
     LEDOff(PLED);
     LEDInit(VLED);

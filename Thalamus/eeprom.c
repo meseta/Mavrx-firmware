@@ -12,7 +12,7 @@ unsigned char paramSendSingle;
 // *** This function loads all parameters from EEPROM.  First it loads the
 // parameters into temporary storage to verify the checksum.  Only if the
 // checksums are correct will the function update the parameters in RAM.
-void eeprom_load_all(void) {
+void eeprom_load_all_old(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
 	unsigned char * ptr;
@@ -31,7 +31,7 @@ void eeprom_load_all(void) {
 	}
 	
 	// Verify the checksum is valid (at this point i points to the correct elements for chkA and chkB)
-	if(chkA == ptr[i] && chkB == ptr[i+1]) {
+	if(chkA == ptr[i+1] && chkB == ptr[i]) {
 		// For valid data, load into parameters in RAM
 		for(i=0; i<paramCount; i++) {
 			paramStorage[i].value = tempStorage[i];
@@ -40,7 +40,7 @@ void eeprom_load_all(void) {
 }
 
 // *** This function saves all parameters to EEPROM.
-void eeprom_save_all(void) {
+void eeprom_save_all_old(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
 	unsigned char * ptr;
@@ -67,31 +67,35 @@ void eeprom_save_all(void) {
 	ptr[0] = chkA;
 	ptr[1] = chkB;
 	
-	EEPROMWrite(EEPROM_OFFSET, (unsigned char *)&tempStorage, paramCount * 4 + 2);
+	EEPROMWrite(EEPROM_OFFSET, (unsigned char *)&tempStorage, paramCount * 4);
 }
 
 
-// does the same as eeprom_load_all() but uses less RAM but many more EEPROM read operations
+// does the same as eeprom_load_all_old() but uses less RAM but many more EEPROM read operations
 // should be safer to use because of lower RAM usage
-void eeprom_load_all2(void) {
+void eeprom_load_all(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
 	unsigned char * ptr;
-	float tempStorage;
+	float tempStorage[1];
 	
     chkA=EEPROM_VERSION;
     chkB=EEPROM_VERSION;
     
     // Verify EEPRM
     for(i=0; i<paramCount && i<EEPROM_MAX_PARAMS; i++) {
-        EEPROMRead(EEPROM_OFFSET + i*4, (unsigned char *)&tempStorage, 4);
+        EEPROMRead(EEPROM_OFFSET + i*4, (unsigned char *)&(tempStorage[0]), 4);
         
         // Calculate the Fletcher-16 checksum
-        ptr = (unsigned char *)&tempStorage;
-        for(i=0; i<4; i++) {
-            chkA += ptr[i];
-            chkB += chkA;
-        }
+        ptr = (unsigned char *)&(tempStorage[0]);
+		chkA += ptr[0];
+		chkB += chkA;
+		chkA += ptr[1];
+		chkB += chkA;
+		chkA += ptr[2];
+		chkB += chkA;
+		chkA += ptr[3];
+		chkB += chkA;
     }
 	
 	// If the checksum is valid, read out values
@@ -103,20 +107,20 @@ void eeprom_load_all2(void) {
 	}
 }
 
-// does the same as eeprom_save_all, involves fewer EEPROM write operations and less RAM usage but many more EEPROM read operations
+// does the same as eeprom_save_all_old(), involves fewer EEPROM write operations and less RAM usage but many more EEPROM read operations
 // should be better to use because of better EEPROM wear (assuming that the microcontroller doesn't automatically detect writing the same data to EEPROM)
-void eeprom_save_all2(void) {
+void eeprom_save_all(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
 	unsigned char * ptr;
-	float tempStorage;
+	float tempStorage[1];
 	
 	chkA=EEPROM_VERSION;
 	chkB=EEPROM_VERSION;
     
 	for(i=0; i<paramCount && i<EEPROM_MAX_PARAMS; i++) {
-        EEPROMRead(EEPROM_OFFSET + i*4, (unsigned char *)&tempStorage, 4);
-        if(tempStorage != paramStorage[i].value) EEPROMWrite(EEPROM_OFFSET + i*4, (unsigned char *)&(paramStorage[i].value), 4);
+        EEPROMRead(EEPROM_OFFSET + i*4, (unsigned char *)&(tempStorage[0]), 4);
+        if(tempStorage[0] != paramStorage[i].value) EEPROMWrite(EEPROM_OFFSET + i*4, (unsigned char *)&(paramStorage[i].value), 4);
 		ptr = (unsigned char *)&(paramStorage[i].value);
 		chkA += ptr[0];
 		chkB += chkA;
@@ -128,6 +132,10 @@ void eeprom_save_all2(void) {
 		chkB += chkA;
 	}
 	
-    EEPROMWriteByte(EEPROM_OFFSET + paramCount*4, chkA);
-    EEPROMWriteByte(EEPROM_OFFSET + paramCount*4, chkB);
+	// for some reason single-byte writing does not work
+	ptr = (unsigned char *)&(tempStorage[0]);
+	ptr[0] = chkA;
+	ptr[1] = chkB;
+	
+	EEPROMWrite(EEPROM_OFFSET + paramCount * 4, (unsigned char *)&tempStorage, 2);
 }
