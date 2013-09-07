@@ -20,16 +20,22 @@ PRJPATH = .
 
 LD_SCRIPT = $(PRJPATH)/../common/linker.ld
 INCLUDE = -I $(PRJPATH)
+INCLUDE += -I $(PRJPATH)/inc
 INCLUDE += -I $(PRJPATH)/../common
 
 ### Compile ALL *.c files found in the directories (don't leave non-project
 ### *.c files lying around, or this makefile might attempt to include them
 ### in your project!
 
-SRCS=$(wildcard *.c)
-SRCS+=$(wildcard $(PRJPATH)/../common/*.c)
+SRCS1=$(wildcard *.c)
+SRCS2=$(wildcard $(PRJPATH)/../common/*.c)
+DIRS=$(PRJPATH)/obj
+DIRS+=$(PRJPATH)/lib
+OBJS=$(SRCS1:%.c=obj/%.o)
+OBJS+=$(SRCS2:$(PRJPATH)/../common/%.c=lib/%.o)
 
-OBJS=$(SRCS:.c=.o)
+#
+#LIBS=$(SRCS:.c=.o)
 
 ### Compiler stuff
 
@@ -40,13 +46,22 @@ OCFLAGS = --strip-unneeded
 
 all: firmware
 
-$(PRJPATH)/%.o : %.c
+$(DIRS):
+	mkdir -p $@
+
+$(PRJPATH)/obj/%.o : %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-$(PRJPATH)/%.o : %.s
+$(PRJPATH)/obj/%.o : %.s
+	$(AS) $(ASFLAGS) -o $@ $<
+	
+$(PRJPATH)/lib/%.o : $(PRJPATH)/../common/%.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(PRJPATH)/lib/%.o : $(PRJPATH)/../common/%.s
 	$(AS) $(ASFLAGS) -o $@ $<
 
-firmware: $(OBJS)
+firmware: $(DIRS) | $(OBJS)
 	-@echo "*** Compiling... ***"
 	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) -o $(PRJPATH)/firmware.elf $(OBJS) -lm
 	-@echo ""
@@ -62,4 +77,4 @@ firmware: $(OBJS)
 	-@echo ""
 	-@echo "*** Compile complete! ***"
 clean:
-	rm -f $(OBJS) $(PRJPATH)/firmware.elf $(PRJPATH)/firmware.bin $(PRJPATH)/firmware.hex
+	rm -f $(PRJPATH)/obj/*.o $(PRJPATH)/lib/*.o $(PRJPATH)/firmware.elf $(PRJPATH)/firmware.bin $(PRJPATH)/firmware.hex

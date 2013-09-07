@@ -47,10 +47,6 @@
 #include "states.h"
 
 
-
-
-
-
 //Main loop, nothing much happens in here.
 void loop() {
 	//if(idleCount < IDLE_MAX) idleCount++; // this is the counter for CPU idle time
