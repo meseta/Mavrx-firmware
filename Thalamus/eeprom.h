@@ -25,6 +25,8 @@ extern struct paramStorage_struct paramStorage[];
 // checksums are correct will the function update the parameters in RAM.
 void eeprom_load_all(void);
 void eeprom_save_all(void);
+
+// deprecated functions
 void eeprom_load_all_old(void);
 void eeprom_save_all_old(void);
 
