@@ -108,14 +108,15 @@ void setup () {
     LEDOn(PLED);
     flashVLED = 0;
     
+	XBeeReset();
+	
     // Initialise virtual serial port
 	
-	Delay(100);
+	Delay(500);
     CDCInit(VIRTUAL);
     CDCCount = 0;
 	
 	Delay(200);
-	
     XBeeInit();
 	
 	

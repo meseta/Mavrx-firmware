@@ -2,12 +2,16 @@
 // *** EEPROM Functions
 // ****************************************************************************
 
-#include "eeprom.h"
 #include "thal.h"
-
-unsigned int paramCount;
-unsigned int paramSendCount;
-unsigned char paramSendSingle;
+#include "mavlink.h"
+#include <math.h>
+#include "calibrate.h"
+#include "comms.h"
+#include "control.h"
+#include "eeprom.h"
+#include "globals.h"
+#include "inputs.h"
+#include "params.h"
 
 // *** This function loads all parameters from EEPROM.  First it loads the
 // parameters into temporary storage to verify the checksum.  Only if the

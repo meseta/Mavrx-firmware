@@ -9,17 +9,6 @@
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
 #define EEPROM_VERSION	10 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
-extern unsigned int paramCount;
-extern unsigned int paramSendCount;
-extern unsigned char paramSendSingle;
-
-typedef struct paramStorage_struct {
-	char name[16];
-	float value;
-} paramStorage_t;
-
-extern struct paramStorage_struct paramStorage[];
-
 // *** This function loads all parameters from EEPROM.  First it loads the
 // parameters into temporary storage to verify the checksum.  Only if the
 // checksums are correct will the function update the parameters in RAM.
