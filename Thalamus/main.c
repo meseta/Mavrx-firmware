@@ -153,6 +153,7 @@ typedef struct
 	float vel;
 	float ult_conf;
 	float ult;
+	float barobias;
 } altStruct;
 altStruct alt = {0};
 

@@ -326,6 +326,7 @@ void setup() {
 		LEDOff(PLED);
 		
 		gps_valid = 0;
+		alt.barobias = 0;
 		
 		ROLL_SPL_set = ROLL_SPL;
 		PITCH_SPL_set = PITCH_SPL;

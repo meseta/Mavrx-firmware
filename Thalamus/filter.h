@@ -6,30 +6,18 @@ void filter_gps_baro(){
 	
 	// Old Barometer which is too poor to use for altitude hold
 	if (FUNCBaro_type == 1) {
-		if (gps_valid == 1) {
-			Filt_GPS_K = 1; 
-			Filt_baroK = 0; 
-		}
-		else {
-			Filt_GPS_K = 0;
-			Filt_baroK = 0; 
-		}
+		// The old barometer was too poor to use for altitude hold so we use gps only.
+		alt.filtered = alt.gps;
 	}
-	// New barometer
+	// New barometer 
 	if (FUNCBaro_type == 2) {
-		if (gps_valid == 1) {
-			Filt_GPS_K = 0.2; 
-			Filt_baroK = 0.8; 
-		}
-		else {
-			Filt_GPS_K = 0;
-			Filt_baroK = 1; 
-		}
+		// We Offset the Barometer Data When Arming to get a roughly globally correct altitude.
+		alt.filtered = alt.baro + alt.barobias;
+		alt.barobias += (alt.gps - alt.filtered) * 0.0; //Filt_baroBiasK = 0.0;
 	}
 	
-	// Merge Barometer and GPS Data
-	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);
-	alt.filtered += Filt_baroK * (alt.baro - alt.filtered);
+	ilink_debug.debug1 = alt.baro;
+	ilink_debug.debug2 = alt.gps;	
 	
 	alt.vel = -ilink_gpsfly.velD;
 	
