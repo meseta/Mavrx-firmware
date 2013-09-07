@@ -26,6 +26,8 @@ void filter_gps_baro(){
 			Filt_baroK = 1; 
 		}
 	}
+	ilink_debug.debug1 = alt.gps;
+	ilink_debug.debug2 = alt.baro;
 	
 	// Merge Barometer and GPS Data
 	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);

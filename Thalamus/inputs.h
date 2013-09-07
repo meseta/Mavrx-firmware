@@ -135,8 +135,6 @@ void read_barometer(void) {
     if(temperature_counter++ < 50) { // note: temperature_counter is incremented AFTER it is compared with 50
         // Get raw barometric pressure reading in Pascals, when it reads 0
         float pressure = GetBaroPressure();
-		
-		ilink_debug.debug1 = FUNCBaro_type;
 			
         // There is an I2C or sensor error if 0 is returned, so only update altitude when pressure is greater than 0
         if(pressure > 0) {	
