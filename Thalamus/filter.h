@@ -4,21 +4,36 @@ void filter_gps_baro(){
 	// GPS Altitude in Metres
 	alt.gps = ilink_gpsfly.altitude;
 	
-	if (gps_valid == 1) {
-		Filt_GPS_K = 1; // TODO Temporary as baro isnt used currently
-		Filt_baroK = 0; // TODO Temporary as baro isnt used currently
+	// Old Barometer which is too poor to use for altitude hold
+	if (FUNCBaro_type == 1) {
+		if (gps_valid == 1) {
+			Filt_GPS_K = 1; 
+			Filt_baroK = 0; 
+		}
+		else {
+			Filt_GPS_K = 0;
+			Filt_baroK = 0; 
+		}
 	}
-	else {
-		Filt_GPS_K = 0;
-		Filt_baroK = 0; // TODO Temporary as baro isnt used currently
+	// New barometer
+	if (FUNCBaro_type == 2) {
+		if (gps_valid == 1) {
+			Filt_GPS_K = 0.2; 
+			Filt_baroK = 0.8; 
+		}
+		else {
+			Filt_GPS_K = 0;
+			Filt_baroK = 1; 
+		}
 	}
 	
 	// Merge Barometer and GPS Data
 	alt.filtered += Filt_GPS_K * (alt.gps - alt.filtered);
 	alt.filtered += Filt_baroK * (alt.baro - alt.filtered);
 	
-	ilink_debug.debug0 = alt.filtered;
 	alt.vel = -ilink_gpsfly.velD;
+	
+	ilink_debug.debug0 = alt.filtered;
 
 	
 }

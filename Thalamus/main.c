@@ -72,7 +72,7 @@
 
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	15 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	10 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 //  Running Average Lengths
 #define GAV_LEN 8
@@ -464,7 +464,7 @@ struct paramStorage_struct paramStorage[] = {
 	{"Filt_GPS_K",		 1.0},
 	#define Filt_GPS_K		paramStorage[61].value
 
-	{"LPF_BARO",   1.0},
+	{"LPF_BARO",   0.05},
 	 #define LPF_BARO  paramStorage[62].value
 
 	{"GPS_ALTKp", 5.0f},
