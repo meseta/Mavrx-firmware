@@ -28,6 +28,14 @@
     #define PACKED __attribute__ ((packed))
 #endif
 
+#ifndef SRAM1 
+	#define SRAM1 __attribute__ ((section(".bss.$sram1")))
+#endif
+
+#ifndef USBRAM 
+	#define USBRAM __attribute__ ((section(".bss.$sram1")))
+#endif
+
 #ifndef TRUE
     #define TRUE        1
     #define FALSE       0
@@ -89,10 +97,13 @@ float fcos(float x);
 
 // *** Random number functions
 #if RAND_MERSENNE
+    extern volatile unsigned int FUNCMersenne[MERSENNE_N] SRAM1;
+    extern volatile unsigned int FUNCMersenneIndex SRAM1;
+    extern volatile unsigned int FUNCMersenneMag[2] SRAM1;
     void RandomSeed(unsigned int seed);
     unsigned int Random(void);
 #else
-    extern volatile unsigned int FUNCRandomNumber;
+    extern volatile unsigned int FUNCRandomNumber SRAM1;
     static inline unsigned int Random(void) { FUNCRandomNumber = FUNCRandomNumber * RAND_A + RAND_C; return FUNCRandomNumber; };
     static inline void RandomSeed(unsigned int seed) { FUNCRandomNumber = seed; };
 #endif
@@ -134,7 +145,7 @@ void WaitDelay(unsigned int milliseconds);
 #if SYSTICK_EN
     void SysTickInit(void);
     void SysTickStop(void);
-    extern volatile unsigned int FUNCSysTicks, FUNCTimeout;
+    extern volatile unsigned int FUNCSysTicks SRAM1, FUNCTimeout SRAM1;
 
     extern WEAK void SysTickInterrupt(void);
     extern WEAK void SDTick(void);
@@ -475,8 +486,8 @@ extern WEAK void Port3Pin3Interrupt(void);
     extern WEAK void UARTParityError(unsigned char UARTData);
     
     #if UART_USE_OUTBUFFER
-        extern unsigned char FUNCUARTBuffer[UART_BUFFER_SIZE];
-        extern volatile unsigned short FUNCUARTBufferPush, FUNCUARTBufferPop;
+        extern unsigned char FUNCUARTBuffer[UART_BUFFER_SIZE] SRAM1;
+        extern volatile unsigned short FUNCUARTBufferPush SRAM1, FUNCUARTBufferPop SRAM1;
         
         unsigned short UARTBufferWritable(void);
         unsigned short UARTBufferReadable(void);
@@ -514,10 +525,10 @@ extern WEAK void Port3Pin3Interrupt(void);
     #define SLAVE               0
 
     // *** I2C global datas
-    extern volatile unsigned char FUNCI2CMasterState, FUNCI2CMasterState2, FUNCI2CSlaveState, FUNCI2CSlaveState2, FUNCI2CMode;
-    extern volatile unsigned int FUNCI2CRdLength, FUNCI2CWrLength;
-    extern volatile unsigned int FUNCI2CRdIndex, FUNCI2CWrIndex;
-    extern unsigned char FUNCI2CBuffer[I2C_DATA_SIZE];
+    extern volatile unsigned char FUNCI2CMasterState SRAM1, FUNCI2CMasterState2 SRAM1, FUNCI2CSlaveState SRAM1, FUNCI2CSlaveState2 SRAM1, FUNCI2CMode SRAM1;
+    extern volatile unsigned int FUNCI2CRdLength SRAM1, FUNCI2CWrLength SRAM1;
+    extern volatile unsigned int FUNCI2CRdIndex SRAM1, FUNCI2CWrIndex SRAM1;
+    extern unsigned char FUNCI2CBuffer[I2C_DATA_SIZE] SRAM1;
     
     // *** I2C functions
     void I2CInit(unsigned short speed);
@@ -790,8 +801,8 @@ extern WEAK void ADCInterrupt(unsigned char ADCChannel, unsigned short ADCValue)
 // *** USB Functions
 // ****************************************************************************
 
-extern USBD_API_T* USBROM;
-extern USBD_HANDLE_T hUsb;
+extern USBD_API_T* USBROM USBRAM;
+extern USBD_HANDLE_T hUsb USBRAM;
 
 void USBInit(void);
 
@@ -800,9 +811,9 @@ void USBInit(void);
 #define MBYTE   1048576
 #define GBYTE   1073741824
     
-extern unsigned char MSC_DeviceDescriptor[];
-extern unsigned char MSC_StringDescriptor[];
-extern unsigned char MSC_ConfigDescriptor[];
+extern unsigned char MSC_DeviceDescriptor[] USBRAM;
+extern unsigned char MSC_StringDescriptor[] USBRAM;
+extern unsigned char MSC_ConfigDescriptor[] USBRAM;
 
 void MSCInit(unsigned int deviceCapacity);
 
@@ -811,13 +822,13 @@ void MSCWrite(unsigned int offset, unsigned char ** buffer, unsigned int length)
 signed int MSCVerify(unsigned int offset, unsigned char * source, unsigned int length);
 
 // HID
-extern unsigned char HID_DeviceDescriptor[];
-extern unsigned char HID_StringDescriptor[];
-extern unsigned char HID_ConfigDescriptor[];
+extern unsigned char HID_DeviceDescriptor[] USBRAM;
+extern unsigned char HID_StringDescriptor[] USBRAM;
+extern unsigned char HID_ConfigDescriptor[] USBRAM;
 
 void HIDInit(void);
 
-extern uint8_t* report_buffer;
+extern uint8_t* report_buffer USBRAM;
 extern ErrorCode_t USB_Configure_Event(USBD_HANDLE_T hUsb);
 ErrorCode_t HID_GetReport( USBD_HANDLE_T hHid, USB_SETUP_PACKET* pSetup, uint8_t** pBuffer, uint16_t* plength);
 ErrorCode_t HID_SetReport( USBD_HANDLE_T hHid, USB_SETUP_PACKET* pSetup, uint8_t** pBuffer, uint16_t length);
@@ -835,16 +846,16 @@ unsigned char HIDInFeature(unsigned char * buffer);
 
 extern unsigned char VCOM_isbridge;
 
-extern unsigned char CDC_DeviceDescriptor[];
-extern unsigned char CDC_StringDescriptor[];
-extern unsigned char CDC_ConfigDescriptor[];
+extern unsigned char CDC_DeviceDescriptor[] USBRAM;
+extern unsigned char CDC_StringDescriptor[] USBRAM;
+extern unsigned char CDC_ConfigDescriptor[] USBRAM;
 void CDCInit(unsigned char bridge);
 
 void CDCReadByte(unsigned char byte);
 void CDCWriteByte(unsigned char byte);
 void CDCWrite(unsigned char * byte, unsigned int length);
 
-struct VCOM_DATA;
+struct VCOM_DATA USBRAM;
 typedef void (*VCOM_SEND_T) (struct VCOM_DATA* pVcom);
 
 typedef struct VCOM_DATA {
@@ -862,7 +873,7 @@ typedef struct VCOM_DATA {
   volatile uint16_t usbrx_pend;
 } VCOM_DATA_T;
 
-extern VCOM_DATA_T g_vCOM;
+extern VCOM_DATA_T g_vCOM USBRAM;
 void VCOM_usb_send(VCOM_DATA_T* pVcom);
 void VCOM_init_bridge(VCOM_DATA_T* pVcom, CDC_LINE_CODING* line_coding);
 void VCOM_uart_write(VCOM_DATA_T* pVcom);
@@ -885,7 +896,7 @@ ErrorCode_t VCOM_bulk_out_hdlr(USBD_HANDLE_T hUsb, void* data, uint32_t event) ;
 #define VLED    (0x1UL << 3)
 #define ALLLED  (RLED | PLED | ULED | VLED)
 
-extern volatile unsigned char FUNCLEDStatus;
+extern volatile unsigned char FUNCLEDStatus SRAM1;
 
 static inline void LEDOff(unsigned int pins) { Port0High(pins); FUNCLEDStatus &= ~pins;}
 static inline void LEDOn(unsigned int pins) { Port0Low(pins); FUNCLEDStatus |= pins;}
@@ -1056,9 +1067,9 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_altitude_t;
     
-    extern volatile unsigned char FUNCILinkState;
-    extern volatile unsigned short FUNCILinkID, FUNCILinkChecksumA, FUNCILinkChecksumB, FUNCILinkLength, FUNCILinkPacket;
-    extern unsigned short FUNCILinkRxBuffer[ILINK_RXBUFFER_SIZE];
+    extern volatile unsigned char FUNCILinkState SRAM1;
+    extern volatile unsigned short FUNCILinkID SRAM1, FUNCILinkChecksumA SRAM1, FUNCILinkChecksumB SRAM1, FUNCILinkLength SRAM1, FUNCILinkPacket SRAM1;
+    extern unsigned short FUNCILinkRxBuffer[ILINK_RXBUFFER_SIZE] SRAM1;
     
     void ILinkInit(unsigned short speed);
     void ILinkPoll(unsigned short message);
@@ -1070,9 +1081,9 @@ static inline void RSTReset(void) { ResetInit(); }
     extern WEAK void ILinkMessageRequest(unsigned short id);
     extern WEAK void ILinkMessageError(unsigned short id);
     
-    extern unsigned int FUNCILinkTxBufferBusy;
-    extern unsigned short FUNCILinkTxBuffer[ILINK_TXBUFFER_SIZE];
-    extern volatile unsigned short FUNCILinkTxBufferPushPtr, FUNCILinkTxBufferPopPtr;
+    extern unsigned int FUNCILinkTxBufferBusy SRAM1;
+    extern unsigned short FUNCILinkTxBuffer[ILINK_TXBUFFER_SIZE] SRAM1;
+    extern volatile unsigned short FUNCILinkTxBufferPushPtr SRAM1, FUNCILinkTxBufferPopPtr SRAM1;
 
     unsigned short ILinkWritable(void);
     unsigned short ILinkReadable(void);
@@ -1087,11 +1098,11 @@ static inline void RSTReset(void) { ResetInit(); }
     // *** ULTRA Functions (Thalamus only)
     // ****************************************************************************
     
-    extern volatile unsigned char FUNCUltraNewData;
-    extern volatile unsigned short FUNCUltraValueMM;
-    extern volatile unsigned char FUNCUltraOutOfRange;
-    extern volatile unsigned char FUNCUltraUnderRange;
-    extern volatile unsigned char FUNCUltraFastRate;
+    extern volatile unsigned char FUNCUltraNewData SRAM1;
+    extern volatile unsigned short FUNCUltraValueMM SRAM1;
+    extern volatile unsigned char FUNCUltraOutOfRange SRAM1;
+    extern volatile unsigned char FUNCUltraUnderRange SRAM1;
+    extern volatile unsigned char FUNCUltraFastRate SRAM1;
     
     unsigned char UltraInit(void);
     static inline void UltraSlow(void) { FUNCUltraFastRate = 0; }
@@ -1122,20 +1133,20 @@ static inline void RSTReset(void) { ResetInit(); }
         #define RX_FLAP 5
         #define RX_AUX2 6
 
-        extern volatile unsigned char FUNCRXCount;
-        extern volatile unsigned char FUNCRXLastByte;
-        extern volatile unsigned char FUNCRXChannel;
-        extern volatile unsigned char FUNCRXNewData;
+        extern volatile unsigned char FUNCRXCount SRAM1;
+        extern volatile unsigned char FUNCRXLastByte SRAM1;
+        extern volatile unsigned char FUNCRXChannel SRAM1;
+        extern volatile unsigned char FUNCRXNewData SRAM1;
         
         
-        extern volatile unsigned char FUNCRXStatus;
+        extern volatile unsigned char FUNCRXStatus SRAM1;
         
         #if RX_TYPE == 0
-        extern unsigned short FUNCRXChanBuffer[7];
-        extern unsigned short FUNCRXChan[7];
+        extern unsigned short FUNCRXChanBuffer[7] SRAM1;
+        extern unsigned short FUNCRXChan[7] SRAM1;
         #else
-        extern unsigned short FUNCRXChanBuffer[18];
-        extern unsigned short FUNCRXChan[18];
+        extern unsigned short FUNCRXChanBuffer[18] SRAM1;
+        extern unsigned short FUNCRXChan[18] SRAM1;
         extern void RXUARTParityError(void);
         #endif
         
@@ -1160,13 +1171,13 @@ static inline void RSTReset(void) { ResetInit(); }
     #define PWM_ALL     0x3f
 
 
-    extern volatile unsigned char FUNCPWMPostscale;
-	extern volatile unsigned short FUNCPWMN_duty;
-	extern volatile unsigned short FUNCPWME_duty;
-	extern volatile unsigned short FUNCPWMS_duty;
-	extern volatile unsigned short FUNCPWMW_duty;
-	extern volatile unsigned short FUNCPWMX_duty;
-	extern volatile unsigned short FUNCPWMY_duty;
+    extern volatile unsigned char FUNCPWMPostscale SRAM1;
+	extern volatile unsigned short FUNCPWMN_duty SRAM1;
+	extern volatile unsigned short FUNCPWME_duty SRAM1;
+	extern volatile unsigned short FUNCPWMS_duty SRAM1;
+	extern volatile unsigned short FUNCPWMW_duty SRAM1;
+	extern volatile unsigned short FUNCPWMX_duty SRAM1;
+	extern volatile unsigned short FUNCPWMY_duty SRAM1;
 
     void PWMInit(unsigned char channels);
 
@@ -1218,9 +1229,9 @@ static inline void RSTReset(void) { ResetInit(); }
     #define BARO_LPS_ADDR	0xb8
 	#define BARO_MS_ADDR 0xee
 	
-	extern volatile unsigned char FUNCBaro_type;
-	extern volatile unsigned short FUNCBaro_C1, FUNCBaro_C2, FUNCBaro_C3,FUNCBaro_C4, FUNCBaro_C5, FUNCBaro_C6;
-	extern volatile signed long long FUNCBaro_sensitivity, FUNCBaro_offset;
+	extern volatile unsigned char FUNCBaro_type SRAM1;
+	extern volatile unsigned short FUNCBaro_C1 SRAM1, FUNCBaro_C2 SRAM1, FUNCBaro_C3 SRAM1,FUNCBaro_C4 SRAM1, FUNCBaro_C5 SRAM1, FUNCBaro_C6 SRAM1;
+	extern volatile signed long long FUNCBaro_sensitivity SRAM1, FUNCBaro_offset SRAM1;
 	unsigned int BaroCrc4(unsigned int n_rem, unsigned char byte);
 	
     void SensorInit(void);
@@ -1251,7 +1262,7 @@ static inline void RSTReset(void) { ResetInit(); }
     #define PWM_ALL 0x1f
 
 
-    extern volatile unsigned char FUNCPWMPostscale;
+    extern volatile unsigned char FUNCPWMPostscale SRAM1;
 
     void PWMInit(unsigned char channels);
 
@@ -1262,11 +1273,11 @@ static inline void RSTReset(void) { ResetInit(); }
         static inline void PWMSetD(unsigned int value) {  Timer3SetMatch0(value);   }
         static inline void PWMSetS(unsigned int value) {  Timer2SetMatch3(value);   }
     #else 
-        extern volatile unsigned int FUNCPWMA_fil;
-        extern volatile unsigned int FUNCPWMB_fil;
-        extern volatile unsigned int FUNCPWMC_fil;
-        extern volatile unsigned int FUNCPWMD_fil;
-        extern volatile unsigned int FUNCPWMS_fil;
+        extern volatile unsigned int FUNCPWMA_fil SRAM1;
+        extern volatile unsigned int FUNCPWMB_fil SRAM1;
+        extern volatile unsigned int FUNCPWMC_fil SRAM1;
+        extern volatile unsigned int FUNCPWMD_fil SRAM1;
+        extern volatile unsigned int FUNCPWMS_fil SRAM1;
         static inline void PWMSetA(unsigned int value) {  FUNCPWMA_fil *= PWM_ABCD_FILTER; FUNCPWMA_fil += value * (1-PWM_ABCD_FILTER); Timer3SetMatch3(FUNCPWMA_fil);   }
         static inline void PWMSetB(unsigned int value) {  FUNCPWMB_fil *= PWM_ABCD_FILTER; FUNCPWMB_fil += value * (1-PWM_ABCD_FILTER); Timer3SetMatch1(FUNCPWMB_fil);   }
         static inline void PWMSetC(unsigned int value) {  FUNCPWMC_fil *= PWM_ABCD_FILTER; FUNCPWMC_fil += value * (1-PWM_ABCD_FILTER); Timer3SetMatch1(FUNCPWMC_fil);   }
@@ -1308,9 +1319,9 @@ static inline void RSTReset(void) { ResetInit(); }
         #endif
         
         #if GPS_METHOD == 1
-            extern volatile unsigned char FUNCGPSState, FUNCGPSChecksumA, FUNCGPSChecksumB, FUNCGPSID1, FUNCGPSID2;
-            extern volatile unsigned short FUNCGPSLength, FUNCGPSPacket, FUNCGPSID;
-            extern unsigned char FUNCGPSBuffer[GPS_BUFFER_SIZE];
+            extern volatile unsigned char FUNCGPSState SRAM1, FUNCGPSChecksumA SRAM1, FUNCGPSChecksumB SRAM1, FUNCGPSID1 SRAM1, FUNCGPSID2 SRAM1;
+            extern volatile unsigned short FUNCGPSLength SRAM1, FUNCGPSPacket SRAM1, FUNCGPSID SRAM1;
+            extern unsigned char FUNCGPSBuffer[GPS_BUFFER_SIZE] SRAM1;
             
             typedef struct gps_nav_posecef_struct{
                 unsigned int iTOW;
@@ -1405,7 +1416,7 @@ static inline void RSTReset(void) { ResetInit(); }
         static inline void FlashSEL(void) { Port0Write(PIN23, 0); }
         static inline void FlashCLR(void) { SSP1Wait(); Port0Write(PIN23, 1); }
     
-        extern volatile unsigned int FUNCFlashCR0Reset, FUNCFlashCPSRReset;
+        extern volatile unsigned int FUNCFlashCR0Reset SRAM1, FUNCFlashCPSRReset SRAM1;
         
         void FlashInit(void);
         void FlashStart(void);
@@ -1429,9 +1440,9 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned char FlashVerify(unsigned int address, unsigned char * data, unsigned int length);
         
         // buffered versions of the above
-        extern volatile unsigned int FUNCFlashCurrentSector;
-        extern unsigned char FUNCFlashSectorBuffer[4096];
-        extern volatile unsigned char FUNCFlashSectorChanged;
+        extern volatile unsigned int FUNCFlashCurrentSector SRAM1;
+        extern unsigned char FUNCFlashSectorBuffer[4096]; // This is the only library function not in SRAM[1] as it won't fit!
+        extern volatile unsigned char FUNCFlashSectorChanged SRAM1;
         void FlashBufferSector(unsigned int address);
         void FlashFlushBuffer(void);
         void FlashWriteByte(unsigned int address, unsigned char data);
@@ -1532,22 +1543,22 @@ static inline void RSTReset(void) { ResetInit(); }
             unsigned short varLen;
         } PACKED xbee_node_identification_indicator_t;
         
-        extern xbee_modem_status_t xbee_modem_status;
-        extern xbee_at_command_t xbee_at_command;
-        extern xbee_at_response_t xbee_at_response;
-        extern xbee_transmit_status_t xbee_transmit_status;
-        extern xbee_receive_packet_t xbee_receive_packet;
-        extern xbee_transmit_request_t xbee_transmit_request;
-        extern xbee_node_identification_indicator_t xbee_node_identification_indicator;
+        extern xbee_modem_status_t xbee_modem_status SRAM1;
+        extern xbee_at_command_t xbee_at_command SRAM1;
+        extern xbee_at_response_t xbee_at_response SRAM1;
+        extern xbee_transmit_status_t xbee_transmit_status SRAM1;
+        extern xbee_receive_packet_t xbee_receive_packet SRAM1;
+        extern xbee_transmit_request_t xbee_transmit_request SRAM1;
+        extern xbee_node_identification_indicator_t xbee_node_identification_indicator SRAM1;
         
-        extern unsigned char FUNCXBeetBuf[TBUF_LEN];
-        extern volatile unsigned char FUNCXBeetBufCount;
+        extern unsigned char FUNCXBeetBuf[TBUF_LEN] SRAM1;
+        extern volatile unsigned char FUNCXBeetBufCount SRAM1;
         unsigned int XBeetBufCompare(unsigned char * compare, unsigned int length);
         
-        extern volatile unsigned int FUNCXBeeState;
-        extern volatile unsigned short FUNCXBeeLength, FUNCXBeeID, FUNCXBeePacket;
-        extern volatile unsigned char FUNCXBeeChecksum;
-        extern unsigned char FUNCXBeeBuffer[XBEE_BUFFER_SIZE];
+        extern volatile unsigned int FUNCXBeeState SRAM1;
+        extern volatile unsigned short FUNCXBeeLength, FUNCXBeeID, FUNCXBeePacket SRAM1;
+        extern volatile unsigned char FUNCXBeeChecksum SRAM1;
+        extern unsigned char FUNCXBeeBuffer[XBEE_BUFFER_SIZE] SRAM1;
     
         extern WEAK void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length);
         void XBeeInit(void);

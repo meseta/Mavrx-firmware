@@ -5,7 +5,8 @@ unsigned int paramSendCount;
 unsigned char paramSendSingle;
 
 struct paramStorage_struct paramStorage[] = {
-	{"DRIFT_AKp",		   0.2f},
+	//ADDPARAM(DRIFT_AKp, 0.2f),
+	[0] = {"DRIFT_AKp",		   0.2f},
 	{"DRIFT_MKp",	  		0.2f}, 
 	{"LPF_ULTRA",	   0.05f},  
 	{"YAW_SEN",	 0.0001f},	 

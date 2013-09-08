@@ -193,7 +193,7 @@ float fcos(float x) {
 
     void RandomSeed(unsigned int seed) {
         unsigned int i;
-        FUNCMersenne[0]= seed;
+        FUNCMersenne[0] = seed;
         for (i=1; i<623; i++) {
             FUNCMersenne[i] = (1812433253UL * (FUNCMersenne[i-1] ^ (FUNCMersenne[i-1] >> 30)) + i);
         }
@@ -1061,26 +1061,26 @@ void PIOINT3_IRQHandler(void) {
                 // assume 72MHz operation
                 #if UART_USE_FBR
                     switch(baud) {                          // some predefined baud rates with pre-calculated fractional baud rates
-                        //case 110: LPC_USART->DLM = 0x92; LPC_USART->DLL = 0x7c; LPC_USART->FDR = 0xb1; break;
-                        //case 4800: LPC_USART->DLM = 0x03; LPC_USART->DLL = 0x6b; LPC_USART->FDR = 0xe1; break;
+                        case 110: LPC_USART->DLM = 0x92; LPC_USART->DLL = 0x7c; LPC_USART->FDR = 0xb1; break;
+                        case 4800: LPC_USART->DLM = 0x03; LPC_USART->DLL = 0x6b; LPC_USART->FDR = 0xe1; break;
                         case 9600: LPC_USART->DLM = 0x01; LPC_USART->DLL = 0x77; LPC_USART->FDR = 0x41; break;
-                        //case 14400: LPC_USART->DLM = 0; LPC_USART->DLL = 0xfa; LPC_USART->FDR = 0x41; break;
-                        //case 19200: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7d; LPC_USART->FDR = 0x87; break;
-                        //case 28800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7d; LPC_USART->FDR = 0x41; break;
-                        //case 38400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4a; LPC_USART->FDR = 0xc7; break;
-                        //case 56000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4b; LPC_USART->FDR = 0xe1; break;
-                        //case 57600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x47; LPC_USART->FDR = 0xa1; break;
+                        case 14400: LPC_USART->DLM = 0; LPC_USART->DLL = 0xfa; LPC_USART->FDR = 0x41; break;
+                        case 19200: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7d; LPC_USART->FDR = 0x87; break;
+                        case 28800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7d; LPC_USART->FDR = 0x41; break;
+                        case 38400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4a; LPC_USART->FDR = 0xc7; break;
+                        case 56000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4b; LPC_USART->FDR = 0xe1; break;
+                        case 57600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x47; LPC_USART->FDR = 0xa1; break;
                         case 115200: LPC_USART->DLM = 0; LPC_USART->DLL = 0x17; LPC_USART->FDR = 0xa7; break;
-                        //case 128000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1f; LPC_USART->FDR = 0xf2; break;
-                        //case 153600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x17; LPC_USART->FDR = 0xb3; break;
-                        //case 230400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x10; LPC_USART->FDR = 0x92; break;
-                        //case 256000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x10; LPC_USART->FDR = 0xa1; break;
-                        //case 460800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x8; LPC_USART->FDR = 0x92; break;
-                        //case 921600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0x92; break;
-                        //case 1000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0x81; break;
-                        //case 2000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x2; LPC_USART->FDR = 0x81; break;
-                        //case 3000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1; LPC_USART->FDR = 0x21; break;
-                        //case 4000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1; LPC_USART->FDR = 0x81; break;
+                        case 128000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1f; LPC_USART->FDR = 0xf2; break;
+                        case 153600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x17; LPC_USART->FDR = 0xb3; break;
+                        case 230400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x10; LPC_USART->FDR = 0x92; break;
+                        case 256000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x10; LPC_USART->FDR = 0xa1; break;
+                        case 460800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x8; LPC_USART->FDR = 0x92; break;
+                        case 921600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0x92; break;
+                        case 1000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0x81; break;
+                        case 2000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x2; LPC_USART->FDR = 0x81; break;
+                        case 3000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1; LPC_USART->FDR = 0x21; break;
+                        case 4000000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1; LPC_USART->FDR = 0x81; break;
                         default:
                             LPC_USART->FDR = 0x10;
                             baudval = 4500000/baud;	                // baud rate
@@ -1104,22 +1104,22 @@ void PIOINT3_IRQHandler(void) {
                 // assume 12MHz operation
                 #if UART_USE_FBR
                     switch(baud) {                          // some predefined baud rates with pre-calculated fractional baud rates
-                        //case 110: LPC_USART->DLM = 0x18; LPC_USART->DLL = 0x6a; LPC_USART->FDR = 0xb1; break;
-                        //case 2400: LPC_USART->DLM = 0; LPC_USART->DLL = 0xfa; LPC_USART->FDR = 0x41; break;
-                        //case 4800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7d; LPC_USART->FDR = 0x41; break;
-                        //case 9600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x47; LPC_USART->FDR = 0xa1; break;
-                        //case 14400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1b; LPC_USART->FDR = 0xed; break;
-                        //case 19200: LPC_USART->DLM = 0; LPC_USART->DLL = 0x17; LPC_USART->FDR = 0xa7; break;
-                        //case 28800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x17; LPC_USART->FDR = 0xf2; break;
-                        //case 38400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x10; LPC_USART->FDR = 0x92; break;
-                        //case 56000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7; LPC_USART->FDR = 0xcb; break;
-                        //case 57600: LPC_USART->DLM = 0; LPC_USART->DLL = 0xd; LPC_USART->FDR = 0x10; break;
-                        //case 115200: LPC_USART->DLM = 0; LPC_USART->DLL = 0x6; LPC_USART->FDR = 0xc1; break;
-                        //case 128000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0xf7; break;
-                        //case 153600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0x92; break;
-                        //case 230400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x3; LPC_USART->FDR = 0xc1; break;
-                        //case 256000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x2; LPC_USART->FDR = 0xf7; break;
-                        //case 460800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1; LPC_USART->FDR = 0x85; break;
+                        case 110: LPC_USART->DLM = 0x18; LPC_USART->DLL = 0x6a; LPC_USART->FDR = 0xb1; break;
+                        case 2400: LPC_USART->DLM = 0; LPC_USART->DLL = 0xfa; LPC_USART->FDR = 0x41; break;
+                        case 4800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7d; LPC_USART->FDR = 0x41; break;
+                        case 9600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x47; LPC_USART->FDR = 0xa1; break;
+                        case 14400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1b; LPC_USART->FDR = 0xed; break;
+                        case 19200: LPC_USART->DLM = 0; LPC_USART->DLL = 0x17; LPC_USART->FDR = 0xa7; break;
+                        case 28800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x17; LPC_USART->FDR = 0xf2; break;
+                        case 38400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x10; LPC_USART->FDR = 0x92; break;
+                        case 56000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x7; LPC_USART->FDR = 0xcb; break;
+                        case 57600: LPC_USART->DLM = 0; LPC_USART->DLL = 0xd; LPC_USART->FDR = 0x10; break;
+                        case 115200: LPC_USART->DLM = 0; LPC_USART->DLL = 0x6; LPC_USART->FDR = 0xc1; break;
+                        case 128000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0xf7; break;
+                        case 153600: LPC_USART->DLM = 0; LPC_USART->DLL = 0x4; LPC_USART->FDR = 0x92; break;
+                        case 230400: LPC_USART->DLM = 0; LPC_USART->DLL = 0x3; LPC_USART->FDR = 0xc1; break;
+                        case 256000: LPC_USART->DLM = 0; LPC_USART->DLL = 0x2; LPC_USART->FDR = 0xf7; break;
+                        case 460800: LPC_USART->DLM = 0; LPC_USART->DLL = 0x1; LPC_USART->FDR = 0x85; break;
                         default:
                             LPC_USART->FDR = 0x10;
                             baudval = 750000/baud;	                // baud rate
@@ -2363,43 +2363,48 @@ void Timer3Capture(unsigned char mode) {
     }
 }
 void CT16B0_IRQHandler(void) {
+    unsigned int interrupts = LPC_CT16B0->IR & 0x1f;
     if(Timer0Interrupt) Timer0Interrupt(LPC_CT16B0->IR & 0x1f);
-    if(LPC_CT16B0->IR & 0x1 && Timer0Interrupt0) Timer0Interrupt0();
-    if(LPC_CT16B0->IR & 0x2 && Timer0Interrupt1) Timer0Interrupt1();
-    if(LPC_CT16B0->IR & 0x4 && Timer0Interrupt2) Timer0Interrupt2();
-    if(LPC_CT16B0->IR & 0x8 && Timer0Interrupt3) Timer0Interrupt3();
-    if(LPC_CT16B0->IR & 0x10 && Timer0InterruptC) Timer0InterruptC(LPC_CT16B0->CR0);
-    LPC_CT16B0->IR = 0x1f;
+    if(interrupts & 0x1 && Timer0Interrupt0) Timer0Interrupt0();
+    if(interrupts & 0x2 && Timer0Interrupt1) Timer0Interrupt1();
+    if(interrupts & 0x4 && Timer0Interrupt2) Timer0Interrupt2();
+    if(interrupts & 0x8 && Timer0Interrupt3) Timer0Interrupt3();
+    if(interrupts & 0x10 && Timer0InterruptC) Timer0InterruptC(LPC_CT16B0->CR0);
+    LPC_CT16B0->IR = interrupts;
     __NOP(); __NOP();
 }
 void CT16B1_IRQHandler(void) {
+    unsigned int interrupts = LPC_CT16B1->IR & 0x1f;
     if(Timer1Interrupt) Timer1Interrupt(LPC_CT16B1->IR & 0x1f);
-    if(LPC_CT16B1->IR & 0x1 && Timer1Interrupt0) Timer1Interrupt0();
-    if(LPC_CT16B1->IR & 0x2 && Timer1Interrupt1) Timer1Interrupt1();
-    if(LPC_CT16B1->IR & 0x4 && Timer1Interrupt2) Timer1Interrupt2();
-    if(LPC_CT16B1->IR & 0x8 && Timer1Interrupt3) Timer1Interrupt3();
-    if(LPC_CT16B1->IR & 0x10 && Timer1InterruptC) Timer1InterruptC(LPC_CT16B1->CR0);
-    LPC_CT16B1->IR = 0x1f;
+    if(interrupts & 0x1 && Timer1Interrupt0) Timer1Interrupt0();
+    if(interrupts & 0x2 && Timer1Interrupt1) Timer1Interrupt1();
+    if(interrupts & 0x4 && Timer1Interrupt2) Timer1Interrupt2();
+    if(interrupts & 0x8 && Timer1Interrupt3) Timer1Interrupt3();
+    if(interrupts & 0x10 && Timer1InterruptC) Timer1InterruptC(LPC_CT16B1->CR0);
+    LPC_CT16B1->IR = interrupts;
     __NOP(); __NOP();
 }
 void CT32B0_IRQHandler(void) {
+    unsigned int interrupts = LPC_CT32B0->IR & 0x1f;
     if(Timer2Interrupt) Timer2Interrupt(LPC_CT32B0->IR & 0x1f);
-    if(LPC_CT32B0->IR & 0x1 && Timer2Interrupt0) Timer2Interrupt0();
-    if(LPC_CT32B0->IR & 0x2 && Timer2Interrupt1) Timer2Interrupt1();
-    if(LPC_CT32B0->IR & 0x4 && Timer2Interrupt2) Timer2Interrupt2();
-    if(LPC_CT32B0->IR & 0x8 && Timer2Interrupt3) Timer2Interrupt3();
-    if(LPC_CT32B0->IR & 0x10 && Timer2InterruptC) Timer2InterruptC(LPC_CT32B0->CR0);
-    LPC_CT32B0->IR = 0x1f;
+    if(interrupts & 0x1 && Timer2Interrupt0) Timer2Interrupt0();
+    if(interrupts & 0x2 && Timer2Interrupt1) Timer2Interrupt1();
+    if(interrupts & 0x4 && Timer2Interrupt2) Timer2Interrupt2();
+    if(interrupts & 0x8 && Timer2Interrupt3) Timer2Interrupt3();
+    if(interrupts & 0x10 && Timer2InterruptC) Timer2InterruptC(LPC_CT32B0->CR0);
+    LPC_CT32B0->IR = interrupts;
     __NOP(); __NOP();
 }
 void CT32B1_IRQHandler(void) {
-    if(Timer3Interrupt) Timer3Interrupt(LPC_CT32B1->IR & 0x1f);
-    if(LPC_CT32B1->IR & 0x1 && Timer3Interrupt0) Timer3Interrupt0();
-    if(LPC_CT32B1->IR & 0x2 && Timer3Interrupt1) Timer3Interrupt1();
-    if(LPC_CT32B1->IR & 0x4 && Timer3Interrupt2) Timer3Interrupt2();
-    if(LPC_CT32B1->IR & 0x8 && Timer3Interrupt3) Timer3Interrupt3();
-    if(LPC_CT32B1->IR & 0x10 && Timer3InterruptC) Timer3InterruptC(LPC_CT32B1->CR0);
-    LPC_CT32B1->IR = 0x1f;
+
+    unsigned int interrupts = LPC_CT32B1->IR & 0x1f;
+    if(Timer3Interrupt) Timer3Interrupt(interrupts);
+    if(interrupts & 0x1 && Timer3Interrupt0) Timer3Interrupt0();
+    if(interrupts & 0x2 && Timer3Interrupt1) Timer3Interrupt1();
+    if(interrupts & 0x4 && Timer3Interrupt2) Timer3Interrupt2();
+    if(interrupts & 0x8 && Timer3Interrupt3) Timer3Interrupt3();
+    if(interrupts & 0x10 && Timer3InterruptC) Timer3InterruptC(LPC_CT32B1->CR0);
+    LPC_CT32B1->IR = interrupts;
     __NOP(); __NOP();
 }
 

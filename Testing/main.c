@@ -1,32 +1,20 @@
 #include "thal.h"
 
-
-#define ZERO	__COUNTER__
-#define ONE		__COUNTER__
-#define TWO		__COUNTER__
+#define NUM	1024*8 - 1
+volatile unsigned char test[NUM];
 
 int main(void) {
+	unsigned int i;
+	unsigned char r;
 	LEDInit(PLED);
-	
-	if(ONE == 0) {
-		LEDOn(PLED);
-		Delay(200);
-		LEDOff(PLED);
-		Delay(200);
-	}
-	
-	if(ZERO == 1) {
-		LEDOn(PLED);
-		Delay(200);
-		LEDOff(PLED);
-		Delay(200);
-	}
-	
-	if(TWO == 2) {
-		LEDOn(PLED);
-		Delay(200);
-		LEDOff(PLED);
-		Delay(200);
+	i=0;
+	while(1) {
+		r = Random();
+		test[i] = r;
+		if(test[i] == r) LEDOn(PLED);
+		else LEDOff(PLED);
+		i++;
+		if(i >= NUM) i=0;
 	}
 	
 	return 0;

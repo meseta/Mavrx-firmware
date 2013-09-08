@@ -243,10 +243,10 @@ void setup() {
     MAVSendHeartbeat();
 
     // *** GPS
-    GPSInit();
+    /*GPSInit();
     GPSSetRate(ID_NAV_POSLLH, 1); // every one nav solutions (i.e. as fast as possible)
     GPSSetRate(ID_NAV_STATUS, 3); // every three nav solutions
-    GPSSetRate(ID_NAV_VELNED, 1);
+    GPSSetRate(ID_NAV_VELNED, 1);*/
     
     lat_diff_i = 0;
     lon_diff_i = 0;
@@ -393,7 +393,7 @@ void RITInterrupt(void) {
     waypointTimer++;
     
     gpsSendCounter++;
-    
+	
     // *** Watchdogs
     // Incoming heartbeat watchdog
     if(heartbeatWatchdog >= MESSAGE_LOOP_HZ*XBEE_PANIC) {
@@ -422,6 +422,7 @@ void RITInterrupt(void) {
         XBeeAllow();
     }
     
+	
     // *** Process GPS
     XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
     GPSFetchData();
@@ -456,7 +457,7 @@ void RITInterrupt(void) {
         
         if(gps_nav_posllh.isNew) {
             gps_nav_posllh.isNew = 0;
-             
+            
             if(gpsFixed == 1) {
                 gpsWatchdog = 0;
                 mavlink_gps_raw_int.lat = gps_nav_posllh.lat;
@@ -861,7 +862,7 @@ void RITInterrupt(void) {
         
         }
     }
-
+	
     // *** MAVLink messages
     if(heartbeatCounter >= MESSAGE_LOOP_HZ) { // 1Hz loop
         heartbeatCounter = 0;
@@ -876,7 +877,8 @@ void RITInterrupt(void) {
     }
     
     if(allowTransmit) {
-        if(paramPointer < PARAMBUFFER_SIZE) {
+        
+		if(paramPointer < PARAMBUFFER_SIZE) {
             unsigned int i;
             // shunt this along to GCS
             for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
@@ -915,14 +917,14 @@ void RITInterrupt(void) {
         }
         //else if(ilink_thalctrl_rx.isNew) {
             // TODO translate mavlink command to thalctrl
-            /*ilink_thalctrl_rx.isNew = 0;
-            if(ilink_thalctrl_rx.command == MAVLINK_MSG_ID_COMMAND_LONG) {
-                mavlink_command_ack.result = 0;
-                mavlink_command_ack.command = ilink_thalctrl_rx.data;
-                mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
-                mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-            }*/
+            // ilink_thalctrl_rx.isNew = 0;
+            // if(ilink_thalctrl_rx.command == MAVLINK_MSG_ID_COMMAND_LONG) {
+                // mavlink_command_ack.result = 0;
+                // mavlink_command_ack.command = ilink_thalctrl_rx.data;
+                // mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
+                // mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+                // XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+            // }
         //}
         else if(dataRate[MAV_DATA_STREAM_RAW_SENSORS] && rawSensorStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_SENSORS]) {
             rawSensorStreamCounter = 0;
@@ -1045,11 +1047,11 @@ void RITInterrupt(void) {
                 mavlink_servo_output_raw.servo8_raw = 0;
                 mavlink_servo_output_raw.port = 0;
                 
-                /*mavlink_msg_servo_output_raw_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_servo_output_raw);
-                mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-                XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-                XBeeAllow();*/
+                // mavlink_msg_servo_output_raw_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_servo_output_raw);
+                // mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+                // XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+                // XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+                // XBeeAllow();
                 //MAVSendVector("OUTPUT0", ilink_outputs0.channel[0], ilink_outputs0.channel[1], ilink_outputs0.channel[2]);
                 //MAVSendVector("OUTPUT1", ilink_outputs0.channel[3], ilink_outputs0.channel[4], ilink_outputs0.channel[5]);
                 MAVSendInt("MOTOR_N", ilink_outputs0.channel[0]);
@@ -1081,26 +1083,26 @@ void RITInterrupt(void) {
                 XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
                 XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
                 XBeeAllow();
-                /*
-                mavlink_rc_channels_scaled.time_boot_ms = sysMS;
-                mavlink_rc_channels_scaled.chan1_scaled = (signed int)ilink_inputs0.channel[0] * 11.8;
-                mavlink_rc_channels_scaled.chan2_scaled = ((signed int)ilink_inputs0.channel[1] - (signed int)511) * 29.4;
-                mavlink_rc_channels_scaled.chan3_scaled = ((signed int)ilink_inputs0.channel[2] - (signed int)511) * 29.4;
-                mavlink_rc_channels_scaled.chan4_scaled = ((signed int)ilink_inputs0.channel[3] - (signed int)511) * 29.4;
-                if(ilink_inputs0.channel[4] < 500) mavlink_rc_channels_scaled.chan5_scaled = 0;
-                else mavlink_rc_channels_scaled.chan5_scaled = 10000;
-                if(ilink_inputs0.channel[5] < 500) mavlink_rc_channels_scaled.chan6_scaled = 0;
-                else mavlink_rc_channels_scaled.chan6_scaled = 10000;
-                mavlink_rc_channels_scaled.chan7_scaled = 0;
-                mavlink_rc_channels_scaled.chan8_scaled = 0;
-                mavlink_rc_channels_scaled.port = 0;
-                mavlink_rc_channels_scaled.rssi = 255;
                 
-                mavlink_msg_rc_channels_scaled_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_rc_channels_scaled);
-                mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-                XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-                XBeeAllow();*/
+                // mavlink_rc_channels_scaled.time_boot_ms = sysMS;
+                // mavlink_rc_channels_scaled.chan1_scaled = (signed int)ilink_inputs0.channel[0] * 11.8;
+                // mavlink_rc_channels_scaled.chan2_scaled = ((signed int)ilink_inputs0.channel[1] - (signed int)511) * 29.4;
+                // mavlink_rc_channels_scaled.chan3_scaled = ((signed int)ilink_inputs0.channel[2] - (signed int)511) * 29.4;
+                // mavlink_rc_channels_scaled.chan4_scaled = ((signed int)ilink_inputs0.channel[3] - (signed int)511) * 29.4;
+                // if(ilink_inputs0.channel[4] < 500) mavlink_rc_channels_scaled.chan5_scaled = 0;
+                // else mavlink_rc_channels_scaled.chan5_scaled = 10000;
+                // if(ilink_inputs0.channel[5] < 500) mavlink_rc_channels_scaled.chan6_scaled = 0;
+                // else mavlink_rc_channels_scaled.chan6_scaled = 10000;
+                // mavlink_rc_channels_scaled.chan7_scaled = 0;
+                // mavlink_rc_channels_scaled.chan8_scaled = 0;
+                // mavlink_rc_channels_scaled.port = 0;
+                // mavlink_rc_channels_scaled.rssi = 255;
+                
+                // mavlink_msg_rc_channels_scaled_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_rc_channels_scaled);
+                // mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+                // XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+                // XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+                // XBeeAllow();
             }
             XBeeInhibit();
             ILinkPoll(ID_ILINK_INPUTS0);
@@ -1190,11 +1192,11 @@ void RITInterrupt(void) {
                 MAVSendFloat("DEBUG0",  ilink_debug.debug0);
                 MAVSendFloat("DEBUG1",  ilink_debug.debug1);
                 MAVSendFloat("DEBUG2",  ilink_debug.debug2);
-                /*MAVSendFloat("DEBUG3",  ilink_debug.debug3);
-                MAVSendFloat("DEBUG4",  ilink_debug.debug4);
-                MAVSendFloat("DEBUG5",  ilink_debug.debug5);
-                MAVSendFloat("DEBUG6",  ilink_debug.debug6);
-                MAVSendFloat("DEBUG7",  ilink_debug.debug7);*/
+                // MAVSendFloat("DEBUG3",  ilink_debug.debug3);
+                // MAVSendFloat("DEBUG4",  ilink_debug.debug4);
+                // MAVSendFloat("DEBUG5",  ilink_debug.debug5);
+                // MAVSendFloat("DEBUG6",  ilink_debug.debug6);
+                // MAVSendFloat("DEBUG7",  ilink_debug.debug7);
             }
             
             XBeeInhibit();
@@ -1203,17 +1205,12 @@ void RITInterrupt(void) {
             
         }
     }
-    
-    // *** Process ILink
-    /*XBeeInhibit();
-    ILinkFetchData();
-    XBeeAllow();*/
 
-    
     // *** Process ILink
     XBeeInhibit();
     ILinkFetchData();
     XBeeAllow();
+	
 }
 
 // ****************************************************************************

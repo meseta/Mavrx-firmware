@@ -13,7 +13,14 @@ typedef struct paramStorage_struct {
 
 extern struct paramStorage_struct paramStorage[];
 
-
+	//#define ADDPARAM(NAME, VALUE)	{"NAME", VALUE}
+	
+	//#define PARAM(x)	paramStorage[x].value
+	
+	//#define DRICT_AccelKp	PARAM(1)
+	//#define 
+	
+	
 	#define DRIFT_AccelKp   paramStorage[0].value	
 	#define DRIFT_MagKp	 paramStorage[1].value  
 	#define LPF_ULTRA 		paramStorage[2].value

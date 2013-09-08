@@ -186,8 +186,8 @@
 // *** ILink Config
 // ****************************************************************************
 #define ILINK_EN            1              // Enable the Interlink functions (0=off, 1=on)
-#define ILINK_TXBUFFER_SIZE 256
-#define ILINK_RXBUFFER_SIZE   256          // ILink buffer size
+#define ILINK_TXBUFFER_SIZE 200
+#define ILINK_RXBUFFER_SIZE 200          // ILink buffer size
 #define ILINK_MAX_FETCH     128          // Maximum characters to fetch at once
 
 #if WHO_AM_I == I_AM_THALAMUS
@@ -284,7 +284,7 @@
     #define GPS_TRIES_MAX       15          // When polling, how many tries to read data from the stream before giving up?
     #define GPS_TRIES_DELAY     100         // When polling, millisecond delay between trying to read data from the stream
     
-    #define GPS_BUFFER_SIZE     64          // Size of the GPS buffer, determines the largest packet that can be stored
+    #define GPS_BUFFER_SIZE     128          // Size of the GPS buffer, determines the largest packet that can be stored
 
     // ****************************************************************************
     // *** Flash Functions (Hypo only)
