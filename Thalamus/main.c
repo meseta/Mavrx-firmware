@@ -32,18 +32,7 @@
 // Throttle blips when flying normally
 
 /////////////////////// Libraries to include /////////////
-#include "thal.h"
-#include "mavlink.h"
-#include <math.h>
-#include "calibrate.h"
-#include "comms.h"
-#include "control.h"
-#include "eeprom.h"
-#include "filter.h"
-#include "globals.h"
-#include "inputs.h"
-#include "params.h"
-#include "states.h"
+#include "all.h"
 
 
 // Initialiser function: sets everything up.
@@ -78,7 +67,7 @@ void setup() {
 		
 
 	// *** Parameters
-		paramCount = 70;
+		//paramCount = sizeof(paramStorage)/20;
 		eeprom_load_all();
 		paramSendCount = paramCount;
 		paramSendSingle = 0;

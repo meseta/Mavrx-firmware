@@ -1,13 +1,4 @@
-#include "thal.h"
-#include "mavlink.h"
-#include <math.h>
-#include "calibrate.h"
-#include "comms.h"
-#include "control.h"
-#include "eeprom.h"
-#include "globals.h"
-#include "inputs.h"
-#include "params.h"
+#include "all.h"
 
 
 

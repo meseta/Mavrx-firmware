@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "all.h"
 
 unsigned char flashPLED, flashVLED, flashRLED;
 
