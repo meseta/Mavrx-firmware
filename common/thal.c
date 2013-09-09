@@ -3214,7 +3214,6 @@ unsigned char PRGPoll(void) {
                 data = SSP0Byte(0xffff);
                 SSP0S0CLR();
 
-                
                 ILinkProcess(data);
                 if(FUNCILinkState == 0) idle++;
             }

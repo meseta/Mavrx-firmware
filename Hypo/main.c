@@ -266,7 +266,7 @@ void setup() {
     home_valid = 0;
     
     // *** Establish ILink and Look for Thalamus
-    ILinkInit(6000);
+    ILinkInit(4000);
     XBeeInhibit();
     ILinkPoll(ID_ILINK_CLEARBUF); // forces Thalamus to clear its output buffers
 	unsigned int i;
