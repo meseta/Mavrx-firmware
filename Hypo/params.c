@@ -1,17 +1,25 @@
-// ****************************************************************************
-// *** EEPROM Functions
-// ****************************************************************************
-
-#include "thal.h"
-#include "mavlink.h"
-#include <math.h>
-#include "calibrate.h"
-#include "comms.h"
-#include "control.h"
-#include "eeprom.h"
-#include "globals.h"
-#include "inputs.h"
 #include "params.h"
+#include "thal.h"
+
+
+
+
+
+
+struct paramStorage_struct paramStorage[] = {
+	[ 0] = {"MAV_ID",         0.0f}, 
+    [ 1] = {"GPS_SAFALT",     3.0f}, 
+    [ 2] = {"GPS_MXANGL",    0.35f}, 
+    [ 3] = {"GPS_MAXSPD",     1.0f}, 
+    [ 4] = {"GPS_MAXROT",     1.5f}, 
+    [ 5] = {"GPS_MAXADF",     3.0f}, 
+    [ 6] = {"GPS_MINRAD",     2.0f}, 
+};
+
+
+unsigned int paramCount = sizeof(paramStorage)/20;
+unsigned int paramSendCount = sizeof(paramStorage)/20; // needs to be initialised to paramCount so that parameters aren't sent on startup
+unsigned char paramSendSingle = 0;
 
 // *** This function loads all parameters from EEPROM.  First it loads the
 // parameters into temporary storage to verify the checksum.  Only if the

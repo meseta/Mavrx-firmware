@@ -1,16 +1,6 @@
-#include "thal.h"
-#include "mavlink.h"
-#include <math.h>
-#include "calibrate.h"
-#include "comms.h"
-#include "control.h"
-#include "eeprom.h"
-#include "globals.h"
-#include "inputs.h"
-#include "params.h"
+#include "all.h"
 
 void state_machine()	{
-
 	static unsigned char auto_lock = 0;
 	static unsigned int throttle_on_count = 0;
 	static unsigned int throttle_off_count = 0;
@@ -384,8 +374,7 @@ void state_machine()	{
 			
 				
 			if (airborne == 1) {
-				
-
+			
 				// then Hypo controls attitude.
 				user.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
 				user.roll = fsin(-psiAngle) * ilink_gpsfly.northDemand + fsin(-psiAngle+M_PI_2) * ilink_gpsfly.eastDemand;
@@ -421,4 +410,64 @@ void state_machine()	{
 
 	}
 	
+}
+
+
+void arm(void) {
+
+	if(CAL_AUTO > 0) {
+		calibrate_gyr_temporary(1);
+	}
+	
+	PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+	//TODO: inline Delays cause system hang.
+	if(armed == 0) {
+		Delay(500);
+		PWMSetNESW(THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE);
+		Delay(100);
+		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+		Delay(300);
+		PWMSetNESW(THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE);
+		Delay(100);
+		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+	}
+	
+	psiAngleinit = psiAngle; 
+	
+	armed = 1;
+	
+	ilink_thalstat.sensorStatus &= ~(0x7); // mask status
+	ilink_thalstat.sensorStatus |= 4; // active/armed
+}
+
+
+
+void disarm(void) {
+	if(armed) {
+		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+		//TODO: inline Delays cause system hang.
+		Delay(100);
+		
+		PWMSetN(THROTTLEOFFSET + IDLETHROTTLE);
+		Delay(100);
+		PWMSetN(THROTTLEOFFSET);
+		Delay(33);
+		PWMSetE(THROTTLEOFFSET + IDLETHROTTLE);
+		Delay(100);
+		PWMSetE(THROTTLEOFFSET);
+		Delay(33);
+		PWMSetS(THROTTLEOFFSET + IDLETHROTTLE);
+		Delay(100);
+		PWMSetS(THROTTLEOFFSET);
+		Delay(33);
+		PWMSetW(THROTTLEOFFSET + IDLETHROTTLE);
+		Delay(100);
+		PWMSetW(THROTTLEOFFSET);
+
+		Delay(100);
+	}
+	PWMSetNESW(0, 0, 0, 0);
+	armed = 0;
+	ilink_thalstat.sensorStatus &= ~(0x7); // mask status
+	ilink_thalstat.sensorStatus |= 3; // standby
 }
