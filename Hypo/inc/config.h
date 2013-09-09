@@ -298,7 +298,7 @@
     #define XBEE_EN             1           // Set to 1 to enable the XBee code
 
     #define XBEE_POWER_LEVEL    0           // Set transmit power: 4=18dBm/63mW, 3=16dBm/40mW, 2=14dBm/25mW, 1=12dBm/16mW, 0=0dBm/1mW
-    #define XBEE_BUFFER_SIZE    128         // XBee buffer size
+    #define XBEE_BUFFER_SIZE    256         // XBee buffer size
     #define XBEE_JOINPERIOD     30          // Number of seconds to allow bind
 #endif
 

@@ -3201,7 +3201,7 @@ unsigned char PRGPoll(void) {
         unsigned char idle = 0;
         unsigned int count = ILINK_MAX_FETCH;
         unsigned short data;
-        while(idle < 3 && count-- > 0) {
+        while(idle < 4 && count-- > 0) {
             if(ILinkReadable()) {
                 SSP0S0SEL();
                 data = SSP0Byte(ILinkPop());
@@ -3216,7 +3216,7 @@ unsigned char PRGPoll(void) {
 
                 
                 ILinkProcess(data);
-                if(FUNCILinkState < 2) idle++;
+                if(FUNCILinkState == 0) idle++;
             }
         }
     }

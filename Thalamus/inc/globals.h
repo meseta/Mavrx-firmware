@@ -3,7 +3,7 @@
 
 
 #define FIRMWARE_VERSION	1		   // Firmware version
-#define MESSAGE_LOOP_HZ	 	15		  // Max frequency of messages in Hz (keep this number low, like around 15)
+#define MESSAGE_LOOP_HZ	 	10		  // Max frequency of messages in Hz (keep this number low, like around 15)
 #define RX_PANIC			2		   // Number of seconds after missing RX before craft considered "disconnected"
 
 #define FAST_RATE		   400

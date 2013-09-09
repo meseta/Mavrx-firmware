@@ -1,7 +1,10 @@
 #include "all.h"
 
-unsigned int paramSendCount;
-unsigned char paramSendSingle;
+
+
+
+
+
 
 struct paramStorage_struct paramStorage[] = {
 	[ 0] = {"DRIFT_AKp",       0.2f}, 
@@ -78,7 +81,8 @@ struct paramStorage_struct paramStorage[] = {
 
 
 unsigned int paramCount = sizeof(paramStorage)/20;
-
+unsigned int paramSendCount;
+unsigned char paramSendSingle;
 
 // *** This function loads all parameters from EEPROM.  First it loads the
 // parameters into temporary storage to verify the checksum.  Only if the

@@ -243,10 +243,10 @@ void setup() {
     MAVSendHeartbeat();
 
     // *** GPS
-    /*GPSInit();
+    GPSInit();
     GPSSetRate(ID_NAV_POSLLH, 1); // every one nav solutions (i.e. as fast as possible)
     GPSSetRate(ID_NAV_STATUS, 3); // every three nav solutions
-    GPSSetRate(ID_NAV_VELNED, 1);*/
+    GPSSetRate(ID_NAV_VELNED, 1);
     
     lat_diff_i = 0;
     lon_diff_i = 0;
@@ -892,7 +892,7 @@ void RITInterrupt(void) {
             
             paramPointer++;
             
-            mavlink_msg_param_value_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_param_value);
+            mavlink_msg_param_value_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_param_value);
             mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
             XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
             XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
