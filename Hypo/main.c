@@ -440,9 +440,9 @@ void RITInterrupt(void) {
         XBeeAllow();
         
         // *** Get GPS data
-        double craft_X = 0;
-        double craft_Y = 0;
-        double craft_Z = 0;
+        static double craft_X = 0;
+        static double craft_Y = 0;
+        static double craft_Z = 0;
         
         if(gps_nav_status.isNew) {
             gps_nav_status.isNew = 0;

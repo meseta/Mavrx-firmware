@@ -45,13 +45,16 @@ Throttle blips when flying normally
 
 \todo clean up globals
 
-
 */
 
 #include "all.h"
 
+/*!
+\brief This is the setup function, sets everything up.
 
-// Initialiser function: sets everything up.
+This is the first user function called after the initialisation is complete.
+All the hardware peripherals and stuff are initialised here.
+*/
 void setup() {	
 	// *** Startup PWM
 		// the ESC will beep when it doesn not receive a PWM signal, we use this to indicate that the craft is powered but disarmed
@@ -121,7 +124,12 @@ void setup() {
 		LEDOff(PLED);
 }
 
-//Main loop, nothing much happens in here.
+/*!
+\brief Main loop
+
+This is the main loop, the processor sits in here when it's not dealing with 
+interrupts.  This loop's only purpose right now is to deal with button presses.
+*/
 void loop() {
 	//if(idleCount < IDLE_MAX) idleCount++; // this is the counter for CPU idle time
 	//Deal with button push for entering bind mode for RX
@@ -137,6 +145,12 @@ void loop() {
 	__WFI();
 }
 
+/*!
+\brief System Tick Timer user-supplied ISR
+
+This function is triggered by interrupt every 1ms, its purpose is to keep
+timings, flash LEDs, and time button pushes.
+*/
 // SysTick timer: deals with general timing
 void SysTickInterrupt(void) {
 	sysMS += 1;

@@ -8,9 +8,8 @@
 
 */
 
-
-
 #include "all.h"
+
 
 unsigned char detect_ori(void) {
     signed short data[3];
