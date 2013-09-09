@@ -9,20 +9,49 @@ void filter_gps_baro(){
 	if (FUNCBaro_type == 1) {
 		// The old barometer was too poor to use for altitude hold so we use gps only.
 		alt.filtered = alt.gps;
+		alt.vel = -ilink_gpsfly.velD;
 	}
 	// New barometer 
 	if (FUNCBaro_type == 2) {
+		
+		
 		// We Offset the Barometer Data When Arming to get a roughly globally correct altitude.
 		alt.filtered = alt.baro + alt.barobias;
 		alt.barobias += (alt.gps - alt.filtered) * 0.0; //Filt_baroBiasK = 0.0;
+		
+		ilink_debug.debug0 = alt.baro;
+			
+		static float alt_baro_old;
+		static float baro_d;
+		
+		// Calculate the first difference
+		// Multiplied by 10000 to prevent loss of accuracy in running average
+		baro_d = 10000.0*(float)((float)alt.baro - (float)alt_baro_old);
+		alt_baro_old = alt.baro;
+		
+		ilink_debug.debug1 = baro_d;
+		
+		// Run an LPF filter on the barometer differential data
+		// alt.vel *= (1-LPF_BARD);
+		// alt.vel +=  LPF_BARD * baro_d;
+		// Running average  on the barometer differential data
+		alt.dtotal -= alt.dhistory[alt.dcount];
+		alt.dtotal += baro_d;
+		alt.dhistory[alt.dcount] = baro_d;
+		alt.vel = (float)alt.dtotal/((float)ALTDAV_LEN * (100));
+		if(++alt.dcount >= ALTDAV_LEN) alt.dcount = 0;
+		
+		ilink_debug.debug2 = alt.vel;	
+			
+			
 	}
 	
-	ilink_debug.debug1 = alt.baro;
-	ilink_debug.debug2 = alt.gps;	
 	
-	alt.vel = -ilink_gpsfly.velD;
 	
-	ilink_debug.debug0 = alt.filtered;
+	
+	
+	
+	
 
 	
 }

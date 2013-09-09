@@ -180,6 +180,12 @@ typedef struct {
 	float ult_conf;
 	float ult;
 	float barobias;
+	unsigned int count;
+	signed int history[ALTAV_LEN];
+	volatile unsigned int total;
+	unsigned int dcount;
+	signed int dhistory[ALTDAV_LEN];
+	volatile signed int dtotal;
 } altStruct;
 extern altStruct alt;
 extern float ultra;

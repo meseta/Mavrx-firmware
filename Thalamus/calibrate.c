@@ -182,6 +182,9 @@ void sensor_zero(void) {
 	Mag.Y.total = 0;
 	Mag.Z.total = 0;
 	
+	alt.total = 0;
+	alt.dtotal = 0;
+	
 
 
 	for(i=0; (i<GAV_LEN); i++) {
@@ -201,6 +204,15 @@ void sensor_zero(void) {
 		Mag.Y.history[i] = 0;
 		Mag.Z.history[i] = 0;
 	}
+	
+	for(i=0; (i<ALTAV_LEN); i++) {
+		alt.history[i] = 0;
+	}
+	
+	for(i=0; (i<ALTDAV_LEN); i++) {
+		alt.dhistory[i] = 0;
+	}
+	
 	
 	Gyro.X.offset = 0;
 	Gyro.Y.offset = 0;

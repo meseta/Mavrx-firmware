@@ -29,7 +29,7 @@ extern struct paramStorage_struct paramStorage[];
 #define YAW_Kp		  	paramStorage[19].value
 #define YAW_Kd		  	paramStorage[20].value
 #define YAW_Boost	   	paramStorage[21].value
-#define UNUSED 			paramStorage[22].value
+#define LPF_BARD		paramStorage[22].value
 #define LIM_ANGLE 		paramStorage[23].value
 #define LIM_ALT 		paramStorage[24].value
 #define MAGCOR_N1	   	paramStorage[25].value
