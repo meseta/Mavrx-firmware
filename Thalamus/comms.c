@@ -79,7 +79,7 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 
 						for (i=0; i<paramCount; i++){
 							unsigned char match = 1;
-							for (j=0; j<16; j++) {
+							for (j=0; j<10; j++) {
 								if (paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
 
 									match = 0;
@@ -96,7 +96,6 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 							}
 						}
 					}
-
 
 					else {
 						paramSendCount = ilink_thalpareq.paramID;

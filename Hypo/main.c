@@ -1,5 +1,6 @@
 #include "thal.h"
 #include "mavlink.h"
+#include "params.h"
 
 // *** Config stuff
 #define FIRMWARE_VERSION    1           // Firmware version
@@ -47,6 +48,7 @@ unsigned int idleCount;
 unsigned short heartbeatWatchdog;
 unsigned short gpsWatchdog;
 unsigned short thalWatchdog;
+unsigned short thalAvailable;
 
 // *** MAVLINK stuff
 unsigned char mavlinkID;
@@ -166,6 +168,7 @@ typedef struct paramBuffer_struct {
 #define PARAMBUFFER_SIZE    50
 paramBuffer_t paramBuffer[PARAMBUFFER_SIZE];
 unsigned int paramPointer = PARAMBUFFER_SIZE;
+unsigned char paramWaitForRemote = 0;
 
 // *** Xbee stuff
 xbee_modem_status_t xbee_modem_status;
@@ -213,14 +216,6 @@ float GPS_Kd = 0.1f;
 unsigned char gpsFixed;
 unsigned char gps_action = 0;
 
-#define GPS_SAFE_ALT    1.0f    // Minimum safe altitude above home position in m
-#define GPS_MAX_ANGLE   0.35f   // Maximum attitude demanded in radians
-#define GPS_MAX_SPEED   1.0f    // Maximum travel speed in m/s
-#define GPS_MAX_ROTATE  1.5f    // Maximum rotation rate in rad/s    
-#define GPS_MAX_ALTDIFF 3.0f    // Maximum altitude demanded in m
-
-#define GPS_MIN_RADIUS	2.0f	// Default (minimum) detection radius for waypoint in meters
-
 void setup() {
     // *** LED setup
     LEDInit(PLED);
@@ -234,7 +229,11 @@ void setup() {
     sysMS = 0;
     sysUS = 0;
     idleCount = 0;
-    
+	
+	// *** EEPROM and params
+	MAV_ID = ReadUIDHash() & 0xff; // get last byte of hash and use as default ID
+	eeprom_load_all();
+	
     // *** XBee and MAVLink
     allowTransmit = 1;
     XBeeInit();
@@ -270,6 +269,10 @@ void setup() {
     ILinkInit(6000);
     XBeeInhibit();
     ILinkPoll(ID_ILINK_CLEARBUF); // forces Thalamus to clear its output buffers
+	unsigned int i;
+	for(i=0; i< 512; i++) { // force flush anyway
+		SSP0Byte(0xffff);
+	}
 	ILinkPoll(ID_ILINK_IDENTIFY);
     XBeeAllow();
 	
@@ -280,9 +283,9 @@ void setup() {
 }
 
 void MAVLinkInit() {
-    // TODO: assignable mavlinkID
-    mavlinkID = 10;
-    
+    mavlinkID = (unsigned char) MAV_ID;
+	if(mavlinkID == 255) mavlinkID = 0; // 255 reserved for ground control
+	
     mavlink_heartbeat.type = MAV_TYPE_QUADROTOR;
     mavlink_heartbeat.autopilot = MAV_AUTOPILOT_GENERIC;
     mavlink_heartbeat.base_mode = MAV_MODE_PREFLIGHT;
@@ -377,6 +380,8 @@ void SysTickInterrupt(void) {
 }
 
 void RITInterrupt(void) {
+	unsigned int i;
+
     heartbeatCounter++;
     heartbeatWatchdog++;
     gpsWatchdog++;
@@ -417,6 +422,7 @@ void RITInterrupt(void) {
 		// should probably output something intelligible here to signify thalamus lost
         //thalWatchdog = MESSAGE_LOOP_HZ*(THAL_PANIC+1); // prevent overflow
         thalWatchdog = 0;
+		thalAvailable = 0;
         XBeeInhibit();
         ILinkPoll(ID_ILINK_IDENTIFY);
         XBeeAllow();
@@ -879,25 +885,54 @@ void RITInterrupt(void) {
     if(allowTransmit) {
         
 		if(paramPointer < PARAMBUFFER_SIZE) {
-            unsigned int i;
             // shunt this along to GCS
             for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
                 mavlink_param_value.param_id[i] = paramBuffer[paramPointer].name[i];
                 if(paramBuffer[paramPointer].name[i] == '\0') break;
             }
             mavlink_param_value.param_value = paramBuffer[paramPointer].value;
-            mavlink_param_value.param_count = ilink_thalparam_rx.paramCount; // this value shouldn't change
+            mavlink_param_value.param_count = ilink_thalparam_rx.paramCount;
             mavlink_param_value.param_index = paramBuffer[paramPointer].id;
             mavlink_param_value.param_type = MAV_PARAM_TYPE_REAL32;
             
             paramPointer++;
             
-            mavlink_msg_param_value_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_param_value);
+			mavlink_msg_param_value_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_param_value);
             mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
             XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
             XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
             XBeeAllow();
+			paramWaitForRemote = 0;
         }
+		else if(paramSendCount < paramCount && ((thalAvailable == 1 && paramWaitForRemote == 0) || thalAvailable == 0)) {
+			// these extra conditions are a small hack: qgroundcontrol doesn't seem to want to display the received status for the second component to transmit parameters, so the above line forces Hypo to transmit after Thalamus since Hypo is generally more reliable
+			unsigned short thisParam = paramSendCount; // store this to avoid race hazard since paramSendCount can change outside this interrupt
+			
+			for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
+				mavlink_param_value.param_id[i] = paramStorage[thisParam].name[i];
+				if(paramStorage[thisParam].name[i] == '\0') break;
+			}
+			
+            mavlink_param_value.param_value = paramStorage[thisParam].value;
+            mavlink_param_value.param_count = paramCount; // this value shouldn't change
+            mavlink_param_value.param_index = thisParam;
+            mavlink_param_value.param_type = MAV_PARAM_TYPE_REAL32;
+            
+            mavlink_msg_param_value_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_param_value);
+            mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+            
+			XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+            XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+            XBeeAllow();
+			
+			if(paramSendSingle) {
+				paramSendSingle = 0;
+				paramSendCount = paramCount;
+			}
+			else {
+				paramSendCount = thisParam+1;
+			}
+		}
         else if(waypointReceiveIndex < waypointCount) {
             if(waypointTimer > WAYPOINT_TIMEOUT) {
                 mavlink_mission_request.seq = waypointReceiveIndex;
@@ -1191,7 +1226,8 @@ void RITInterrupt(void) {
                 ilink_debug.isNew = 0;
                 MAVSendFloat("DEBUG0",  ilink_debug.debug0);
                 MAVSendFloat("DEBUG1",  ilink_debug.debug1);
-                MAVSendFloat("DEBUG2",  ilink_debug.debug2);
+                //MAVSendFloat("DEBUG2",  ilink_debug.debug2);
+                MAVSendFloat("DEBUG2",  thalAvailable);
                 // MAVSendFloat("DEBUG3",  ilink_debug.debug3);
                 // MAVSendFloat("DEBUG4",  ilink_debug.debug4);
                 // MAVSendFloat("DEBUG5",  ilink_debug.debug5);
@@ -1332,6 +1368,7 @@ void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length
 }
 
 void MAVLinkParse(unsigned char UARTData) {
+	unsigned int i, j, match;
     if(mavlink_parse_char(MAVLINK_COMM_0, UARTData, &mavlink_rx_msg, &mavlink_status)) {
         //mavlinkSendDebugV("MSGID", mavlink_rx_msg.msgid, 0, 0);
         switch(mavlink_rx_msg.msgid) {
@@ -1415,8 +1452,14 @@ void MAVLinkParse(unsigned char UARTData) {
                         // MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS=242, // Set sensor offsets. This command will be only accepted if in pre-flight mode. |Sensor to adjust the offsets for: 0: gyros, 1: accelerometer, 2: magnetometer, 3: barometer, 4: optical flow| X axis offset (or generic dimension 1), in the sensor's raw units| Y axis offset (or generic dimension 2), in the sensor's raw units| Z axis offset (or generic dimension 3), in the sensor's raw units| Generic dimension 4, in the sensor's raw units| Generic dimension 5, in the sensor's raw units| Generic dimension 6, in the sensor's raw units|  
 
                         case MAV_CMD_PREFLIGHT_STORAGE:
-                            if(mavlink_command_long.param1 == 0) ilink_thalpareq.reqType = 3; // read all
-                            else ilink_thalpareq.reqType = 2; // save all
+                            if(mavlink_command_long.param1 == 0) { // read all
+								eeprom_load_all();
+								ilink_thalpareq.reqType = 3;
+							}
+                            else {
+								eeprom_save_all();
+								ilink_thalpareq.reqType = 2; // save all
+							}
                             ILinkSendMessage(ID_ILINK_THALPAREQ, (unsigned short *) & ilink_thalpareq, sizeof(ilink_thalpareq)/2-1);
                             break;
                             
@@ -1452,36 +1495,101 @@ void MAVLinkParse(unsigned char UARTData) {
             case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:
                 // request send of all parameters
 				ilink_thalpareq.reqType = 0; // request all
+				// remote params
 				ILinkSendMessage(ID_ILINK_THALPAREQ, (unsigned short *) & ilink_thalpareq, sizeof(ilink_thalpareq)/2-1);
-                break;
+                // local params
+				paramSendCount = 0;
+				paramSendSingle = 0;
+				paramWaitForRemote = 1;
+				break;
             case MAVLINK_MSG_ID_PARAM_REQUEST_READ:
-                // request send of all parameters
+                // request send of one parameters
                 mavlink_msg_param_request_read_decode(&mavlink_rx_msg, &mavlink_param_request_read);
-				
-				ilink_thalpareq.reqType = 1; // request one
-				unsigned short i;
-				for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
-					ilink_thalpareq.paramName[i] = mavlink_param_request_read.param_id[i];
-					if(mavlink_param_set.param_id[i] == '\0') break;
+			
+				if (mavlink_param_request_read.target_system == mavlinkID) {
+					if(mavlink_param_request_read.target_component == MAV_COMP_ID_IMU) {
+						// remote params
+						ilink_thalpareq.reqType = 1; // request one
+						for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
+							ilink_thalpareq.paramName[i] = mavlink_param_request_read.param_id[i];
+							if(mavlink_param_request_read.param_id[i] == '\0') break;
+						}
+						ilink_thalpareq.paramID = mavlink_param_request_read.param_index;
+						ILinkSendMessage(ID_ILINK_THALPAREQ, (unsigned short *) & ilink_thalpareq, sizeof(ilink_thalpareq)/2-1);
+					}
+					else if(mavlink_param_request_read.target_component == MAV_COMP_ID_MISSIONPLANNER) {
+						// local params
+						for (i=0; i<paramCount; i++){
+							match = 1;
+							for (j=0; j<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; j++) {
+								if (paramStorage[i].name[j] !=  mavlink_param_request_read.param_id[i]) {
+									match = 0;
+									break;
+								}
+								if (paramStorage[i].name[j] == '\0') break;
+							}
+							
+							if(match == 1) {
+								// when a match is found get the iD
+								paramSendCount = i;
+								paramSendSingle = 1;
+								break;
+							}
+						}
+					}
 				}
-				ilink_thalpareq.paramID = mavlink_param_request_read.param_index;
-				ILinkSendMessage(ID_ILINK_THALPAREQ, (unsigned short *) & ilink_thalpareq, sizeof(ilink_thalpareq)/2-1);
-                break;
+				break;
             case MAVLINK_MSG_ID_PARAM_SET:
                 // request set parameter
                 mavlink_msg_param_set_decode(&mavlink_rx_msg, &mavlink_param_set);
                 if(mavlink_param_set.target_system == mavlinkID) {
                     
-					unsigned short i;
-					for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
-						ilink_thalparam_tx.paramName[i] = mavlink_param_set.param_id[i];
-						if(mavlink_param_set.param_id[i] == '\0') break;
+					if(mavlink_param_set.target_component == MAV_COMP_ID_IMU) {
+						// remote params
+						for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
+							ilink_thalparam_tx.paramName[i] = mavlink_param_set.param_id[i];
+							if(mavlink_param_set.param_id[i] == '\0') break;
+						}
+						
+						ilink_thalparam_tx.paramID = 0;
+						ilink_thalparam_tx.paramValue = mavlink_param_set.param_value;
+						ilink_thalparam_tx.paramCount = 0;
+						ILinkSendMessage(ID_ILINK_THALPARAM, (unsigned short *) &ilink_thalparam_tx, sizeof(ilink_thalparam_tx)/2 - 1);
 					}
-					
-					ilink_thalparam_tx.paramID = 0;
-					ilink_thalparam_tx.paramValue = mavlink_param_set.param_value;
-					ilink_thalparam_tx.paramCount = 0;
-					ILinkSendMessage(ID_ILINK_THALPARAM, (unsigned short *) &ilink_thalparam_tx, sizeof(ilink_thalparam_tx)/2 - 1);
+					else if(mavlink_param_set.target_component == MAV_COMP_ID_MISSIONPLANNER) {
+						// local params
+						for (i=0; i<paramCount; i++){
+							match = 1;
+							for (j=0; j<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; j++) {
+								if (paramStorage[i].name[j] !=  mavlink_param_set.param_id[j]) {
+									match = 0;
+									break;
+								}
+								if (paramStorage[i].name[j] == '\0') break;
+							}
+							
+							if(match == 1) {
+								// when a match is found, save it to paramStorage
+								paramStorage[i].value = mavlink_param_set.param_value;
+								
+								// then order the value to be sent out again using the param send engine
+								// but deal with cases where it's already in the process of sending out data
+								if(paramSendCount < paramCount) {
+									// parameter engine currently sending out data
+									if(paramSendCount >= i) {
+										// if parameter engine already sent out this now-changed data, redo this one, otherwise no action needed
+										paramSendCount = i;
+									}
+								}
+								else {
+									// parameter engine not currently sending out data, so send single parameter
+									paramSendCount = i;
+									paramSendSingle = 1;
+								}
+								break;
+							}
+						}
+					}
                 }
                 break;
             case MAVLINK_MSG_ID_SET_GPS_GLOBAL_ORIGIN:
@@ -1747,6 +1855,7 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 				break;
         }
 		
+		thalAvailable = 1;
 		thalWatchdog = 0;
     }
 }

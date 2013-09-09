@@ -31,9 +31,9 @@
 // Throttle and attitude blips when flying under GPS
 // Throttle blips when flying normally
 
-/////////////////////// Libraries to include /////////////
-#include "all.h"
+// TODO: clean up globals
 
+#include "all.h"
 
 // Initialiser function: sets everything up.
 void setup() {	
