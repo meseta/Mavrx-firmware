@@ -118,6 +118,7 @@ extern float tempW;
 #define AAV_LEN 30
 #define MAV_LEN 30
 #define ALTDAV_LEN 60
+#define ALTAV_LEN 30
 
 typedef struct{
 	volatile signed short raw;
