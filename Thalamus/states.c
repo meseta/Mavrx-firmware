@@ -182,9 +182,11 @@ void state_machine()	{
 		// If the switch is flicked, we go into AUTO mode
 		if (auxState == 1) {
 			state = STATE_AUTO;
-			// and request resume/ go from Hypo
-			ilink_gpsreq.request = 4;
+			// request hold from Hypo
+			ilink_gpsreq.request = 3;
 			ilink_gpsreq.sequence++;
+			// set button state to 1
+			flapState = 1;		
 		}
 
 		// Auto Disarm
