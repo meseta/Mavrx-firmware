@@ -1,14 +1,5 @@
 #include "all.h"
 
-unsigned char got_setpoint; //bool
-float pitchcorrectionav, rollcorrectionav, yawcorrectionav;
-float motorN, motorE, motorS, motorW;
-float motorNav, motorEav, motorSav, motorWav;
-float tempN;
-float tempE;
-float tempS;
-float tempW;
-
 void control_throttle()	{
 
 	static float gpsThrottle = 0;
@@ -183,14 +174,14 @@ void control_motors(){
 	static float yawold = 0;
 	
 	// This section of code limits the rate at which the craft is allowed to track angle demand changes
-	if ((attitude_demand_body.pitch - pitchold) > PITCH_SPL_set) attitude_demand_body.pitch = pitchold + PITCH_SPL_set;
-	if ((attitude_demand_body.pitch - pitchold) < -PITCH_SPL_set) attitude_demand_body.pitch = pitchold - PITCH_SPL_set;
+	if ((attitude_demand_body.pitch - pitchold) > PITCH_SPL) attitude_demand_body.pitch = pitchold + PITCH_SPL;
+	if ((attitude_demand_body.pitch - pitchold) < -PITCH_SPL) attitude_demand_body.pitch = pitchold - PITCH_SPL;
 	pitchold = attitude_demand_body.pitch;
-	if ((attitude_demand_body.roll - rollold) > ROLL_SPL_set) attitude_demand_body.roll = rollold + ROLL_SPL_set;
-	if ((attitude_demand_body.roll - rollold) < -ROLL_SPL_set) attitude_demand_body.roll = rollold - ROLL_SPL_set;
+	if ((attitude_demand_body.roll - rollold) > ROLL_SPL) attitude_demand_body.roll = rollold + ROLL_SPL;
+	if ((attitude_demand_body.roll - rollold) < -ROLL_SPL) attitude_demand_body.roll = rollold - ROLL_SPL;
 	rollold = attitude_demand_body.roll;
-	if ((attitude_demand_body.yaw - yawold) > YAW_SPL_set) attitude_demand_body.yaw = yawold + YAW_SPL_set;
-	if ((attitude_demand_body.yaw - yawold) < -YAW_SPL_set) attitude_demand_body.yaw = yawold - YAW_SPL_set;
+	if ((attitude_demand_body.yaw - yawold) > YAW_SPL) attitude_demand_body.yaw = yawold + YAW_SPL;
+	if ((attitude_demand_body.yaw - yawold) < -YAW_SPL) attitude_demand_body.yaw = yawold - YAW_SPL;
 	yawold = attitude_demand_body.yaw;
 	
 	// This part of the code makes the yaw demand loop around and not exceed Pi or -Pi bounds

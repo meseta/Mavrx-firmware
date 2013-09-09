@@ -90,4 +90,127 @@ extern float PITCH_SPL_set;
 extern float YAW_SPL_set;
 
 
+
+
+
+// Outputs/control
+#define THROTTLEOFFSET	900		// Corresponds to zero output PWM. Nominally 1000=1ms, but 800 works better
+#define IDLETHROTTLE		175		// Minimum PWM output to ESC when in-flight to avoid motors turning off
+#define MAXTHROTTLE	 	1200	// Maximum PWM output to ESC (PWM = THROTTLEOFFSET + MAXTHROTTLE)
+#define MAXTHROTTLEPERCENT	0.9	 // Maximum percentage throttle should be (reserves some extra output for stabilisation at high throttle).
+
+
+extern unsigned char got_setpoint; //bool
+extern float pitchcorrectionav, rollcorrectionav, yawcorrectionav;
+extern float motorN, motorE, motorS, motorW;
+extern float motorNav, motorEav, motorSav, motorWav;
+extern float tempN;
+extern float tempE;
+extern float tempS;
+extern float tempW;
+
+
+
+// Inputs
+
+//  IMU sensors
+#define GAV_LEN 8
+#define AAV_LEN 30
+#define MAV_LEN 30
+
+typedef struct{
+	volatile signed short raw;
+	volatile float av;
+	volatile float value;
+	volatile float offset;
+	volatile signed int total;
+	float error;
+	signed short history[GAV_LEN];
+} sensorStructGyro;
+
+typedef struct{
+	sensorStructGyro X;
+	sensorStructGyro Y;
+	sensorStructGyro Z;
+	unsigned int count;
+} threeAxisSensorStructGyro;
+extern threeAxisSensorStructGyro Gyro;
+
+typedef struct{
+	volatile signed short raw;
+	volatile float av;
+	volatile float value;
+	volatile signed int total;
+	signed short history[AAV_LEN];
+} sensorStructAccel;
+
+typedef struct{
+	sensorStructAccel X;
+	sensorStructAccel Y;
+	sensorStructAccel Z;
+	unsigned int count;
+} threeAxisSensorStructAccel;
+extern threeAxisSensorStructAccel Accel;
+
+
+typedef struct{
+	volatile signed short raw;
+	volatile float av;
+	volatile float value;
+	volatile signed int total;
+	signed short history[AAV_LEN];
+} sensorStructMag;
+
+typedef struct{
+	sensorStructMag X;
+	sensorStructMag Y;
+	sensorStructMag Z;
+	unsigned int count;
+} threeAxisSensorStructMag;
+extern threeAxisSensorStructMag Mag;
+
+
+typedef struct {
+	float pressure;
+    float baro;
+	float gps;
+	float filtered;
+	float ultra;
+	float vel;
+	float ult_conf;
+	float ult;
+	float barobias;
+} altStruct;
+extern altStruct alt;
+extern float ultra;
+extern unsigned int ultraLoss;
+extern float batteryVoltage;
+
+
+extern unsigned char gps_valid;
+
+
+
+#define OFFSTICK			50
+#define MIDSTICK			512		// Corresponds to input when stick is in middle (approx value).
+#define MAXSTICK			850		// Corresponds to input when stick is at the top
+
+#define MAXTHRESH		   750 //(MAXSTICK+MIDSTICK)/2 - 50
+#define MINTHRESH		   250 //(MIDSTICK+OFFSTICK)/2 + 50
+
+extern unsigned short rcInput[7];
+extern unsigned int rxLoss;
+extern unsigned int rxFirst;
+extern signed short yawtrim;
+extern signed short throttletrim;
+extern float throttle;
+extern float throttle_angle;
+extern int hold_thro_off;
+extern unsigned char auxState, flapState, rateState, throState, aileState, elevState, ruddState;
+extern unsigned int flapswitch;
+extern float pitchDemandSpin;
+extern float rollDemandSpin;
+extern float pitchDemandSpinold;
+extern float rollDemandSpinold;
+extern float flpswitch;
 #endif

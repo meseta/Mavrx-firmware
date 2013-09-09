@@ -3,4 +3,8 @@
 
 void state_machine(void);
 
+void arm(void);
+
+void disarm(void);
+
 #endif

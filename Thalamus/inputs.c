@@ -2,7 +2,6 @@
 
 
 
-unsigned char gps_valid = 0;
 void gps_status(void) {	
 	static unsigned int loss_counter = 0;
 	
@@ -23,21 +22,6 @@ void gps_status(void) {
 	}
 }
 
-unsigned short rcInput[7];
-unsigned int rxLoss;
-unsigned int rxFirst;
-signed short yawtrim;
-signed short throttletrim;
-float throttle;
-float throttle_angle;
-int hold_thro_off;
-unsigned char auxState, flapState, rateState, throState, aileState, elevState, ruddState;
-unsigned int flapswitch;
-float pitchDemandSpin;
-float rollDemandSpin;
-float pitchDemandSpinold;
-float rollDemandSpinold;
-float flpswitch;
 
 void read_rx_input(void) {			
 
@@ -180,9 +164,7 @@ void read_barometer(void) {
 		TrigBaro();
     }
 }
-altStruct alt;
-float ultra;
-unsigned int ultraLoss;
+
 void read_ultrasound(void) {			
 	// Get ultrasound data and scale to mm??
 	// TODO: Scale to m (everywhere should use SI units)
@@ -215,7 +197,6 @@ void read_ultrasound(void) {
 			
 }
 
-float batteryVoltage;
 void trig_batt_voltage(void) {
 	ADCTrigger(CHN7);
 }
@@ -228,9 +209,6 @@ void read_batt_voltage(void) {
 	batteryVoltage += 0.01f * (float)battV;
 	ilink_thalstat.battVoltage = battV;
 }
-threeAxisSensorStructGyro Gyro;
-threeAxisSensorStructAccel Accel;
-threeAxisSensorStructMag Mag;
 void convert_ori(volatile signed short * X, volatile signed short * Y, volatile signed short * Z, signed short * data) {
     switch((unsigned char)ORI) {
         default:

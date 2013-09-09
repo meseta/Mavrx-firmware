@@ -81,8 +81,8 @@ struct paramStorage_struct paramStorage[] = {
 
 
 unsigned int paramCount = sizeof(paramStorage)/20;
-unsigned int paramSendCount;
-unsigned char paramSendSingle;
+unsigned int paramSendCount = sizeof(paramStorage)/20; // needs to be initialised to paramCount so that parameters aren't sent on startup
+unsigned char paramSendSingle = 0;
 
 // *** This function loads all parameters from EEPROM.  First it loads the
 // parameters into temporary storage to verify the checksum.  Only if the
