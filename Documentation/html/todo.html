@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.4"/>
-<title>Mavrx Multirotor Firmware: Thalamus/inc/states.h Source File</title>
+<title>Mavrx Multirotor Firmware: Todo List</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -45,9 +45,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li class="current"><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
-      <li class="current"><a href="files.html"><span>Files</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -66,12 +66,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-  <div id="navrow2" class="tabs2">
-    <ul class="tablist">
-      <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>Globals</span></a></li>
-    </ul>
-  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -84,7 +78,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('states_8h_source.html','');});
+$(document).ready(function(){initNavTree('todo.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -103,25 +97,42 @@ $(document).ready(function(){initNavTree('states_8h_source.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">states.h</div>  </div>
+<div class="title">Todo List </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef __STATES_H__</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define __STATES_H__</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="keywordtype">void</span> state_machine(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keywordtype">void</span> arm(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keywordtype">void</span> disarm(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#endif</span></div>
-</div><!-- fragment --></div><!-- contents -->
+<div class="textblock"><dl class="reflist">
+<dt><a class="anchor" id="_todo000001"></a>Global <a class="el" href="calibrate_8c.html#a36fabae6abbd94eeb1a86e2be5ec096d">calibrate_mag</a>  (void)</dt>
+<dd><p class="startdd">filter out spikes </p>
+<p class="enddd">Inline delay  </p>
+</dd>
+<dt><a class="anchor" id="_todo000006"></a>Global <a class="el" href="control_8c.html#a3e76a14d433c187c06fc0531c2e98955">control_motors</a>  ()</dt>
+<dd><p class="startdd">Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates) </p>
+<p>Check to see if added Yaw integral solves yaw offsets in autonomous flight </p>
+<p>Check direction of yaw integral </p>
+<p>Test this code </p>
+<p>fill these in properly </p>
+<p class="enddd">Add Auto Land on rxLoss!  </p>
+</dd>
+<dt><a class="anchor" id="_todo000003"></a>Global <a class="el" href="control_8c.html#aa239da247d76688b4ae3e5375acede47">control_throttle</a>  ()</dt>
+<dd><p class="startdd">Work out what happens if move out of the ultrasound confidence zone again. </p>
+<p>Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus </p>
+<p class="enddd">Diagnose throttle jumps while in GPS hold mode.  </p>
+</dd>
+<dt><a class="anchor" id="_todo000012"></a>File <a class="el" href="_thalamus_2main_8c.html">main.c</a>  </dt>
+<dd><p class="startdd">Diagnose loss of control experienced at full throttle. I ascended at full throttle while probably applying some pitch and roll demands and suddenly the craft just seemed to loose stability. It rolled/ pitched upside down a few times, luckily it recovered and I was able to bring it back safely. However, have heard that a backer had a similar problem. Possible causes are Yuan's Max throttle stuff, my roll angle prioritisation (less likely as wasn't in the backers code), ROLL/ PITCH SPL (spin limit). Or other! Have done some test flights and witnessed the loss of control at high throttles, it only does it when applying a high throttle and a large attitude demand, it inverts then enters a continual spin at high throttle Have added code on line 51 of <a class="el" href="control_8h_source.html">control.h</a> to try and solve this problem Rescues craft if error gets too large at high throttles by detecting roll and pitch error getting too large and reducing the throttle.</p>
+<p>Test to see if this code solves the problem Tried this: if (((pitcherror &gt; 0.08) || (pitcherror &lt; -0.08) || (rollerror &gt; 0.08) || (rollerror &lt; -0.08)) &amp;&amp; (throttle &gt; 600)) throttle -= 200; Should really be able to solve with better PID tuning.}</p>
+<p>check all integrators for decoupling, and make sure they are locked in this case</p>
+<p>Assess and Improve leveling on take off and leveling in flight Key areas to investigate are integral gain on takeoff Accelerometer feedback gain Accelerometer feedback method - additional filtering needed? Landing Gear separation seems to play a large part, it causes undesired integral wind-up before the craft is in the air Landing gear would need switches or be sprung and damped with longish travel</p>
+<p>Measure loop rates instead of just assuming it The control needs to know how fast they're going, right now we assume the loops are going at their specified rate however, it would be better to just time instead. Use one of the hardware timers to get sub-ms resolution.</p>
+<p>Check for some discontinuities in flight Throttle and attitude blips when flying under GPS Throttle blips when flying normally</p>
+<p class="enddd">clean up globals</p>
+</dd>
+</dl>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><b>states.h</b></li>
     <li class="footer">Generated on Mon Sep 9 2013 19:24:15 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>

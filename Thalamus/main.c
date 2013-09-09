@@ -1,4 +1,55 @@
+/*!
+\file Thalamus/main.c
+\brief It all starts here
+
+On bootup, a startup function is run (part of the function library, and 
+not	documented in this code.  The startuf function after initialising 
+the hardware proceeds to invoke the function setup() followed by loop().
+
+This file contains setup() and loop(), as well as some of the interrupt 
+service routines that are set to run repeatedly.
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+\todo Diagnose loss of control experienced at full throttle.
+I ascended at full throttle while probably applying some pitch and roll demands and suddenly the craft just seemed to loose stability.
+It rolled/ pitched upside down a few times, luckily it recovered and I was able to bring it  back safely. 
+However, have heard that a backer had a similar problem. 
+Possible causes are Yuan's Max throttle stuff, my roll angle prioritisation (less likely as wasn't in the backers code), ROLL/ PITCH SPL (spin limit). Or other!
+Have done some test flights and witnessed the loss of control at high throttles, it only does it when applying a high throttle and a large attitude demand, it inverts then enters a continual spin at high throttle
+Have added code on line 51 of control.h to try and solve this problem
+Rescues craft if error gets too large at high throttles by detecting roll and pitch error getting too large and reducing the throttle.
+
+\todo Test to see if this code solves the problem
+Tried this: if (((pitcherror > 0.08) || (pitcherror < -0.08) || (rollerror > 0.08) || (rollerror < -0.08)) && (throttle > 600)) throttle -= 200;
+Should really be able to solve with better PID tuning.}
+
+\todo check all integrators for decoupling, and make sure they are locked in this case
+
+\todo Assess and Improve leveling on take off and leveling in flight
+Key areas to investigate are integral gain on takeoff
+Accelerometer feedback gain
+Accelerometer feedback method - additional filtering needed?
+Landing Gear separation seems to play a large part, it causes undesired integral wind-up before the craft is in the air
+Landing gear would need switches or be sprung and damped with longish travel
+
+\todo Measure loop rates instead of just assuming it
+The control needs to know how fast they're going, right now we assume the loops are going at their specified rate
+however, it would be better to just time instead.  Use one of the hardware timers to get sub-ms resolution.
+
+\todo Check for some discontinuities in flight
+Throttle and attitude blips when flying under GPS
+Throttle blips when flying normally
+
+\todo clean up globals
+
+
+*/
+
 #include "all.h"
+
 
 // Initialiser function: sets everything up.
 void setup() {	

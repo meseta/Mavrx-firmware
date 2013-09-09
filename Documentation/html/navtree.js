@@ -1,12 +1,17 @@
 var NAVTREE =
 [
-  [ "Mavrx Firmware", "index.html", [
+  [ "Mavrx Multirotor Firmware", "index.html", [
+    [ "Todo List", "todo.html", null ],
     [ "Data Structures", null, [
       [ "Data Structures", "annotated.html", "annotated" ],
       [ "Data Structure Index", "classes.html", null ]
     ] ],
     [ "Files", null, [
-      [ "File List", "files.html", "files" ]
+      [ "File List", "files.html", "files" ],
+      [ "Globals", "globals.html", [
+        [ "All", "globals.html", null ],
+        [ "Functions", "globals_func.html", null ]
+      ] ]
     ] ]
   ] ]
 ];

@@ -1,3 +1,13 @@
+/*!
+\file Thalamus/control.c
+\brief Output functions
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #include "all.h"
 
 void control_throttle()	{
@@ -18,7 +28,7 @@ void control_throttle()	{
 		ultTouchdownHyst = 10;
 
 		// When we enter the confidence range, we store the ultrasound altitude and attempt to hold it.
-		// TODO: Work out what happens if move out of the ultrasound confidence zone again.
+		/*! \todo Work out what happens if move out of the ultrasound confidence zone again. */
 		if (got_setpoint == 0) {
 			targetZ_ult = alt.ultra;
 			got_setpoint = 1;
@@ -53,7 +63,7 @@ void control_throttle()	{
 
 
 	//Baro/GPS derived PID controller
-	//TODO: Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus
+	/*! \todo Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus */
 	// float GPS_errP = ilink_gpsfly.altitudeDemand + (alt_tkoff + 0.8) - alt.filtered;
 	float GPS_errP = ilink_gpsfly.altitudeDemand - alt.filtered;
 	// float GPS_errP = alt_tkoff - alt.filtered;
@@ -63,7 +73,7 @@ void control_throttle()	{
 	// Collecting the PID terms
 	gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
 
-	// TODO: Diagnose throttle jumps while in GPS hold mode.
+	/*! \todo Diagnose throttle jumps while in GPS hold mode. */
 	// This section of code limits the rate at which the craft is allowed to change the throttle according to GPS and Barometer Demands
 	// if ((gpsThrottle - gpsThrottleold) > LIM_THRO) gpsThrottle = gpsThrottleold + LIM_THRO;
 	// if ((gpsThrottle - gpsThrottleold) < -LIM_THRO) gpsThrottle = gpsThrottleold - LIM_THRO;
@@ -237,8 +247,8 @@ void control_motors(){
 	else if(yawerror < -M_PI) yawerror += M_TWOPI;
 	
 	// Creating the integral for the motor PID
-	// TODO: Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates)
-	//TODO: Check to see if added Yaw integral solves yaw offsets in autonomous flight
+	/*! \todo Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates) */
+	/*! \todo Check to see if added Yaw integral solves yaw offsets in autonomous flight */
 	static float pitchIntegral = 0;
 	static float rollIntegral = 0;
 	static float yawIntegral = 0;
@@ -284,11 +294,11 @@ void control_motors(){
 
 	float yawcorrection = -((float)Gyro.Z.value + YAW_Boost*deltaYaw) * YAW_Kd; 
 	yawcorrection += -YAW_Kp*yawerror;
-	// TODO: Check direction of yaw integral
+	/*! \todo Check direction of yaw integral */
 	yawcorrection += -YAW_Ki*yawIntegral;
 	
 	// If the craft is upsidedown, turn off yaw control until control brings it back upright.
-	// TODO: Test this code
+	/*! \todo Test this code */
 	if (M9 < 0) {
 		yawcorrection = 0;
 	}
@@ -297,7 +307,7 @@ void control_motors(){
 	oldGyroValueRoll = (float)Gyro.X.value;
    
 	//Assigning the PID results to the correct motors
-	// TODO: fill these in properly
+	/*! \todo fill these in properly */
     switch((unsigned char)ORI) {
         default:
         case 3: // NAVY EDITION
@@ -342,7 +352,7 @@ void control_motors(){
 	tempW = (signed short)motorWav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
 	
 		
-	// TODO: Add Auto Land on rxLoss!
+	/*! \todo Add Auto Land on rxLoss! */
 	if (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK) || (hold_thro_off > 0)) {
 		
 		// Set Airborne = 0

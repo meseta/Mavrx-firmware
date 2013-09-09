@@ -1,3 +1,15 @@
+/*!
+\file Thalamus/calibrate.c
+\brief Functions for zeroing and calibrating sensors
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
+
+
 #include "all.h"
 
 unsigned char detect_ori(void) {
@@ -89,7 +101,7 @@ void calibrate_mag(void) {
 			Zmin = Zmax;
 			
 			// Calibrate for 70 seconds or until still for 2.8 seconds.
-			//TODO: filter out spikes
+			/*! \todo filter out spikes */
 			for(i=0; i<5000; i++) {
 				read_gyr_sensors();
 				
@@ -139,7 +151,7 @@ void calibrate_mag(void) {
 				Zav *= 0.95f;
 				Zav += 0.05f * (float)Gyro.Z.raw; 
 				
-				//TODO: Inline delay
+				/*! \todo Inline delay */
 				Delay(14);
 			}
 			
