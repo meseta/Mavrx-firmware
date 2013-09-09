@@ -1,12 +1,29 @@
 #ifndef __INPUTS_H__
 #define __INPUTS_H__
 
+//  IMU sensors
+#define GAV_LEN 8
+#define AAV_LEN 30
+#define MAV_LEN 30
+#define ALTAV_LEN 30
+#define ALTDAV_LEN 60
+
+// Inputs
+
+#define OFFSTICK			50
+#define MIDSTICK			512		// Corresponds to input when stick is in middle (approx value).
+#define MAXSTICK			850		// Corresponds to input when stick is at the top
+
+#define MAXTHRESH		   750 //(MAXSTICK+MIDSTICK)/2 - 50
+#define MINTHRESH		   250 //(MIDSTICK+OFFSTICK)/2 + 50
+
 // grabs GPS status
 
 extern unsigned char gps_valid;
 void gps_status(void);
 
 // Altitude sensors
+
 
 typedef struct {
 	float pressure;
@@ -18,6 +35,12 @@ typedef struct {
 	float ult_conf;
 	float ult;
 	float barobias;
+	unsigned int count;
+	signed int history[ALTAV_LEN];
+	volatile unsigned int total;
+	unsigned int dcount;
+	signed int dhistory[ALTDAV_LEN];
+	volatile signed int dtotal;
 } altStruct;
 extern altStruct alt;
 
@@ -32,12 +55,6 @@ void read_ultrasound(void);
 extern float batteryVoltage;
 void trig_batt_voltage(void);
 void read_batt_voltage(void);
-
-
-//  IMU sensors
-#define GAV_LEN 8
-#define AAV_LEN 30
-#define MAV_LEN 30
 
 typedef struct{
 	volatile signed short raw;
@@ -96,16 +113,6 @@ void read_mag_sensors(void);
 
 // sensor orientation
 void convert_ori(volatile signed short * X, volatile signed short * Y, volatile signed short * Z, signed short * data);
-
-// user inputs
-// Inputs
-
-#define OFFSTICK			50
-#define MIDSTICK			512		// Corresponds to input when stick is in middle (approx value).
-#define MAXSTICK			850		// Corresponds to input when stick is at the top
-
-#define MAXTHRESH		   750 //(MAXSTICK+MIDSTICK)/2 - 50
-#define MINTHRESH		   250 //(MIDSTICK+OFFSTICK)/2 + 50
 
 extern unsigned short rcInput[7];
 extern unsigned int rxLoss;

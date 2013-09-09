@@ -27,8 +27,8 @@ struct paramStorage_struct paramStorage[] = {
 	{"YAW_Kp",		1000.0f},	 
 	{"YAW_Kd",		250.0f},  
 	{"YAW_Bst",		0.00f},   
-	// Mode
-	{"UNUSED",	   0},  //
+
+	{"LPF_BARD",	   0.01},  //
 	//Limits
 	{"LIM_ANGLE",	   0.35f},  // Roll and Pitch Angle Limit in Radians
 	{"LIM_ALT",		 1000.0f},  // Altitude Limit in mm when in Ultrasound Mode

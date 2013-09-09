@@ -164,14 +164,22 @@ void read_barometer(void) {
 	 
     if(temperature_counter++ < 50) { // note: temperature_counter is incremented AFTER it is compared with 50
         // Get raw barometric pressure reading in Pascals, when it reads 0
-        float pressure = GetBaroPressure();
+		// Multiplied by 100 to prevent loss of accuracy in running average
+        float pressure = 100.0*(GetBaroPressure());
+		
 
         // There is an I2C or sensor error if 0 is returned, so only update altitude when pressure is greater than 0
         if(pressure > 0) {	
             // Run an LPF filter on the barometer data
-            alt.pressure *= (1-LPF_BARO);
-            alt.pressure +=  LPF_BARO * pressure;									
-			
+            // alt.pressure *= (1-LPF_BARO);
+            // alt.pressure +=  LPF_BARO * pressure;
+			// Running average on the barometer data
+			alt.total -= alt.history[alt.count];
+			alt.total += pressure;
+			alt.history[alt.count] = pressure;
+			alt.pressure = (float)alt.total/((float)ALTAV_LEN * (100));
+			if(++alt.count >= ALTAV_LEN) alt.count = 0;
+													
             //Scale to Metres
             alt.baro = Pressure2Alt(alt.pressure);
             

@@ -15,7 +15,7 @@
 #define WAYPOINT_TIMEOUT    500/MESSAGE_LOOP_HZ // value = timeout in ms / message_loop_hz
 #define WAYPOINT_TRIES      5   // number of times to retry waypoint
 #define WAYPOINT_MIN_RADIUS 1
-#define WAYPOINT_SAFE_HEIGHT 2  // altitude above home to use
+#define WAYPOINT_SAFE_HEIGHT 30  // altitude above home to use
 
 #define INTMODE_OFF         0 // horizontal is off (maximum), veritcal is off (maximum)
 #define INTMODE_VERTICAL    1 // horizontal is off (maximum), vertical interpolates up to the target
