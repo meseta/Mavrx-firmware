@@ -70,7 +70,7 @@ firmware: $(DIRS) | $(OBJS)
 	$(OBJCOPY) $(OCFLAGS) -O ihex $(PRJPATH)/firmware.elf firmware.hex
 	-@echo ""
 	-@echo "*** Adding Checksum... ***"
-	$(CHKSM) firmware.bin
+	-$(CHKSM) firmware.bin
 	-@echo ""
 	-@echo "*** Getting Size information... ***"
 	$(SIZE) $(PRJPATH)/firmware.elf
