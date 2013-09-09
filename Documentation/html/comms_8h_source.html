@@ -92,7 +92,7 @@ $(document).ready(function(){initNavTree('comms_8h_source.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -111,23 +111,23 @@ $(document).ready(function(){initNavTree('comms_8h_source.html','');});
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;thal.h&quot;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">extern</span> ilink_identify_t ilink_identify;</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">extern</span> ilink_thalstat_t ilink_thalstat;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">extern</span> ilink_thalctrl_t ilink_thalctrl_rx;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">extern</span> ilink_thalctrl_t ilink_thalctrl_tx;</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">extern</span> ilink_imu_t ilink_rawimu;</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">extern</span> ilink_imu_t ilink_scaledimu;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">extern</span> ilink_altitude_t ilink_altitude;</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">extern</span> ilink_attitude_t ilink_attitude;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">extern</span> ilink_attitude_t ilink_attitude_demand;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">extern</span> ilink_thalparam_t ilink_thalparam_tx;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">extern</span> ilink_thalparam_t ilink_thalparam_rx;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">extern</span> ilink_thalpareq_t ilink_thalpareq;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">extern</span> ilink_iochan_t ilink_inputs0;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">extern</span> ilink_iochan_t ilink_outputs0;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">extern</span> ilink_gpsfly_t ilink_gpsfly;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keyword">extern</span> ilink_gpsreq_t ilink_gpsreq;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">extern</span> ilink_debug_t ilink_debug;</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">extern</span> ilink_identify_t <a class="code" href="comms_8c.html#afe932c5cf4edac24eb2117d5072a7e81">ilink_identify</a>;</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">extern</span> ilink_thalstat_t <a class="code" href="comms_8c.html#abf87beb2efbaacba452aed7465b398f7">ilink_thalstat</a>;</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">extern</span> ilink_thalctrl_t <a class="code" href="comms_8c.html#a1fb32d18dccbe4b586d52255ad3bbf98">ilink_thalctrl_rx</a>;</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">extern</span> ilink_thalctrl_t <a class="code" href="comms_8c.html#aef15e7a6f3509ec4af325a896e0cbd0d">ilink_thalctrl_tx</a>;</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">extern</span> ilink_imu_t <a class="code" href="comms_8c.html#a10d1a3e4fc8bfc363210450b48bed65a">ilink_rawimu</a>;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">extern</span> ilink_imu_t <a class="code" href="comms_8c.html#ad1a511f09bb8116a0c58e958b03dc0a4">ilink_scaledimu</a>;</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">extern</span> ilink_altitude_t <a class="code" href="comms_8c.html#ada747c57207b53d18c6ccc84e6798bfc">ilink_altitude</a>;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">extern</span> ilink_attitude_t <a class="code" href="comms_8c.html#aacdc66e6eeabde118f4f67942674fc30">ilink_attitude</a>;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">extern</span> ilink_attitude_t <a class="code" href="comms_8c.html#ab75644a1d25dea7ef1cdd5d1832d6cdc">ilink_attitude_demand</a>;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">extern</span> ilink_thalparam_t <a class="code" href="comms_8c.html#a85276f37fb3ef9f9b623ab619ccf6fc8">ilink_thalparam_tx</a>;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">extern</span> ilink_thalparam_t <a class="code" href="comms_8c.html#a24b483990e149a22217dcff219703192">ilink_thalparam_rx</a>;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">extern</span> ilink_thalpareq_t <a class="code" href="comms_8c.html#a63d82821f72a9c45566167faff26f375">ilink_thalpareq</a>;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">extern</span> ilink_iochan_t <a class="code" href="comms_8c.html#a494392020676441347f3ad25a2ea2be9">ilink_inputs0</a>;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">extern</span> ilink_iochan_t <a class="code" href="comms_8c.html#a4a5037aae33015a0295d72acb90e6b96">ilink_outputs0</a>;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">extern</span> ilink_gpsfly_t <a class="code" href="comms_8c.html#a073b655daf5cbf253165ff19f32efbfd">ilink_gpsfly</a>;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keyword">extern</span> ilink_gpsreq_t <a class="code" href="comms_8c.html#a0638d7c8c968f4ff2d7f10ac8eb231c7">ilink_gpsreq</a>;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">extern</span> ilink_debug_t <a class="code" href="comms_8c.html#afcbe55af0870f29eda4558e1148d80db">ilink_debug</a>;</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment">// ****************************************************************************</span></div>
@@ -135,9 +135,9 @@ $(document).ready(function(){initNavTree('comms_8h_source.html','');});
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">// ****************************************************************************</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="comment">// *** Deal with ilink requets between Hypo and Thalamus</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keywordtype">void</span> ILinkMessageRequest(<span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <span class="keywordtype">id</span>);</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keywordtype">void</span> <a class="code" href="comms_8c.html#ad8b14158ff8b72e233271e2d0b93b4ea" title="Deals with message requests over ilink for messages received. ">ILinkMessageRequest</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <span class="keywordtype">id</span>);</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment">// *** iLink interrupt handler between Hypo and Thalamus</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keywordtype">void</span> ILinkMessage(<span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <span class="keywordtype">id</span>, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> * buffer, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> length);</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keywordtype">void</span> <a class="code" href="comms_8c.html#a730f89e2e9de3bcd9327e086926b8528" title="Deals with message received over ilink. ">ILinkMessage</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <span class="keywordtype">id</span>, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> * buffer, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> length);</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -145,7 +145,7 @@ $(document).ready(function(){initNavTree('comms_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><b>comms.h</b></li>
-    <li class="footer">Generated on Mon Sep 9 2013 19:24:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Tue Sep 10 2013 00:27:26 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

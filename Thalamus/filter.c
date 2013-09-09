@@ -1,6 +1,20 @@
+/*!
+\file Thalamus/filter.c
+\brief Filters and AHRS
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #include "all.h"
 
-void filter_gps_baro(){
+/*!
+\brief Filters GPS and barometer altitude
+
+*/
+void filter_gps_baro(void){
 
 	// GPS Altitude in Metres
 	alt.gps = ilink_gpsfly.altitude;
@@ -46,23 +60,24 @@ void filter_gps_baro(){
 			
 	}
 	
-	
-	
-	
-	
-	
-	
-
-	
 }
 
+/*!
+\brief ATTITUDE HEADING REFERENCE SYSTEM
+
+*/
 void a_h_r_s(){
 
-// ****************************************************************************
-// *** ATTITUDE HEADING REFERENCE SYSTEM
-// ****************************************************************************
-	
 	// CREATE THE MEASURED ROTATION MATRIX //
+	static float RM1=1;
+	static float RM2=0;
+	static float RM3=0;
+	static float RM4=0;
+	static float RM5=1;
+	static float RM6=0;
+	static float RM7=0;
+	static float RM8=0;
+	static float RM9=1;
 	
 	//Both mag and acc are normalized in their Read functions
 	

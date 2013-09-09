@@ -92,7 +92,7 @@ $(document).ready(function(){initNavTree('control_8c.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -115,10 +115,12 @@ $(document).ready(function(){initNavTree('control_8c.html','');});
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa239da247d76688b4ae3e5375acede47"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="control_8c.html#aa239da247d76688b4ae3e5375acede47">control_throttle</a> ()</td></tr>
-<tr class="separator:aa239da247d76688b4ae3e5375acede47"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e76a14d433c187c06fc0531c2e98955"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="control_8c.html#a3e76a14d433c187c06fc0531c2e98955">control_motors</a> ()</td></tr>
-<tr class="separator:a3e76a14d433c187c06fc0531c2e98955"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afaf768d6c85a3e7a8e2fc5ec17bc3d8b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="control_8c.html#afaf768d6c85a3e7a8e2fc5ec17bc3d8b">control_throttle</a> (void)</td></tr>
+<tr class="memdesc:afaf768d6c85a3e7a8e2fc5ec17bc3d8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls the throttle for altitude control.  <a href="#afaf768d6c85a3e7a8e2fc5ec17bc3d8b">More...</a><br/></td></tr>
+<tr class="separator:afaf768d6c85a3e7a8e2fc5ec17bc3d8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb9bac63b73330ebe25df944a9e9fedf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="control_8c.html#abb9bac63b73330ebe25df944a9e9fedf">control_motors</a> (void)</td></tr>
+<tr class="memdesc:abb9bac63b73330ebe25df944a9e9fedf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls the motors, PID stuff. Angle demands in, motor control out.  <a href="#abb9bac63b73330ebe25df944a9e9fedf">More...</a><br/></td></tr>
+<tr class="separator:abb9bac63b73330ebe25df944a9e9fedf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Output functions. </p>
@@ -128,7 +130,7 @@ Henry Fletcher </dd>
 <dd>
 Oskar Weigl </dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a3e76a14d433c187c06fc0531c2e98955"></a>
+<a class="anchor" id="abb9bac63b73330ebe25df944a9e9fedf"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -141,16 +143,18 @@ Oskar Weigl </dd></dl>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates) </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Check to see if added Yaw integral solves yaw offsets in autonomous flight </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Check direction of yaw integral </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Test this code </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>fill these in properly </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Add Auto Land on rxLoss! </dd></dl>
+
+<p>Controls the motors, PID stuff. Angle demands in, motor control out. </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates) </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Check to see if added Yaw integral solves yaw offsets in autonomous flight </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Check direction of yaw integral </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Test this code </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>fill these in properly </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Add Auto Land on rxLoss! </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="aa239da247d76688b4ae3e5375acede47"></a>
+<a class="anchor" id="afaf768d6c85a3e7a8e2fc5ec17bc3d8b"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -163,9 +167,12 @@ Oskar Weigl </dd></dl>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Work out what happens if move out of the ultrasound confidence zone again. </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>Diagnose throttle jumps while in GPS hold mode. </dd></dl>
+
+<p>Controls the throttle for altitude control. </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Work out what happens if move out of the ultrasound confidence zone again. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Set this back when COde finished </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Diagnose throttle jumps while in GPS hold mode. </dd></dl>
 
 </div>
 </div>
@@ -175,7 +182,7 @@ Oskar Weigl </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="control_8c.html">control.c</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 19:24:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Tue Sep 10 2013 00:27:26 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

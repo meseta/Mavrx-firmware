@@ -70,6 +70,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -92,7 +93,7 @@ $(document).ready(function(){initNavTree('structalt_struct.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -108,55 +109,228 @@ $(document).ready(function(){initNavTree('structalt_struct.html','');});
 <div class="title">altStruct Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Altitude data struct.  
+ <a href="structalt_struct.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="globals_8h_source.html">globals.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:ac870e1249bab4a2a68cc4126761d24ef"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac870e1249bab4a2a68cc4126761d24ef"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>pressure</b></td></tr>
+<tr class="memitem:ac870e1249bab4a2a68cc4126761d24ef"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#ac870e1249bab4a2a68cc4126761d24ef">pressure</a></td></tr>
 <tr class="separator:ac870e1249bab4a2a68cc4126761d24ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc517b2492e289a41f5c82512440b007"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abc517b2492e289a41f5c82512440b007"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>baro</b></td></tr>
+<tr class="memitem:abc517b2492e289a41f5c82512440b007"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#abc517b2492e289a41f5c82512440b007">baro</a></td></tr>
 <tr class="separator:abc517b2492e289a41f5c82512440b007"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ad13e894a9aff8a9227602b36e68baa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ad13e894a9aff8a9227602b36e68baa"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>gps</b></td></tr>
+<tr class="memitem:a7ad13e894a9aff8a9227602b36e68baa"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a7ad13e894a9aff8a9227602b36e68baa">gps</a></td></tr>
 <tr class="separator:a7ad13e894a9aff8a9227602b36e68baa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2eed96d0424911b730d85f8304c47a2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af2eed96d0424911b730d85f8304c47a2"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>filtered</b></td></tr>
+<tr class="memitem:af2eed96d0424911b730d85f8304c47a2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#af2eed96d0424911b730d85f8304c47a2">filtered</a></td></tr>
 <tr class="separator:af2eed96d0424911b730d85f8304c47a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6cc9550b3ab20742147edf2ee0a29621"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6cc9550b3ab20742147edf2ee0a29621"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>ultra</b></td></tr>
+<tr class="memitem:a6cc9550b3ab20742147edf2ee0a29621"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a6cc9550b3ab20742147edf2ee0a29621">ultra</a></td></tr>
 <tr class="separator:a6cc9550b3ab20742147edf2ee0a29621"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc29fb7fadd39a1bc2e3c52532248689"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afc29fb7fadd39a1bc2e3c52532248689"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>vel</b></td></tr>
+<tr class="memitem:afc29fb7fadd39a1bc2e3c52532248689"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#afc29fb7fadd39a1bc2e3c52532248689">vel</a></td></tr>
 <tr class="separator:afc29fb7fadd39a1bc2e3c52532248689"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b16d7662cfca169f8b24c925d98873e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7b16d7662cfca169f8b24c925d98873e"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>ult_conf</b></td></tr>
+<tr class="memitem:a7b16d7662cfca169f8b24c925d98873e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a7b16d7662cfca169f8b24c925d98873e">ult_conf</a></td></tr>
 <tr class="separator:a7b16d7662cfca169f8b24c925d98873e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48bda85c2b5984a598440336f2f839b3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a48bda85c2b5984a598440336f2f839b3"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>ult</b></td></tr>
-<tr class="separator:a48bda85c2b5984a598440336f2f839b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac825f30808ec3e4a3b7bffbbe0733b33"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac825f30808ec3e4a3b7bffbbe0733b33"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>barobias</b></td></tr>
+<tr class="memitem:ac825f30808ec3e4a3b7bffbbe0733b33"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#ac825f30808ec3e4a3b7bffbbe0733b33">barobias</a></td></tr>
 <tr class="separator:ac825f30808ec3e4a3b7bffbbe0733b33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16ff2d8e15ade4948398b0aeb80124a8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a16ff2d8e15ade4948398b0aeb80124a8"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>count</b></td></tr>
+<tr class="memitem:a16ff2d8e15ade4948398b0aeb80124a8"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a16ff2d8e15ade4948398b0aeb80124a8">count</a></td></tr>
 <tr class="separator:a16ff2d8e15ade4948398b0aeb80124a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c9dfe7b88b62b3ef8334ff704422e54"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7c9dfe7b88b62b3ef8334ff704422e54"></a>
-signed int&#160;</td><td class="memItemRight" valign="bottom"><b>history</b> [ALTAV_LEN]</td></tr>
+<tr class="memitem:a7c9dfe7b88b62b3ef8334ff704422e54"><td class="memItemLeft" align="right" valign="top">signed int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a7c9dfe7b88b62b3ef8334ff704422e54">history</a> [ALTAV_LEN]</td></tr>
 <tr class="separator:a7c9dfe7b88b62b3ef8334ff704422e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b015344564ac51f5296b819f0f47505"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8b015344564ac51f5296b819f0f47505"></a>
-volatile unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>total</b></td></tr>
+<tr class="memitem:a8b015344564ac51f5296b819f0f47505"><td class="memItemLeft" align="right" valign="top">volatile unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a8b015344564ac51f5296b819f0f47505">total</a></td></tr>
 <tr class="separator:a8b015344564ac51f5296b819f0f47505"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77f867934ed3f8b298393d9350fd2202"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a77f867934ed3f8b298393d9350fd2202"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>dcount</b></td></tr>
+<tr class="memitem:a77f867934ed3f8b298393d9350fd2202"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a77f867934ed3f8b298393d9350fd2202">dcount</a></td></tr>
 <tr class="separator:a77f867934ed3f8b298393d9350fd2202"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a065b135deb1c647fc6e4886d9d5df432"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a065b135deb1c647fc6e4886d9d5df432"></a>
-signed int&#160;</td><td class="memItemRight" valign="bottom"><b>dhistory</b> [ALTDAV_LEN]</td></tr>
+<tr class="memitem:a065b135deb1c647fc6e4886d9d5df432"><td class="memItemLeft" align="right" valign="top">signed int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a065b135deb1c647fc6e4886d9d5df432">dhistory</a> [ALTDAV_LEN]</td></tr>
 <tr class="separator:a065b135deb1c647fc6e4886d9d5df432"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a591a290db73edac8ccc59c4f04a49299"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a591a290db73edac8ccc59c4f04a49299"></a>
-volatile signed int&#160;</td><td class="memItemRight" valign="bottom"><b>dtotal</b></td></tr>
+<tr class="memitem:a591a290db73edac8ccc59c4f04a49299"><td class="memItemLeft" align="right" valign="top">volatile signed int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html#a591a290db73edac8ccc59c4f04a49299">dtotal</a></td></tr>
 <tr class="separator:a591a290db73edac8ccc59c4f04a49299"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Altitude data struct. </p>
+</div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="abc517b2492e289a41f5c82512440b007"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float baro</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Barometer altitude </p>
+
+</div>
+</div>
+<a class="anchor" id="ac825f30808ec3e4a3b7bffbbe0733b33"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float barobias</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Barometer/GPS bias </p>
+
+</div>
+</div>
+<a class="anchor" id="a16ff2d8e15ade4948398b0aeb80124a8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int count</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Altitude running average counter </p>
+
+</div>
+</div>
+<a class="anchor" id="a77f867934ed3f8b298393d9350fd2202"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int dcount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Altitude derivative running average counter </p>
+
+</div>
+</div>
+<a class="anchor" id="a065b135deb1c647fc6e4886d9d5df432"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">signed int dhistory[ALTDAV_LEN]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Altitude derivative running average history </p>
+
+</div>
+</div>
+<a class="anchor" id="a591a290db73edac8ccc59c4f04a49299"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">volatile signed int dtotal</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Altitude derivative running average total </p>
+
+</div>
+</div>
+<a class="anchor" id="af2eed96d0424911b730d85f8304c47a2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float filtered</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Filtered altitude </p>
+
+</div>
+</div>
+<a class="anchor" id="a7ad13e894a9aff8a9227602b36e68baa"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float gps</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>GPS altitude </p>
+
+</div>
+</div>
+<a class="anchor" id="a7c9dfe7b88b62b3ef8334ff704422e54"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">signed int history[ALTAV_LEN]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Altitude running average history </p>
+
+</div>
+</div>
+<a class="anchor" id="ac870e1249bab4a2a68cc4126761d24ef"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float pressure</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Atmospheric pressure </p>
+
+</div>
+</div>
+<a class="anchor" id="a8b015344564ac51f5296b819f0f47505"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">volatile unsigned int total</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Altitude running average total </p>
+
+</div>
+</div>
+<a class="anchor" id="a7b16d7662cfca169f8b24c925d98873e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float ult_conf</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Ultrasound confidence </p>
+
+</div>
+</div>
+<a class="anchor" id="a6cc9550b3ab20742147edf2ee0a29621"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float ultra</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Ultrasound height over ground </p>
+
+</div>
+</div>
+<a class="anchor" id="afc29fb7fadd39a1bc2e3c52532248689"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float vel</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Vertical velocity </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Thalamus/inc/<a class="el" href="globals_8h_source.html">globals.h</a></li>
 </ul>
@@ -166,7 +340,7 @@ volatile signed int&#160;</td><td class="memItemRight" valign="bottom"><b>dtotal
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="structalt_struct.html">altStruct</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 19:24:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Tue Sep 10 2013 00:27:26 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

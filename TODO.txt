@@ -1,3 +1,0 @@
-GENERAL TODO list in order of priority
-Specific TODO's are listed next to the relevant bit of code.
-

@@ -11,7 +11,6 @@ var structalt_struct =
     [ "history", "structalt_struct.html#a7c9dfe7b88b62b3ef8334ff704422e54", null ],
     [ "pressure", "structalt_struct.html#ac870e1249bab4a2a68cc4126761d24ef", null ],
     [ "total", "structalt_struct.html#a8b015344564ac51f5296b819f0f47505", null ],
-    [ "ult", "structalt_struct.html#a48bda85c2b5984a598440336f2f839b3", null ],
     [ "ult_conf", "structalt_struct.html#a7b16d7662cfca169f8b24c925d98873e", null ],
     [ "ultra", "structalt_struct.html#a6cc9550b3ab20742147edf2ee0a29621", null ],
     [ "vel", "structalt_struct.html#afc29fb7fadd39a1bc2e3c52532248689", null ]

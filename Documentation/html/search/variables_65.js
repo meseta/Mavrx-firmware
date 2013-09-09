@@ -1,19 +1,5 @@
 var searchData=
 [
-  ['emr',['EMR',['../struct_l_p_c___c_t16_b0___type.html#a6034c7458d8e6030f6dacecf0f1a3a89',1,'LPC_CT16B0_Type::EMR()'],['../struct_l_p_c___c_t16_b1___type.html#a6034c7458d8e6030f6dacecf0f1a3a89',1,'LPC_CT16B1_Type::EMR()'],['../struct_l_p_c___c_t32_b0___type.html#a6034c7458d8e6030f6dacecf0f1a3a89',1,'LPC_CT32B0_Type::EMR()'],['../struct_l_p_c___c_t32_b1___type.html#a6034c7458d8e6030f6dacecf0f1a3a89',1,'LPC_CT32B1_Type::EMR()']]],
-  ['enableep',['EnableEP',['../struct_u_s_b_d___h_w___a_p_i.html#a67e4e0e555e545efb59d6e668a65a843',1,'USBD_HW_API']]],
-  ['end_5findex',['end_index',['../struct____mavlink__mission__request__partial__list__t.html#ae4722779326867778ce8d98fb266deb2',1,'__mavlink_mission_request_partial_list_t::end_index()'],['../struct____mavlink__mission__write__partial__list__t.html#ae4722779326867778ce8d98fb266deb2',1,'__mavlink_mission_write_partial_list_t::end_index()']]],
-  ['epbufcfg',['EPBUFCFG',['../struct_l_p_c___u_s_b___type.html#aec7fa09079af5066f15cfdcdf903e2c7',1,'LPC_USB_Type']]],
-  ['eph',['eph',['../struct____mavlink__gps__raw__int__t.html#ace3782faa6883da77f3d0af26202bf82',1,'__mavlink_gps_raw_int_t']]],
-  ['epinuse',['EPINUSE',['../struct_l_p_c___u_s_b___type.html#a413ff4756e446f1e496b11768ce735ac',1,'LPC_USB_Type']]],
-  ['epliststart',['EPLISTSTART',['../struct_l_p_c___u_s_b___type.html#a7ad845ecd5fdd9e384332ba73cf98f58',1,'LPC_USB_Type']]],
-  ['epskip',['EPSKIP',['../struct_l_p_c___u_s_b___type.html#ad0f6c5c22660019c3cfc02078989bb50',1,'LPC_USB_Type']]],
-  ['eptoggle',['EPTOGGLE',['../struct_l_p_c___u_s_b___type.html#a1c8615033134835a090267f0598de9be',1,'LPC_USB_Type']]],
-  ['epv',['epv',['../struct____mavlink__gps__raw__int__t.html#ab9a2aef3890d1df59d40acdbc5d61b5c',1,'__mavlink_gps_raw_int_t']]],
-  ['errors_5fcomm',['errors_comm',['../struct____mavlink__sys__status__t.html#a2795d4c32e7a43cd3fe773fef335aaca',1,'__mavlink_sys_status_t']]],
-  ['errors_5fcount1',['errors_count1',['../struct____mavlink__sys__status__t.html#a09e98809172c2df24a7c04cf1535a5e7',1,'__mavlink_sys_status_t']]],
-  ['errors_5fcount2',['errors_count2',['../struct____mavlink__sys__status__t.html#a6bb3ff12e6b689916318bbefc4a0a6e5',1,'__mavlink_sys_status_t']]],
-  ['errors_5fcount3',['errors_count3',['../struct____mavlink__sys__status__t.html#a85026e0ea76e3e4d85313f9f251d3b86',1,'__mavlink_sys_status_t']]],
-  ['errors_5fcount4',['errors_count4',['../struct____mavlink__sys__status__t.html#a8ba162c9935c32a8ceec38a3d675c1ea',1,'__mavlink_sys_status_t']]],
-  ['extended_5fpayload_5flen',['extended_payload_len',['../struct____mavlink__extended__message.html#acf4cc0153cf7c1793a76a740847d1df6',1,'__mavlink_extended_message']]]
+  ['elevstate',['elevState',['../globals_8c.html#a5aa6c2482ebb112498dc4470e94d1410',1,'globals.c']]],
+  ['error',['error',['../structsensor_struct_gyro.html#a7cfd13d282af770aaa971755fa092fca',1,'sensorStructGyro']]]
 ];

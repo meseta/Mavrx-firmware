@@ -651,9 +651,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = Hypo \
-                         Hypx \
-                         Thalamus \
+INPUT                  = Thalamus \
 						 mainpage.dox
 
 # This tag can be used to specify the character encoding of the source files 

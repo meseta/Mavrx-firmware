@@ -1,9 +1,12 @@
 #ifndef __PARAMS_H__
 #define __PARAMS_H__
 
+#define PARAMNAMELEN	10
+
+/*! \brief Parameter storage structure */
 typedef struct paramStorage_struct {
-	char name[16];
-	float value;
+	char name[PARAMNAMELEN];	/*!< Parameter name */
+	float value;				/*!< Parameter value */
 } paramStorage_t;
 
 extern struct paramStorage_struct paramStorage[];

@@ -1,7 +1,19 @@
+/*!
+\file Thalamus/inputs.c
+\brief Sensor and user inputs
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #include "all.h"
 
+/*!
+\brief Filters GPS and barometer altitude
 
-
+*/
 void gps_status(void) {	
 	static unsigned int loss_counter = 0;
 	
@@ -23,6 +35,10 @@ void gps_status(void) {
 }
 
 
+/*!
+\brief Reads RX data
+
+*/
 void read_rx_input(void) {			
 
 	if(RXGetData(rcInput)) {
@@ -113,7 +129,7 @@ void read_rx_input(void) {
 		if(rxLoss > 50) {
 			rxLoss = 50;
 			// RC signal lost
-			// TODO: Perform RC signal loss state setting
+			/*! \todo Perform RC signal loss state setting */
 			if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
 			ilink_outputs0.channel[0] = THROTTLEOFFSET;
 			ilink_outputs0.channel[1] = THROTTLEOFFSET;
@@ -126,6 +142,10 @@ void read_rx_input(void) {
 }
 
 
+/*!
+\brief Reads and filters barometer
+
+*/
 void read_barometer(void) {
     // There are two versions of Thalamus, one with a barometer chip that needs to be
     // manually triggered, and temperature compensated, another with a barometer chip
@@ -173,9 +193,13 @@ void read_barometer(void) {
     }
 }
 
+
+/*!
+\brief Reads and filters the ultrasound
+
+*/
 void read_ultrasound(void) {			
-	// Get ultrasound data and scale to mm??
-	// TODO: Scale to m (everywhere should use SI units)
+	// Get ultrasound data and scale to m (everywhere should use SI units)
 	ultra = (UltraGetNewRawData()) * 0.17;
 	
 	
@@ -193,7 +217,7 @@ void read_ultrasound(void) {
 		
 	}
 	// if ultra = 0 then there isn't valid data
-	// TODO: Improve ultrasound confidence estimator
+	/*! \todo  Improve ultrasound confidence estimator */
 	else {
 		ultraLoss++;
 		if(ultraLoss > ULTRA_OVTH) ultraLoss = ULTRA_OVTH;
@@ -205,10 +229,27 @@ void read_ultrasound(void) {
 			
 }
 
+/*!
+\brief Triggers ADC for the battery voltage
+
+The ADC that is used to read the battery voltage is set to manual trigger mode
+instead of interrupt-driven, and therefor needs to be commanded to trigger.
+This function is therefore run shortly before the battery voltage is read.
+The ADC doesn't require that many clock cycles to complete, so not a big 
+delay is needed.
+*/
 void trig_batt_voltage(void) {
 	ADCTrigger(CHN7);
 }
 
+/*!
+\brief Reads ADC for the battery voltage
+
+Reads the battery voltage ADC.  An integer/bitwise operation can be used to 
+obtain the battery voltage in millivolts without loosing accuracy (assuming
+the resistors that are part of the potential divider is ideal).  But this
+gets filtered anyway using a SPR filter on a float.
+*/
 void read_batt_voltage(void) {
 	// Because the factor is 6325/1024, we can do this in integer maths by right-shifting 10 bits instead of dividing by 1024.
 	unsigned short battV = (ADCGet() * 6325) >> 10; 
@@ -217,6 +258,15 @@ void read_batt_voltage(void) {
 	batteryVoltage += 0.01f * (float)battV;
 	ilink_thalstat.battVoltage = battV;
 }
+
+/*!
+\brief Converts sensor axes to body axes
+
+The flight controller are mounted in different configurations on different
+craft, so it is possible to use the orientation of the flight controller on 
+ARM as a method for determining which airframe is being used.  This function
+converts the axes of the sensors into the axes of the craft body.
+*/
 void convert_ori(volatile signed short * X, volatile signed short * Y, volatile signed short * Z, signed short * data) {
     switch((unsigned char)ORI) {
         default:
@@ -237,7 +287,11 @@ void convert_ori(volatile signed short * X, volatile signed short * Y, volatile 
             break;
     }
 }
-			
+
+/*!
+\brief Reads and filters the gyroscopes
+
+*/
 void read_gyr_sensors(void) {
 	signed short data[4];
 	if(GetGyro(data)) {
@@ -273,6 +327,11 @@ void read_gyr_sensors(void) {
 	}
 }
 
+/*!
+\brief Reads and filters the accelerometers
+
+Accelerometer data is normalised
+*/
 void read_acc_sensors(void) {
 	float sumsqu;
 	signed short data[4];
@@ -312,6 +371,12 @@ void read_acc_sensors(void) {
     }
 }
 
+/*!
+\brief Reads and filters the magnetometers
+
+Magnetometer data is corrected for soft and hard iron, and normalised.
+
+*/
 void read_mag_sensors(void) {
 	float sumsqu, temp1, temp2, temp3;
 	signed short data[4];

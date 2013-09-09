@@ -10,7 +10,11 @@
 
 #include "all.h"
 
-void control_throttle()	{
+/*!
+\brief Controls the throttle for altitude control
+
+*/
+void control_throttle(void)	{
 
 	static float gpsThrottle = 0;
 	static float ultraThrottle = 0;
@@ -68,7 +72,8 @@ void control_throttle()	{
 	float GPS_errP = ilink_gpsfly.altitudeDemand - alt.filtered;
 	// float GPS_errP = alt_tkoff - alt.filtered;
 	GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
-	// float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel; TODO: Set this back when COde finished
+	// float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel;
+	/*! \todo Set this back when COde finished */
 	float GPS_errD = 0.0 - alt.vel;
 	// Collecting the PID terms
 	gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
@@ -140,19 +145,14 @@ void control_throttle()	{
 		}
 		
 	}	
-	
-		
-		
 }
 	
 
+/*!
+\brief Controls the motors, PID stuff.  Angle demands in, motor control out.
 
-
-
-
-
-
-void control_motors(){	
+*/
+void control_motors(void){	
     // Orientation Referencing
     switch((unsigned char)ORI) {
         default:
@@ -307,6 +307,9 @@ void control_motors(){
 	oldGyroValueRoll = (float)Gyro.X.value;
    
 	//Assigning the PID results to the correct motors
+	static float motorN=0, motorE=0, motorS=0, motorW=0;
+	static float motorNav=0, motorEav=0, motorSav=0, motorWav=0;
+	
 	/*! \todo fill these in properly */
     switch((unsigned char)ORI) {
         default:
@@ -346,6 +349,7 @@ void control_motors(){
 
 
 	// Combine attitude stabilisation demands from PID loop with throttle demands
+	float tempN=0, tempE=0, tempS=0, tempW=0;
 	tempN = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
 	tempE = (signed short)motorEav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
 	tempS = (signed short)motorSav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
