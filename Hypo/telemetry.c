@@ -71,18 +71,6 @@ xbee_transmit_request_t xbee_transmit_request;
 
 
 void mavlink_telemetry(void) {
-
-    waypointTimer++;
-	
-    rawSensorStreamCounter++;
-    extStatusStreamCounter++;
-    rcChannelCounter++;
-    rawControllerCounter++;
-    positionStreamCounter++;
-    extra1ChannelCounter++;
-    extra2ChannelCounter++;
-    extra3ChannelCounter++;
-
 	if(waypointReceiveIndex < waypointCount) {
 		if(waypointTimer > WAYPOINT_TIMEOUT) {
 			mavlink_mission_request.seq = waypointReceiveIndex;
@@ -227,18 +215,11 @@ void mavlink_telemetry(void) {
 			mavlink_servo_output_raw.servo8_raw = 0;
 			mavlink_servo_output_raw.port = 0;
 			
-			// mavlink_msg_servo_output_raw_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_servo_output_raw);
-			// mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-			// XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-			// XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-			// XBeeAllow();
-			//MAVSendVector("OUTPUT0", ilink_outputs0.channel[0], ilink_outputs0.channel[1], ilink_outputs0.channel[2]);
-			//MAVSendVector("OUTPUT1", ilink_outputs0.channel[3], ilink_outputs0.channel[4], ilink_outputs0.channel[5]);
-			MAVSendInt("MOTOR_N", ilink_outputs0.channel[0]);
-			MAVSendInt("MOTOR_E", ilink_outputs0.channel[1]);
-			MAVSendInt("MOTOR_S", ilink_outputs0.channel[2]);
-			MAVSendInt("MOTOR_W", ilink_outputs0.channel[3]);
-		
+			mavlink_msg_servo_output_raw_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_servo_output_raw);
+			mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+			XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+			XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+			XBeeAllow();
 		}
 		XBeeInhibit();
 		ILinkPoll(ID_ILINK_OUTPUTS0);
@@ -369,10 +350,10 @@ void mavlink_telemetry(void) {
 		
 		if(ilink_debug.isNew) {
 			ilink_debug.isNew = 0;
-			MAVSendFloat("DEBUG0",  ilink_debug.debug0);
+			MAVSendVector("DEBUG012", ilink_debug.debug0, ilink_debug.debug1, ilink_debug.debug2);
+			/*MAVSendFloat("DEBUG0",  ilink_debug.debug0);
 			MAVSendFloat("DEBUG1",  ilink_debug.debug1);
-			//MAVSendFloat("DEBUG2",  ilink_debug.debug2);
-			MAVSendFloat("DEBUG2",  thalAvailable);
+			MAVSendFloat("DEBUG2",  ilink_debug.debug2);*/
 			// MAVSendFloat("DEBUG3",  ilink_debug.debug3);
 			// MAVSendFloat("DEBUG4",  ilink_debug.debug4);
 			// MAVSendFloat("DEBUG5",  ilink_debug.debug5);
@@ -387,8 +368,37 @@ void mavlink_telemetry(void) {
 	}
 }
 
-
-
+void mavlink_messages(void) {
+	// remote messages
+	if(ilink_thalctrl_rx.isNew) {
+		ilink_thalctrl_rx.isNew = 0;
+		switch(ilink_thalctrl_rx.command) {
+			case THALCTRL_EEPROM_SAVEOK:
+				/*mavlink_command_ack.result = MAV_MISSION_ACCEPTED;
+				mavlink_command_ack.command = MAV_CMD_PREFLIGHT_STORAGE;
+				mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
+				mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+				XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
+				MAVSendText(MAV_SEVERITY_INFO, "EEPROM Saved OK");
+				break;
+			case THALCTRL_EEPROM_LOADOK:
+				/*mavlink_command_ack.result = MAV_MISSION_ACCEPTED;
+				mavlink_command_ack.command = MAV_CMD_PREFLIGHT_STORAGE;
+				mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
+				mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+				XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
+				MAVSendText(MAV_SEVERITY_INFO, "EEPROM Load OK");
+				break;
+			case THALCTRL_ORIOK:	MAVSendText(MAV_SEVERITY_INFO, "Craft orientation calibration ok");	break;
+			case THALCTRL_ORIBAD:	MAVSendText(MAV_SEVERITY_WARNING, "Craft orientation does not match!");	break;
+			case THALCTRL_RXLOST:	MAVSendText(MAV_SEVERITY_CRITICAL, "Radio transmitter signal lost!");	break;
+			case THALCTRL_RXFOUND:	MAVSendText(MAV_SEVERITY_INFO, "Radio transmitter signal found");	break;
+		}
+	}
+	
+	// local messages
+	
+}
 
 void MAVLinkInit() {
     mavlinkID = (unsigned char) MAV_ID;
@@ -567,15 +577,22 @@ void MAVLinkParse(unsigned char UARTData) {
                 // actions!
                 mavlink_msg_command_long_decode(&mavlink_rx_msg, &mavlink_command_long);
                 if (mavlink_command_long.target_system == mavlinkID) {
-                    
-                    
                     switch(mavlink_command_long.command) {
                         case 0: // custom 0, reset
-                            mavlink_command_ack.result = 0;
+                            // reset remote
+							ilink_thalctrl_tx.command = THALCTRL_RESET;
+							ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
+							
+							ILinkFetchData();
+							
+							/*mavlink_command_ack.result = MAV_MISSION_ACCEPTED;
                             mavlink_command_ack.command = mavlink_command_long.command;
                             mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
                             mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                            XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+                            XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
+							
+							MAVSendText(MAV_SEVERITY_INFO, "USER REQUESTED RESET!");
+							Delay(100);
                             Reset();
                             break;
                         //case MAV_CMD_NAV_WAYPOINT:
@@ -619,13 +636,14 @@ void MAVLinkParse(unsigned char UARTData) {
                         case MAV_CMD_PREFLIGHT_STORAGE:
                             if(mavlink_command_long.param1 == 0) { // read all
 								eeprom_load_all();
-								ilink_thalpareq.reqType = 3;
+								ilink_thalctrl_tx.command = THALCTRL_EEPROM_LOAD;
+								ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
 							}
                             else {
 								eeprom_save_all();
-								ilink_thalpareq.reqType = 2; // save all
+								ilink_thalctrl_tx.command = THALCTRL_EEPROM_SAVE;
+								ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
 							}
-                            ILinkSendMessage(ID_ILINK_THALPAREQ, (unsigned short *) & ilink_thalpareq, sizeof(ilink_thalpareq)/2-1);
                             break;
                             
                         case MAV_CMD_NAV_LAND:
@@ -643,6 +661,11 @@ void MAVLinkParse(unsigned char UARTData) {
                             else if(mavlink_command_long.param1 == MAV_GOTO_DO_CONTINUE) {
                                 gps_action = 4;
                             }
+							mavlink_command_ack.result = MAV_MISSION_ACCEPTED;
+                            mavlink_command_ack.command = mavlink_command_long.command;
+                            mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
+                            mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+                            XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
                             break;
                         
                         
@@ -657,11 +680,10 @@ void MAVLinkParse(unsigned char UARTData) {
                     break;
                 }
                 break;
-            case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:
-                // request send of all parameters
-				ilink_thalpareq.reqType = 0; // request all
+            case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: // request send of all parameters
 				// remote params
-				ILinkSendMessage(ID_ILINK_THALPAREQ, (unsigned short *) & ilink_thalpareq, sizeof(ilink_thalpareq)/2-1);
+				ilink_thalctrl_tx.command = THALCTRL_EEPROM_READALL;
+				ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
                 // local params
 				paramSendCount = 0;
 				paramSendSingle = 0;
@@ -674,13 +696,14 @@ void MAVLinkParse(unsigned char UARTData) {
 				if (mavlink_param_request_read.target_system == mavlinkID) {
 					if(mavlink_param_request_read.target_component == MAV_COMP_ID_IMU) {
 						// remote params
-						ilink_thalpareq.reqType = 1; // request one
+						
 						for(i=0; i<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; i++) {
-							ilink_thalpareq.paramName[i] = mavlink_param_request_read.param_id[i];
+							ilink_thalparam_tx.paramName[i] = mavlink_param_request_read.param_id[i];
 							if(mavlink_param_request_read.param_id[i] == '\0') break;
 						}
-						ilink_thalpareq.paramID = mavlink_param_request_read.param_index;
-						ILinkSendMessage(ID_ILINK_THALPAREQ, (unsigned short *) & ilink_thalpareq, sizeof(ilink_thalpareq)/2-1);
+						ilink_thalparam_tx.paramID = mavlink_param_request_read.param_index;
+						ilink_thalparam_tx.paramCount = 0; // set 1 to request parameter
+						ILinkSendMessage(ID_ILINK_THALPARAM, (unsigned short *) &ilink_thalparam_tx, sizeof(ilink_thalparam_tx)/2 - 1);
 					}
 					else if(mavlink_param_request_read.target_component == MAV_COMP_ID_MISSIONPLANNER) {
 						// local params
@@ -718,7 +741,7 @@ void MAVLinkParse(unsigned char UARTData) {
 						
 						ilink_thalparam_tx.paramID = 0;
 						ilink_thalparam_tx.paramValue = mavlink_param_set.param_value;
-						ilink_thalparam_tx.paramCount = 0;
+						ilink_thalparam_tx.paramCount = 1; // set 1 to write parameter
 						ILinkSendMessage(ID_ILINK_THALPARAM, (unsigned short *) &ilink_thalparam_tx, sizeof(ilink_thalparam_tx)/2 - 1);
 					}
 					else if(mavlink_param_set.target_component == MAV_COMP_ID_MISSIONPLANNER) {

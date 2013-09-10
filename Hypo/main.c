@@ -26,7 +26,7 @@ void setup() {
     mavlink_sys_status.onboard_control_sensors_health = mavlink_sys_status.onboard_control_sensors_enabled;
 
     // *** Establish ILink and Look for Thalamus
-    ILinkInit(4000);
+    ILinkInit(6000);
     XBeeInhibit();
     ILinkPoll(ID_ILINK_CLEARBUF); // forces Thalamus to clear its output buffers
 	unsigned int i;
@@ -108,6 +108,19 @@ void SysTickInterrupt(void) {
 }
 
 void RITInterrupt(void) {
+
+
+    waypointTimer++;
+	
+    rawSensorStreamCounter++;
+    extStatusStreamCounter++;
+    rcChannelCounter++;
+    rawControllerCounter++;
+    positionStreamCounter++;
+    extra1ChannelCounter++;
+    extra2ChannelCounter++;
+    extra3ChannelCounter++;
+	
     // *** Watchdogs
     // Incoming heartbeat watchdog
     heartbeatWatchdog++;
@@ -164,6 +177,7 @@ void RITInterrupt(void) {
     if(allowTransmit) {
 		paramater_transmit();
         mavlink_telemetry();
+		mavlink_messages();
     }
 
     // *** Process ILink

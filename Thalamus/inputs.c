@@ -14,7 +14,7 @@
 // Inputs
 
 unsigned short rcInput[7];				/*!< Contains RX input */
-unsigned int rxLoss=1000;   			/*!< Increments if RX is not available */ // initialise to a high number to start off assuming RX is lost
+unsigned int rxLoss=0;   				/*!< Increments if RX is not available */
 unsigned int rxFirst=0;					/*!< Counts the first few RX data, used to ignore invalid initial values */
 signed short yawtrim=0;					/*!< Initial yaw input trim */
 signed short throttletrim=0;			/*!< Initial trottle trim */
@@ -82,6 +82,11 @@ void read_rx_input(void) {
 
 	if(RXGetData(rcInput)) {
 		if(rxLoss > 10) {
+			if(rxLoss > 40) {
+				rxLoss = 40;
+				ilink_thalctrl_tx.command = THALCTRL_RXFOUND;
+				ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
+			}
 			rxLoss -= 10;
 			if(armed && ilink_thalstat.systemStatus == THALSTAT_SYSTEMSTATUS_CRITICAL) ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_ACTIVE;
 		}
@@ -167,9 +172,14 @@ void read_rx_input(void) {
 		LEDOff(VLED);
 	}
 	else {
-		rxLoss ++;
-		if(rxLoss > RX_PANIC) {
-			rxLoss = RX_PANIC;
+		rxLoss++;
+		
+		if(rxLoss >= RX_PANIC) {
+			if(rxLoss == RX_PANIC) {
+				ilink_thalctrl_tx.command = THALCTRL_RXLOST;
+				ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
+			}
+			rxLoss = RX_PANIC+1;
 			// RC signal lost
 			/*! \todo Perform RC signal loss state setting and stuff like autoland */
 			if(armed) {

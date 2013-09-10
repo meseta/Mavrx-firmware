@@ -15,7 +15,6 @@ var searchData=
   ['ilink_5fthalctrl_5ftx',['ilink_thalctrl_tx',['../comms_8c.html#aef15e7a6f3509ec4af325a896e0cbd0d',1,'comms.c']]],
   ['ilink_5fthalparam_5frx',['ilink_thalparam_rx',['../comms_8c.html#a24b483990e149a22217dcff219703192',1,'comms.c']]],
   ['ilink_5fthalparam_5ftx',['ilink_thalparam_tx',['../comms_8c.html#a85276f37fb3ef9f9b623ab619ccf6fc8',1,'comms.c']]],
-  ['ilink_5fthalpareq',['ilink_thalpareq',['../comms_8c.html#a63d82821f72a9c45566167faff26f375',1,'comms.c']]],
   ['ilink_5fthalstat',['ilink_thalstat',['../comms_8c.html#abf87beb2efbaacba452aed7465b398f7',1,'comms.c']]],
   ['ilinkmessage',['ILinkMessage',['../comms_8c.html#a730f89e2e9de3bcd9327e086926b8528',1,'comms.c']]],
   ['ilinkmessagerequest',['ILinkMessageRequest',['../comms_8c.html#ad8b14158ff8b72e233271e2d0b93b4ea',1,'comms.c']]],

@@ -4,13 +4,13 @@
 ilink_identify_t ilink_identify;
 ilink_thalstat_t ilink_thalstat;
 ilink_thalctrl_t ilink_thalctrl_rx;
+ilink_thalctrl_t ilink_thalctrl_tx;
 ilink_imu_t ilink_rawimu;
 ilink_imu_t ilink_scaledimu;
 ilink_altitude_t ilink_altitude;
 ilink_attitude_t ilink_attitude;
 ilink_thalparam_t ilink_thalparam_rx;
 ilink_thalparam_t ilink_thalparam_tx;
-ilink_thalpareq_t ilink_thalpareq;
 ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
 ilink_gpsfly_t ilink_gpsfly;
@@ -34,7 +34,6 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
         case ID_ILINK_THALPARAM: ptr = (unsigned short *) &ilink_thalparam_rx; break;
         case ID_ILINK_INPUTS0: ptr = (unsigned short *) &ilink_inputs0; break;
         case ID_ILINK_OUTPUTS0: ptr = (unsigned short *) &ilink_outputs0; break;
-        case ID_ILINK_THALPAREQ: ptr = (unsigned short *) &ilink_thalpareq; break;
         case ID_ILINK_DEBUG: ptr = (unsigned short *) &ilink_debug; break;
         case ID_ILINK_GPSREQ: ptr = (unsigned short *) &ilink_gpsreq; break;
     }
@@ -45,7 +44,6 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
         }
         ptr[j] = 1; // this is the "isNew" byte
         switch(id) {
-        
             case ID_ILINK_GPSREQ:
                 __NOP(); // this fixes some weird compiler bug that occurs when putting a static after a case
                 static unsigned short gpsreq_lastsequence = 0;
@@ -78,11 +76,6 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
                         paramBuffer[paramPointer].name[j] = ilink_thalparam_rx.paramName[j];
                         if(ilink_thalparam_rx.paramName[j] == '\r') break;
                     }
-                }
-                break;
-            case ID_ILINK_THALPAREQ:
-                if(ilink_thalpareq.reqType == 2) {
-                    // output something intelligible to user to signify successful EEPROM save
                 }
                 break;
 			case ID_ILINK_IDENTIFY:

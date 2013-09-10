@@ -17,6 +17,5 @@ var comms_8c =
     [ "ilink_thalctrl_tx", "comms_8c.html#aef15e7a6f3509ec4af325a896e0cbd0d", null ],
     [ "ilink_thalparam_rx", "comms_8c.html#a24b483990e149a22217dcff219703192", null ],
     [ "ilink_thalparam_tx", "comms_8c.html#a85276f37fb3ef9f9b623ab619ccf6fc8", null ],
-    [ "ilink_thalpareq", "comms_8c.html#a63d82821f72a9c45566167faff26f375", null ],
     [ "ilink_thalstat", "comms_8c.html#abf87beb2efbaacba452aed7465b398f7", null ]
 ];

@@ -3249,7 +3249,6 @@ unsigned char PRGPoll(void) {
             }
 			FUNCILinkTxBufferBusy = 0;
         }
-        
         return 0;
     }
     
@@ -3760,7 +3759,7 @@ unsigned char PRGPoll(void) {
 		Timer3SetMatch0(FUNCPWMN_duty);
 		Timer3SetMatch2(FUNCPWMW_duty);
 		
-        if(FUNCPWMPostscale++ > PWM_NESWFREQ/PWM_XYFREQ) {
+        if(++FUNCPWMPostscale > PWM_NESWFREQ/PWM_XYFREQ) {
 			Timer2SetMatch3(FUNCPWMX_duty);
 			Timer2SetMatch1(FUNCPWMY_duty);
 			
@@ -4261,7 +4260,7 @@ unsigned char PRGPoll(void) {
         Timer3Reset();
         Timer3Go();
         
-        if(FUNCPWMPostscale++ > PWM_ABCDFREQ/PWM_SFREQ) {
+        if(++FUNCPWMPostscale > PWM_ABCDFREQ/PWM_SFREQ) {
             Timer2SetStatus(MATCH1 | MATCH3);
             FUNCPWMPostscale = 0;
         }

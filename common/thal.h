@@ -925,7 +925,6 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ID_ILINK_THALCTRL   0x0100
     #define ID_ILINK_THALSTAT   0x0101
     #define ID_ILINK_THALPARAM  0x0102
-    #define ID_ILINK_THALPAREQ  0x0103
     #define ID_ILINK_INPUTS0    0x4000
     #define ID_ILINK_OUTPUTS0   0x4100
     #define ID_ILINK_RAWIMU     0x4200
@@ -977,12 +976,17 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_identify_t;
     
-	#define THALCTRL_EEPROM_GETALL			0x0100
-	#define THALCTRL_EEPROM_GETONE			0x0101
-	#define THALCTRL_EEPROM_SAVE			0x0102
-	#define THALCTRL_EEPROM_SAVEOK			0x0103
-	#define THALCTRL_EEPROM_READ			0x0104
-	#define THALCTRL_EEPROM_READOK			0x0105
+	#define THALCTRL_ORIOK					0x0078
+	#define THALCTRL_ORIBAD					0x0079
+	#define THALCTRL_EEPROM_READALL			0x0100
+	#define THALCTRL_EEPROM_SAVE			0x0101
+	#define THALCTRL_EEPROM_SAVEOK			0x0102
+	#define THALCTRL_EEPROM_LOAD			0x0103
+	#define THALCTRL_EEPROM_LOADOK			0x0104
+	#define THALCTRL_RXFOUND				0x0201
+	#define THALCTRL_RXLOST					0x0202
+	
+	#define THALCTRL_RESET					0xffff
 	
     typedef struct ilink_thalctrl_struct {
         unsigned short command;
@@ -1059,17 +1063,10 @@ static inline void RSTReset(void) { ResetInit(); }
     typedef struct ilink_thalparam_struct { // Parameters
         unsigned short paramID;
         float paramValue;
-        unsigned short paramCount;
-        char paramName[16];
+        unsigned short paramCount;		// Also doubles as Request type
+        unsigned char paramName[10];    // careful with this, should be equal to PARAMNAMELEN rounded up to an even number 
         unsigned short isNew;
     } PACKED ilink_thalparam_t;
-    
-    typedef struct ilink_thalpareq_struct { // Parameter request
-        unsigned short reqType;             // Request type, 0 is get all, 1 is get One, 2 is save all, 3 is reload all
-        unsigned short paramID;             // Parameter to request, set to 0xffff to fetch by name
-        char paramName[16];                 // Parameter name to request    
-        unsigned short isNew;
-    } PACKED ilink_thalpareq_t;
     
     typedef struct ilink_iochan_struct {    // Input/output channel data
         unsigned short channel[6];

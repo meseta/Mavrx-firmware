@@ -18,7 +18,6 @@ ilink_altitude_t 	ilink_altitude={0};			/**< Telemetry: altitude */
 ilink_attitude_t 	ilink_attitude={0};			/**< Telemetry: attitude */
 ilink_thalparam_t 	ilink_thalparam_tx={0};		/**< Transmit parameters */
 ilink_thalparam_t 	ilink_thalparam_rx={0};		/**< Receive parametrs */
-ilink_thalpareq_t 	ilink_thalpareq={0};		/**< Parameter request control */
 ilink_iochan_t 		ilink_inputs0={{0}};		/**< Telemetry: inputs */
 ilink_iochan_t 		ilink_outputs0={{0}};		/**< Telemetry: outputs */
 ilink_gpsfly_t 		ilink_gpsfly={0};			/**< GPS autofly PID stuff */
@@ -77,7 +76,6 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 	unsigned int i, j;
 	
 	switch(id) {
-		case ID_ILINK_THALPAREQ: ptr = (unsigned short *) &ilink_thalpareq; break;
 		case ID_ILINK_THALPARAM: ptr = (unsigned short *) &ilink_thalparam_rx; break;
 		case ID_ILINK_THALCTRL: ptr = (unsigned short *) &ilink_thalctrl_rx; break;
 		case ID_ILINK_GPSFLY: ptr = (unsigned short *) &ilink_gpsfly; break;
@@ -91,95 +89,88 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 	}
 	
 	switch(id) {
-		case ID_ILINK_THALPAREQ:
-			ilink_thalpareq.isNew = 0;
-			switch(ilink_thalpareq.reqType) {
-				case 1: // get one
-					if(ilink_thalpareq.paramID == 0xffff) {
-
-						for (i=0; i<paramCount; i++){
-							unsigned char match = 1;
-							for (j=0; j<PARAMNAMELEN; j++) {
-								if (paramStorage[i].name[j] !=  ilink_thalpareq.paramName[j]) {
-
-									match = 0;
-									break;
-								}
-								if (paramStorage[i].name[j] == '\0') break;
-							}
-							
-							if(match == 1) {
-								// when a match is found get the iD
-								paramSendCount = i;
-								paramSendSingle = 1;
-								break;
-							}
-						}
-					}
-
-					else {
-						paramSendCount = ilink_thalpareq.paramID;
-						paramSendSingle = 1;
-					}
-					break;
-				case 2: // save all
+		case ID_ILINK_THALCTRL:
+            switch(ilink_thalctrl_rx.command) {
+				case THALCTRL_EEPROM_SAVE: // save all
 					eeprom_save_all();
-					ilink_thalpareq.isNew = 1;
-					ilink_thalctrl_rx.command = MAVLINK_MSG_ID_COMMAND_LONG;
-					ilink_thalctrl_rx.data = MAV_CMD_PREFLIGHT_STORAGE;
-					//ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_rx, sizeof(ilink_thalctrl_rx)/2 - 1);
+					ilink_thalctrl_tx.command = THALCTRL_EEPROM_SAVEOK;
+					ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
 					break;
-				case 3: // reload all
+				case THALCTRL_EEPROM_LOAD: // reload all
 					eeprom_load_all();
-					ilink_thalpareq.isNew = 1;
-					ilink_thalctrl_rx.command = MAVLINK_MSG_ID_COMMAND_LONG;
-					ilink_thalctrl_rx.data = MAV_CMD_PREFLIGHT_STORAGE;
-					//ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_rx, sizeof(ilink_thalctrl_rx)/2 - 1);
-					// fall through to get all
-				default:
-				case 0: // get all
+					ilink_thalctrl_tx.command = THALCTRL_EEPROM_LOADOK;
+					ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
+					// fallthrough! to get all
+				case THALCTRL_EEPROM_READALL: // get all parameters
 					paramSendCount = 0;
 					paramSendSingle = 0;
 					break;
-				}
-			break;
-		case ID_ILINK_THALCTRL:
-            switch(ilink_thalctrl_rx.command) {
-                case 0:
-                    break;
-            }
+				case THALCTRL_RESET:
+					Delay(100);
+					Reset();
+					break;
+			}
             break;
 		case ID_ILINK_THALPARAM:
-			// match up received parameter with stored parameter.
-			for (i=0; i<paramCount; i++){
-				unsigned char match = 1;
-				for (j=0; j<PARAMNAMELEN; j++) {
-					if (paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
-						match = 0;
+			if(ilink_thalparam_rx.paramCount == 1) { // write parameter
+			
+				for (i=0; i<paramCount; i++){
+					unsigned char match = 1;
+					for (j=0; j<PARAMNAMELEN; j++) {
+						if (paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
+							match = 0;
+							break;
+						}
+						if (paramStorage[i].name[j] == '\0') break;
+					}
+					
+					if(match == 1) {
+						// when a match is found, save it to paramStorage
+						paramStorage[i].value = ilink_thalparam_rx.paramValue;
+						
+						// then order the value to be sent out again using the param send engine
+						// but deal with cases where it's already in the process of sending out data
+						if(paramSendCount < paramCount) {
+							// parameter engine currently sending out data
+							if(paramSendCount >= i) {
+								// if parameter engine already sent out this now-changed data, redo this one, otherwise no action needed
+								paramSendCount = i;
+							}
+						}
+						else {
+							// parameter engine not currently sending out data, so send single parameter
+							paramSendCount = i;
+							paramSendSingle = 1;
+						}
 						break;
 					}
-					if (paramStorage[i].name[j] == '\0') break;
 				}
-				
-				if(match == 1) {
-					// when a match is found, save it to paramStorage
-					paramStorage[i].value = ilink_thalparam_rx.paramValue;
-					
-					// then order the value to be sent out again using the param send engine
-					// but deal with cases where it's already in the process of sending out data
-					if(paramSendCount < paramCount) {
-						// parameter engine currently sending out data
-						if(paramSendCount >= i) {
-							// if parameter engine already sent out this now-changed data, redo this one, otherwise no action needed
+			}
+			else { // read parameter
+			// match up received parameter with stored parameter.
+				if(ilink_thalparam_rx.paramID == 0xffff) {
+					for (i=0; i<paramCount; i++){
+						unsigned char match = 1;
+						for (j=0; j<PARAMNAMELEN; j++) {
+							if (paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
+
+								match = 0;
+								break;
+							}
+							if (paramStorage[i].name[j] == '\0') break;
+						}
+						
+						if(match == 1) {
+							// when a match is found get the iD
 							paramSendCount = i;
+							paramSendSingle = 1;
+							break;
 						}
 					}
-					else {
-						// parameter engine not currently sending out data, so send single parameter
-						paramSendCount = i;
-						paramSendSingle = 1;
-					}
-					break;
+				}
+				else {
+					paramSendCount = ilink_thalparam_rx.paramID;
+					paramSendSingle = 1;
 				}
 			}
 			break;

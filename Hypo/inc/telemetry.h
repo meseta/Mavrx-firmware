@@ -71,7 +71,7 @@ extern xbee_transmit_request_t xbee_transmit_request;
 
 // Functions
 void mavlink_telemetry(void);
-
+void mavlink_messages(void);
 
 void MAVLinkInit(void);
 void MAVSendHeartbeat(void);

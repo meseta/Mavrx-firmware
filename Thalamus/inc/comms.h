@@ -14,7 +14,6 @@ extern ilink_altitude_t ilink_altitude;
 extern ilink_attitude_t ilink_attitude;
 extern ilink_thalparam_t ilink_thalparam_tx;
 extern ilink_thalparam_t ilink_thalparam_rx;
-extern ilink_thalpareq_t ilink_thalpareq;
 extern ilink_iochan_t ilink_inputs0;
 extern ilink_iochan_t ilink_outputs0;
 extern ilink_gpsfly_t ilink_gpsfly;
