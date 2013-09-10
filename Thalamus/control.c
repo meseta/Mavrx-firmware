@@ -332,6 +332,7 @@ void control_motors(void){
             motorE = pitchcorrection - rollcorrection;
             motorS = -pitchcorrection - rollcorrection;
             motorW = -pitchcorrection + rollcorrection;
+			
             motorN -= yawcorrection;
             motorE += yawcorrection;
             motorS -= yawcorrection;

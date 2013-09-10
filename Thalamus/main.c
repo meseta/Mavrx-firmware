@@ -110,6 +110,12 @@ void setup(void) {
 			while(1);
 		}
 		
+		// Pre-fill averages. IMPORTANT: you don't want to run the AHRS with the averages at zero, it causes divide-by-zero
+		unsigned int i;
+		for(i=0; (i<GAV_LEN); i++) read_gyr_sensors();
+		for(i=0; (i<AAV_LEN); i++) read_acc_sensors();
+		for(i=0; (i<MAV_LEN); i++) read_mag_sensors();
+			
 		TrigBaroTemp(); // get parometer temperature for temperature compensation.
 		Delay(15);
 		GetBaroTemp();
@@ -136,7 +142,6 @@ void setup(void) {
 		RITInitms(1000/MESSAGE_LOOP_HZ);
 		flashPLED = 0;
 		LEDOff(PLED);
-		
 		
 		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_STANDBY; // set ilink status to boot
 }
@@ -270,6 +275,4 @@ void Timer0Interrupt0(void) {
 	
 	control_throttle();
 	control_motors();
-
-
 }

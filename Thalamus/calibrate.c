@@ -221,6 +221,7 @@ void calibrate_gyr_temporary(unsigned int seconds) {
 	float distance;
 	
 	if(armed == 0) {
+		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_CALIB; // calibrating
 		
 		read_gyr_sensors();
 		Xtotal = 0;
@@ -262,8 +263,6 @@ void calibrate_gyr_temporary(unsigned int seconds) {
 		
 			Delay(3);
 		}
-		
-		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_CALIB; // calibrating
 
 		flashPLED=2;
 		LEDOn(PLED);
