@@ -100,7 +100,7 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 						for (i=0; i<paramCount; i++){
 							unsigned char match = 1;
 							for (j=0; j<PARAMNAMELEN; j++) {
-								if (paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
+								if (paramStorage[i].name[j] !=  ilink_thalpareq.paramName[j]) {
 
 									match = 0;
 									break;

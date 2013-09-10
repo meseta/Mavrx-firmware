@@ -977,6 +977,13 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_identify_t;
     
+	#define THALCTRL_EEPROM_GETALL			0x0100
+	#define THALCTRL_EEPROM_GETONE			0x0101
+	#define THALCTRL_EEPROM_SAVE			0x0102
+	#define THALCTRL_EEPROM_SAVEOK			0x0103
+	#define THALCTRL_EEPROM_READ			0x0104
+	#define THALCTRL_EEPROM_READOK			0x0105
+	
     typedef struct ilink_thalctrl_struct {
         unsigned short command;
         unsigned int data;

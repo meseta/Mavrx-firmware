@@ -3247,6 +3247,7 @@ unsigned char PRGPoll(void) {
                 FUNCILinkTxBufferBusy = 0;
                 return 1;
             }
+			FUNCILinkTxBufferBusy = 0;
         }
         
         return 0;
