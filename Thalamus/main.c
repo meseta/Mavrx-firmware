@@ -110,7 +110,7 @@ void setup(void) {
 			while(1);
 		}
 		
-		// Pre-fill averages. IMPORTANT: you don't want to run the AHRS with the averages at zero, it causes divide-by-zero
+		// Pre-fill averages. IMPORTANT: this avoids divide-by-zero when the sensor averages are zero
 		unsigned int i;
 		for(i=0; (i<GAV_LEN); i++) read_gyr_sensors();
 		for(i=0; (i<AAV_LEN); i++) read_acc_sensors();

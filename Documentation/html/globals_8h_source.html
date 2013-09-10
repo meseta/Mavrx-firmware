@@ -111,24 +111,26 @@ $(document).ready(function(){initNavTree('globals_8h_source.html','');});
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#define FIRMWARE_VERSION    1           </span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#define MESSAGE_LOOP_HZ     10          </span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#define RX_PANIC            2           </span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#define RX_PANIC_SECONDS    1           </span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#define FAST_RATE           400         </span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#define SLOW_RATE           75          </span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#define SLOW_DIVIDER        FAST_RATE/SLOW_RATE     </span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">extern unsigned int PRGBlankTimer; // Blanking time for button pushes</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor"></span><span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="globals_8c.html#a1fa0c48ad9be9b5424ed5a0de6bea398">PRGTimer</a>; <span class="comment">// Timer for button pushes, continuously increments as the button is held</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="globals_8c.html#a529ce6a612d2f317e54e86e29ff9ac47">PRGPushTime</a>; <span class="comment">// Contains the time that a button was pushed for, populated after button is released</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="globals_8c.html#ac64b3f3682b384b735d5a12e24b0cf3a">flashPLED</a>, <a class="code" href="globals_8c.html#ae38a05198819b8a9b6da24bbb3fb8e35">flashVLED</a>, <a class="code" href="globals_8c.html#a23fc4a3aacc66adc3470e712076b9425">flashRLED</a>;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#define RX_PANIC            RX_PANIC_SECONDS*SLOW_RATE</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="globals_8c.html#aa602838ea5c3dcdba1422278e2ee6f10">PRGBlankTimer</a>; <span class="comment">// Blanking time for button pushes</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="globals_8c.html#a1fa0c48ad9be9b5424ed5a0de6bea398">PRGTimer</a>; <span class="comment">// Timer for button pushes, continuously increments as the button is held</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="globals_8c.html#a529ce6a612d2f317e54e86e29ff9ac47">PRGPushTime</a>; <span class="comment">// Contains the time that a button was pushed for, populated after button is released</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="globals_8c.html#ac64b3f3682b384b735d5a12e24b0cf3a">flashPLED</a>, <a class="code" href="globals_8c.html#ae38a05198819b8a9b6da24bbb3fb8e35">flashVLED</a>, <a class="code" href="globals_8c.html#a23fc4a3aacc66adc3470e712076b9425">flashRLED</a>;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><b>globals.h</b></li>
-    <li class="footer">Generated on Tue Sep 10 2013 01:41:38 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Tue Sep 10 2013 16:45:32 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>
