@@ -5,8 +5,8 @@
 #define MIDSTICK			512		/*!< Corresponds to input when stick is in middle (approx) */
 #define MAXSTICK			850		/*!< Corresponds to input when stick is at top (approx) */
 
-#define MAXTHRESH		   	750 	/*!<(MAXSTICK+MIDSTICK)/2 - 50 */
-#define MINTHRESH		   	250 	/*!< MIDSTICK+OFFSTICK)/2 + 50 */
+#define MAXTHRESH		   	750 	/*!< ~(MAXSTICK+MIDSTICK)/2 - 50 */
+#define MINTHRESH		   	250 	/*!< ~(MIDSTICK+OFFSTICK)/2 + 50 */
 
 extern unsigned short rcInput[7];
 extern unsigned int rxLoss;

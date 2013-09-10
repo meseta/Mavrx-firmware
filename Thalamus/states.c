@@ -145,7 +145,7 @@ void state_machine()	{
 			user.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
 			tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 		
 			
-			throttle = rcInput[RX_THRO] - throttletrim;
+			throttle = ((signed int)rcInput[RX_THRO] - (signed int)throttletrim) * MAXTHROTTLE / ((signed int)MAXSTICK - (signed int)throttletrim); // all this should fit within signed ints. results in throttle between 0 and MAXTHROTTLE
 			
 			// A yaw rate is demanded by the rudder input, not an absolute angle.
 			// This code increments the demanded angle at a rate proportional to the rudder input
@@ -235,7 +235,8 @@ void state_machine()	{
 			// In manual mode, set pitch and roll demands based on the user commands collected from the rx unit
 			user.pitch = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
 			user.roll = ((float)MIDSTICK - (float)rcInput[RX_AILE])*ROLL_SENS;
-			throttle = rcInput[RX_THRO] - throttletrim;
+			
+			throttle = ((signed int)rcInput[RX_THRO] - (signed int)throttletrim) * (MAXTHROTTLE * MAXTHROTTLEPERCENT) / ((signed int)MAXSTICK - (signed int)throttletrim); // all this should fit within signed ints. results in throttle between 0 and MAXTHROTTLE*MAXTHROTTLEPERCENT
 				
 			// The pilot has control of yaw		
 			tempf = -(float)(yawtrim - rcInput[RX_RUDD])*YAW_SENS; 									

@@ -246,8 +246,6 @@ void control_motors(void){
 	rollDemandOld = attitude_demand_body.roll;
 	yawDemandOld = attitude_demand_body.yaw;
 	
-	
-	
 	// Use the Current and demanded angles to create the error for the proportional part of the PID loop
 	float pitcherror = attitude_demand_body.pitch + thetaAngle;
 	float rollerror = attitude_demand_body.roll - phiAngle;
@@ -417,7 +415,7 @@ void control_motors(void){
 		ilink_thalstat.throttle = 0;
 	}
 	else if(armed) {
-		ilink_thalstat.throttle = (throttle + throttle_angle)/10;
+		ilink_thalstat.throttle = ((unsigned short)throttle + (unsigned short)throttle_angle)/10;
 
 		// Set the PWM channels. Maximum of MAXTHROTTLE + THROTTLEOFFSET, MINMUM OF IDLETHROTTLE + THROTTLE OFFSET
 		// Throttle offset offsets the throttle readings (which start at 0) to the PWM values (in ms?) which need to start at around 1000

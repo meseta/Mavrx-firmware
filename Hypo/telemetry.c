@@ -165,7 +165,7 @@ void mavlink_telemetry(void) {
 			}
 			
 			// do a conversion between ILINK values and MAVLINK for flight status, refer to Thalamus/inc/state.h for details
-			switch(ilink_thalstat.systemStatus) {
+			switch(ilink_thalstat.flightStatus) {
 				default:
 				case 0: // uninitialised
 				case 1: // disarmed
@@ -189,7 +189,7 @@ void mavlink_telemetry(void) {
 					break;
 			}
 
-			mavlink_sys_status.voltage_battery = ilink_thalstat.battVoltage;			
+			mavlink_sys_status.voltage_battery = ilink_thalstat.battVoltage;
 			mavlink_vfr_hud.throttle = ilink_thalstat.throttle;
 		}
 		XBeeInhibit();

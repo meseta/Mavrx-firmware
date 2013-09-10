@@ -136,6 +136,9 @@ void setup(void) {
 		RITInitms(1000/MESSAGE_LOOP_HZ);
 		flashPLED = 0;
 		LEDOff(PLED);
+		
+		
+		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_STANDBY; // set ilink status to boot
 }
 
 /*!
