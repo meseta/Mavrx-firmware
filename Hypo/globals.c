@@ -15,7 +15,6 @@ unsigned int counter = 0;
 // *** Timers and counters
 unsigned int sysMS=0;
 unsigned long long sysUS=0;
-unsigned int statusCounter;
 unsigned int idleCount=0;
 unsigned short heartbeatWatchdog=0;
 unsigned short gpsWatchdog=0;

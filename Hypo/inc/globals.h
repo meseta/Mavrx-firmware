@@ -36,7 +36,6 @@ extern unsigned int counter;
 // *** Timers and counters
 extern unsigned int sysMS;
 extern unsigned long long sysUS;
-extern unsigned int statusCounter;
 extern unsigned int idleCount;
 extern unsigned short heartbeatWatchdog;
 extern unsigned short gpsWatchdog;

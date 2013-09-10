@@ -30,6 +30,7 @@ extern mavlink_mission_request_t mavlink_mission_request;
 extern mavlink_mission_item_t mavlink_mission_item;
 extern mavlink_mission_ack_t mavlink_mission_ack;
 extern mavlink_mission_item_reached_t mavlink_mission_item_reached;
+extern mavlink_vfr_hud_t mavlink_vfr_hud;
 
 
 // Received messages
@@ -53,7 +54,6 @@ extern mavlink_set_mode_t mavlink_set_mode;
 // extern mavlink_global_position_setpoint_int_t
 // 
 // extern mavlink_raw_pressure_t
-// extern mavlink_vfr_hud_t
 
 extern mavlink_mission_request_list_t mavlink_mission_request_list;
 

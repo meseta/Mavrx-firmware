@@ -35,7 +35,9 @@ unsigned char gps_action = 0;
 
 
 void gps_navigate(void) {
-if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
+    gpsSendCounter++;
+	
+	if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
         gpsSendCounter = 0;
         
         XBeeInhibit();
@@ -72,6 +74,8 @@ if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
                 mavlink_gps_raw_int.eph = gps_nav_posllh.hAcc / 10;
                 mavlink_gps_raw_int.epv = gps_nav_posllh.vAcc / 10;
                 
+				mavlink_vfr_hud.alt = mavlink_gps_raw_int.alt = gps_nav_posllh.hMSL;
+				
                 craft_X = gps_nav_posllh.lat / 10000000.0d;
                 craft_Y = gps_nav_posllh.lon / 10000000.0d;
                 craft_Z = (double)gps_nav_posllh.hMSL/ 1000.0d;
@@ -80,10 +84,15 @@ if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
         
         if(gps_nav_velned.isNew) {
             gps_nav_velned.isNew = 0;
-            
+			
             mavlink_gps_raw_int.vel = gps_nav_velned.gSpeed;
             mavlink_gps_raw_int.cog = gps_nav_velned.heading / 100; // because GPS assumes cog IS heading.
-        }
+        
+			mavlink_vfr_hud.groundspeed = gps_nav_velned.gSpeed;
+			mavlink_vfr_hud.airspeed = gps_nav_velned.speed;
+			mavlink_vfr_hud.heading = gps_nav_velned.heading / 100;
+			mavlink_vfr_hud.climb = (float)gps_nav_velned.velD / 100.0f;
+		}
         
         if(gpsFixed) {
             // *** Actions

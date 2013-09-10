@@ -30,6 +30,8 @@ mavlink_mission_item_t mavlink_mission_item;
 mavlink_mission_ack_t mavlink_mission_ack;
 mavlink_mission_item_reached_t mavlink_mission_item_reached;
 
+mavlink_vfr_hud_t mavlink_vfr_hud;
+
 
 // Received messages
 mavlink_message_t mavlink_rx_msg;
@@ -52,7 +54,6 @@ mavlink_set_mode_t mavlink_set_mode;
 // mavlink_global_position_setpoint_int_t
 // 
 // mavlink_raw_pressure_t
-// mavlink_vfr_hud_t
 
 mavlink_mission_request_list_t mavlink_mission_request_list;
 
@@ -70,6 +71,18 @@ xbee_transmit_request_t xbee_transmit_request;
 
 
 void mavlink_telemetry(void) {
+
+    waypointTimer++;
+	
+    rawSensorStreamCounter++;
+    extStatusStreamCounter++;
+    rcChannelCounter++;
+    rawControllerCounter++;
+    positionStreamCounter++;
+    extra1ChannelCounter++;
+    extra2ChannelCounter++;
+    extra3ChannelCounter++;
+
 	if(waypointReceiveIndex < waypointCount) {
 		if(waypointTimer > WAYPOINT_TIMEOUT) {
 			mavlink_mission_request.seq = waypointReceiveIndex;
@@ -201,6 +214,8 @@ void mavlink_telemetry(void) {
 		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
 		XBeeAllow();
 		
+		
+		
 	}
 	else if(dataRate[MAV_DATA_STREAM_RC_CHANNELS] && rcChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RC_CHANNELS]) {
 		// RC_CHANNELS_SCALED, RC_CHANNELS_RAW, SERVO_OUTPUT_RAW
@@ -316,6 +331,15 @@ void mavlink_telemetry(void) {
 		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
 		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
 		XBeeAllow();
+		
+		// mavlink_vfr_hud.throttle = ;
+		
+		mavlink_msg_vfr_hud_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL,  &mavlink_tx_msg, &mavlink_vfr_hud);
+		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+		XBeeAllow();
+		
 	}
 	else if(dataRate[MAV_DATA_STREAM_EXTRA1] && extra1ChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA1]) {
 		extra1ChannelCounter = 0;

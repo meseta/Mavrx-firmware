@@ -108,25 +108,9 @@ void SysTickInterrupt(void) {
 }
 
 void RITInterrupt(void) {
-    heartbeatCounter++;
-    heartbeatWatchdog++;
-    gpsWatchdog++;
-    statusCounter++;
-    thalWatchdog++;
-    rawSensorStreamCounter++;
-    extStatusStreamCounter++;
-    rcChannelCounter++;
-    rawControllerCounter++;
-    positionStreamCounter++;
-    extra1ChannelCounter++;
-    extra2ChannelCounter++;
-    extra3ChannelCounter++;
-    waypointTimer++;
-    
-    gpsSendCounter++;
-	
     // *** Watchdogs
     // Incoming heartbeat watchdog
+    heartbeatWatchdog++;
     if(heartbeatWatchdog >= MESSAGE_LOOP_HZ*XBEE_PANIC) {
         // heartbeat from ground control lost
         heartbeatWatchdog = MESSAGE_LOOP_HZ*(XBEE_PANIC+1); // prevent overflow
@@ -134,6 +118,7 @@ void RITInterrupt(void) {
     }
     
     // GPS watchdog
+    gpsWatchdog++;
     if(gpsWatchdog >= MESSAGE_LOOP_HZ*GPS_PANIC) {
         // GPS signal loss/no-fix
         gpsWatchdog = MESSAGE_LOOP_HZ*(GPS_PANIC+1); // prevent overflow
@@ -143,6 +128,7 @@ void RITInterrupt(void) {
     }
         
     // Thalamus watchdog
+    thalWatchdog++;
     if(thalWatchdog >= MESSAGE_LOOP_HZ*THAL_PANIC) {
         // thalamus signal loss/no-fix
 		// should probably output something intelligible here to signify thalamus lost
@@ -154,7 +140,8 @@ void RITInterrupt(void) {
         XBeeAllow();
     }
     
-	// *** MAVLink messages
+	// *** Outgoing heartbeat
+    heartbeatCounter++;
     if(heartbeatCounter >= MESSAGE_LOOP_HZ) { // 1Hz loop
         heartbeatCounter = 0;
         MAVSendHeartbeat();
