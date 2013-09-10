@@ -24,7 +24,6 @@ mavlink_named_value_int_t mavlink_named_value_int;
 mavlink_debug_vect_t mavlink_debug_vect;
 mavlink_debug_t mavlink_debug;
 mavlink_statustext_t mavlink_statustext;
-
 mavlink_mission_request_t mavlink_mission_request;
 mavlink_mission_item_t mavlink_mission_item;
 mavlink_mission_ack_t mavlink_mission_ack;
@@ -49,11 +48,6 @@ mavlink_mission_clear_all_t mavlink_mission_clear_all;
 mavlink_mission_set_current_t mavlink_mission_set_current;
 mavlink_mission_current_t mavlink_mission_current;
 mavlink_set_mode_t mavlink_set_mode;
-
-// Disabled messages
-// mavlink_global_position_setpoint_int_t
-// 
-// mavlink_raw_pressure_t
 
 mavlink_mission_request_list_t mavlink_mission_request_list;
 
@@ -85,20 +79,9 @@ void mavlink_telemetry(void) {
 		}
 		if(waypointTries > waypointTries) { // timeout failure
 			waypointCount = 0;
-			MAVSendText(255, "Receiving Waypoint timeout");
+			MAVSendTextFrom(MAV_SEVERITY_NOTICE, "NOTICE: Receiving waypoint timeout!", MAV_COMP_ID_MISSIONPLANNER);
 		}
 	}
-	//else if(ilink_thalctrl_rx.isNew) {
-		// TODO translate mavlink command to thalctrl
-		// ilink_thalctrl_rx.isNew = 0;
-		// if(ilink_thalctrl_rx.command == MAVLINK_MSG_ID_COMMAND_LONG) {
-			// mavlink_command_ack.result = 0;
-			// mavlink_command_ack.command = ilink_thalctrl_rx.data;
-			// mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
-			// mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-			// XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-		// }
-	//}
 	else if(dataRate[MAV_DATA_STREAM_RAW_SENSORS] && rawSensorStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_SENSORS]) {
 		rawSensorStreamCounter = 0;
 		
@@ -114,7 +97,7 @@ void mavlink_telemetry(void) {
 			mavlink_raw_imu.ymag = ilink_rawimu.yMag;
 			mavlink_raw_imu.zmag = ilink_rawimu.zMag;
 			
-			mavlink_msg_raw_imu_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_raw_imu);
+			mavlink_msg_raw_imu_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_raw_imu);
 			mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
 			XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
 			XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
@@ -190,7 +173,6 @@ void mavlink_telemetry(void) {
 		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
 		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
 		XBeeAllow();
-		
 		
 		mavlink_msg_vfr_hud_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL,  &mavlink_tx_msg, &mavlink_vfr_hud);
 		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
@@ -284,7 +266,7 @@ void mavlink_telemetry(void) {
 			mavlink_attitude.pitchspeed = ilink_attitude.pitchRate;
 			mavlink_attitude.yawspeed = ilink_attitude.yawRate;
 			
-			mavlink_msg_attitude_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_attitude);
+			mavlink_msg_attitude_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_attitude);
 			mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
 			XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
 			XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
@@ -300,7 +282,7 @@ void mavlink_telemetry(void) {
 
 		mavlink_gps_raw_int.time_usec = sysUS;
 		
-		mavlink_msg_gps_raw_int_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_gps_raw_int);
+		mavlink_msg_gps_raw_int_encode(mavlinkID, MAV_COMP_ID_GPS, &mavlink_tx_msg, &mavlink_gps_raw_int);
 		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
 		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
 		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
@@ -321,7 +303,7 @@ void mavlink_telemetry(void) {
 			mavlink_scaled_imu.ymag = ilink_scaledimu.yMag;
 			mavlink_scaled_imu.zmag = ilink_scaledimu.zMag;
 			
-			mavlink_msg_scaled_imu_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_scaled_imu);
+			mavlink_msg_scaled_imu_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_scaled_imu);
 			mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
 			XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
 			XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
@@ -379,7 +361,7 @@ void mavlink_messages(void) {
 				mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
 				mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
 				XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
-				MAVSendText(MAV_SEVERITY_INFO, "EEPROM Saved OK");
+				MAVSendTextFrom(MAV_SEVERITY_INFO, "EEPROM Saved OK", MAV_COMP_ID_SYSTEM_CONTROL);
 				break;
 			case THALCTRL_EEPROM_LOADOK:
 				/*mavlink_command_ack.result = MAV_MISSION_ACCEPTED;
@@ -387,17 +369,24 @@ void mavlink_messages(void) {
 				mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
 				mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
 				XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
-				MAVSendText(MAV_SEVERITY_INFO, "EEPROM Load OK");
+				MAVSendTextFrom(MAV_SEVERITY_INFO, "EEPROM Load OK", MAV_COMP_ID_SYSTEM_CONTROL);
 				break;
-			case THALCTRL_ORIOK:	MAVSendText(MAV_SEVERITY_INFO, "Craft orientation calibration ok");	break;
-			case THALCTRL_ORIBAD:	MAVSendText(MAV_SEVERITY_WARNING, "Craft orientation does not match!");	break;
-			case THALCTRL_RXLOST:	MAVSendText(MAV_SEVERITY_CRITICAL, "Radio transmitter signal lost!");	break;
-			case THALCTRL_RXFOUND:	MAVSendText(MAV_SEVERITY_INFO, "Radio transmitter signal found");	break;
+			case THALCTRL_ORIOK:	MAVSendTextFrom(MAV_SEVERITY_INFO, "Craft orientation calibration ok", MAV_COMP_ID_IMU);	break;
+			case THALCTRL_ORIBAD:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Craft orientation does not match stored value!", MAV_COMP_ID_IMU);	break;
+			case THALCTRL_RXLOST:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Radio transmitter signal lost!", MAV_COMP_ID_IMU);	break;
+			case THALCTRL_RXFOUND:	MAVSendTextFrom(MAV_SEVERITY_INFO, "Radio transmitter signal found", MAV_COMP_ID_IMU);	break;
 		}
 	}
 	
 	// local messages
-	
+	/*if(debug_message) {
+		switch(debug_message) {
+			case DEBUG_AUTOTAKEOFF
+		
+		}
+		
+		debug_message = 0;
+	}*/
 }
 
 void MAVLinkInit() {
@@ -493,6 +482,10 @@ void MAVSendVector(char * name, float valX, float valY, float valZ) {
 }
 
 void MAVSendText(unsigned char severity, char * text) {
+	MAVSendTextFrom(severity, text, MAV_COMP_ID_SYSTEM_CONTROL);
+}
+
+void MAVSendTextFrom(unsigned char severity, char * text, unsigned char from) {
     if(allowTransmit) {
         unsigned int i;
         mavlink_statustext.severity = severity;
@@ -500,7 +493,7 @@ void MAVSendText(unsigned char severity, char * text) {
             mavlink_statustext.text[i] = text[i];
             if(text[i] == '\0') break;
         }
-        mavlink_msg_statustext_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_statustext);
+        mavlink_msg_statustext_encode(mavlinkID, from, &mavlink_tx_msg, &mavlink_statustext);
         mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
         XBeeInhibit();
         XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
@@ -545,7 +538,7 @@ void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length
 void MAVLinkParse(unsigned char UARTData) {
 	unsigned int i, j, match;
     if(mavlink_parse_char(MAVLINK_COMM_0, UARTData, &mavlink_rx_msg, &mavlink_status)) {
-        //mavlinkSendDebugV("MSGID", mavlink_rx_msg.msgid, 0, 0);
+        //MAVSendInt("ID", mavlink_rx_msg.msgid);
         switch(mavlink_rx_msg.msgid) {
              case MAVLINK_MSG_ID_HEARTBEAT:
                 // count heartbeat messages
@@ -564,19 +557,22 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_SET_MODE:
                 mavlink_msg_set_mode_decode(&mavlink_rx_msg, &mavlink_set_mode);
-                if (mavlink_set_mode.target_system == mavlinkID) {
-                    //mavlink_heartbeat.base_mode = mavlink_set_mode.base_mode;
-                    //mavlink_heartbeat.custom_mode = mavlink_set_mode.custom_mode;
-                    
-                    /*ilink_thalctrl_rx.command = MAVLINK_MSG_ID_SET_MODE;
-                    ilink_thalctrl_rx.data = mavlink_set_mode.base_mode;
-                    ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_rx, sizeof(ilink_thalctrl_rx)/2-1);*/
-                }
+                if(mavlink_set_mode.target_system == mavlinkID) {
+					//MAVSendVector("MOD", mavlink_set_mode.custom_mode, mavlink_set_mode.base_mode, 0);
+					if(mavlink_set_mode.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
+						ilink_thalctrl_tx.command = THALCTRL_ARM;
+						ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
+					}
+					else {
+						ilink_thalctrl_tx.command = THALCTRL_DISARM;
+						ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
+					}
+				}
                 break;
             case MAVLINK_MSG_ID_COMMAND_LONG:
                 // actions!
                 mavlink_msg_command_long_decode(&mavlink_rx_msg, &mavlink_command_long);
-                if (mavlink_command_long.target_system == mavlinkID) {
+                if(mavlink_command_long.target_system == mavlinkID) {
                     switch(mavlink_command_long.command) {
                         case 0: // custom 0, reset
                             // reset remote
@@ -591,48 +587,14 @@ void MAVLinkParse(unsigned char UARTData) {
                             mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
                             XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
 							
-							MAVSendText(MAV_SEVERITY_INFO, "USER REQUESTED RESET!");
+							MAVSendText(MAV_SEVERITY_WARNING, "WARNING: User requested RESET!");
 							Delay(100);
                             Reset();
                             break;
-                        //case MAV_CMD_NAV_WAYPOINT:
-                            // param1 Hold time in decimal seconds.
-                            // Acceptance radius in meters
-                            //  0 to pass through the WP, if > 0 radius in meters to pass by WP
-                            // Positive value for clockwise orbit, negative value for counter-clockwise orbit
-                            // Desired yaw angle at MISSION (rotary wing)
-                            //| Latitude| Longitude| Altitude|
-                            
-                            // use this for FOLLOW-ME mode (or without mission planner)
-                         //   break;
-                            
-                        // MAV_CMD_NAV_LOITER_UNLIM=17, // Loiter around this MISSION an unlimited amount of time |Empty| Empty| Radius around MISSION, in meters. If positive loiter clockwise, else counter-clockwise| Desired yaw angle.| Latitude| Longitude| Altitude|  
-                        // MAV_CMD_NAV_LOITER_TURNS=18, // Loiter around this MISSION for X turns |Turns| Empty| Radius around MISSION, in meters. If positive loiter clockwise, else counter-clockwise| Desired yaw angle.| Latitude| Longitude| Altitude|  
-                        // MAV_CMD_NAV_LOITER_TIME=19, // Loiter around this MISSION for X seconds |Seconds (decimal)| Empty| Radius around MISSION, in meters. If positive loiter clockwise, else counter-clockwise| Desired yaw angle.| Latitude| Longitude| Altitude|  
-                        // MAV_CMD_NAV_RETURN_TO_LAUNCH=20, // Return to launch location |Empty| Empty| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_NAV_ROI=80, // Sets the region of interest (ROI) |Region of intereset mode. (see MAV_ROI enum)| MISSION index/ target ID. (see MAV_ROI enum)| ROI index (allows a vehicle to manage multiple ROI's)| Empty| x the location of the fixed ROI (see MAV_FRAME)| y| z|  
-                        // MAV_CMD_NAV_PATHPLANNING=81, // Control autonomous path planning on the MAV. |0: Disable local obstacle avoidance / local path planning (without resetting map), 1: Enable local path planning, 2: Enable and reset local path planning| 0: Disable full path planning (without resetting map), 1: Enable, 2: Enable and reset map/occupancy grid, 3: Enable and reset planned route, but not occupancy grid| Empty| Yaw angle at goal, in compass degrees, [0..360]| Latitude/X of goal| Longitude/Y of goal| Altitude/Z of goal|  
-                        
-                        // MAV_CMD_CONDITION_DELAY=112, // Delay mission state machine. |Delay in seconds (decimal)| Empty| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_CONDITION_CHANGE_ALT=113, // Ascend/descend at rate.  Delay mission state machine until desired altitude reached. |Descent / Ascend rate (m/s)| Empty| Empty| Empty| Empty| Empty| Finish Altitude|  
-                        // MAV_CMD_CONDITION_DISTANCE=114, // Delay mission state machine until within desired distance of next NAV point. |Distance (meters)| Empty| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_CONDITION_YAW=115, // Reach a certain target angle. |target angle: [0-360], 0 is north| speed during yaw change:[deg per second]| direction: negative: counter clockwise, positive: clockwise [-1,1]| relative offset or absolute angle: [ 1,0]| Empty| Empty| Empty|  
-                        // MAV_CMD_CONDITION_LAST=159, // NOP - This command is only used to mark the upper limit of the CONDITION commands in the enumeration |Empty| Empty| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_SET_MODE=176, // Set system mode. |Mode, as defined by ENUM MAV_MODE| Empty| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_JUMP=177, // Jump to the desired command in the mission list.  Repeat this action only the specified number of times |Sequence number| Repeat count| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_CHANGE_SPEED=178, // Change speed and/or throttle set points. |Speed type (0=Airspeed, 1=Ground Speed)| Speed  (m/s, -1 indicates no change)| Throttle  ( Percent, -1 indicates no change)| Empty| Empty| Empty| Empty|  
-                        // case MAV_CMD_DO_SET_HOME:
-                            
-                        // MAV_CMD_DO_SET_PARAMETER=180, // Set a system parameter.  Caution!  Use of this command requires knowledge of the numeric enumeration value of the parameter. |Parameter number| Parameter value| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_SET_RELAY=181, // Set a relay to a condition. |Relay number| Setting (1=on, 0=off, others possible depending on system hardware)| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_REPEAT_RELAY=182, // Cycle a relay on and off for a desired number of cyles with a desired period. |Relay number| Cycle count| Cycle time (seconds, decimal)| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_SET_SERVO=183, // Set a servo to a desired PWM value. |Servo number| PWM (microseconds, 1000 to 2000 typical)| Empty| Empty| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_REPEAT_SERVO=184, // Cycle a between its nominal setting and a desired PWM for a desired number of cycles with a desired period. |Servo number| PWM (microseconds, 1000 to 2000 typical)| Cycle count| Cycle time (seconds)| Empty| Empty| Empty|  
-                        // MAV_CMD_DO_CONTROL_VIDEO=200, // Control onboard camera system. |Camera ID (-1 for all)| Transmission: 0: disabled, 1: enabled compressed, 2: enabled raw| Transmission mode: 0: video stream, >0: single images every n seconds (decimal)| Recording: 0: disabled, 1: enabled compressed, 2: enabled raw| Empty| Empty| Empty|  
-
-                        // MAV_CMD_PREFLIGHT_CALIBRATION=241, // Trigger calibration. This command will be only accepted if in pre-flight mode. |Gyro calibration: 0: no, 1: yes| Magnetometer calibration: 0: no, 1: yes| Ground pressure: 0: no, 1: yes| Radio calibration: 0: no, 1: yes| Empty| Empty| Empty|  
-                        // MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS=242, // Set sensor offsets. This command will be only accepted if in pre-flight mode. |Sensor to adjust the offsets for: 0: gyros, 1: accelerometer, 2: magnetometer, 3: barometer, 4: optical flow| X axis offset (or generic dimension 1), in the sensor's raw units| Y axis offset (or generic dimension 2), in the sensor's raw units| Z axis offset (or generic dimension 3), in the sensor's raw units| Generic dimension 4, in the sensor's raw units| Generic dimension 5, in the sensor's raw units| Generic dimension 6, in the sensor's raw units|  
-
+							
+						case 1: // custom 1
+							break;
+							
                         case MAV_CMD_PREFLIGHT_STORAGE:
                             if(mavlink_command_long.param1 == 0) { // read all
 								eeprom_load_all();
@@ -647,7 +609,10 @@ void MAVLinkParse(unsigned char UARTData) {
                             break;
                             
                         case MAV_CMD_NAV_LAND:
+							gps_action = 6; // RTL
+							break;
                         case MAV_CMD_NAV_TAKEOFF:
+							gps_action = 2; // Takeoff
                         case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN: // KILL UAS
                             /*ilink_thalctrl_rx.command = MAVLINK_MSG_ID_COMMAND_LONG;
                             ilink_thalctrl_rx.data = mavlink_command_long.command;
@@ -655,17 +620,17 @@ void MAVLinkParse(unsigned char UARTData) {
                             break;
                         
                         case MAV_CMD_OVERRIDE_GOTO:
-                            if(mavlink_command_long.param1 == MAV_GOTO_DO_HOLD) {
+                            if(mavlink_command_long.param1 == MAV_GOTO_DO_HOLD) { // QGROUNDCONTROL BUG: "Land now" issues a "hold" instruction
                                 gps_action = 3;
                             }
                             else if(mavlink_command_long.param1 == MAV_GOTO_DO_CONTINUE) {
                                 gps_action = 4;
                             }
-							mavlink_command_ack.result = MAV_MISSION_ACCEPTED;
+							/*mavlink_command_ack.result = MAV_MISSION_ACCEPTED;
                             mavlink_command_ack.command = mavlink_command_long.command;
-                            mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_command_ack);
+                            mavlink_msg_command_ack_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_command_ack);
                             mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                            XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+                            XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
                             break;
                         
                         
@@ -693,7 +658,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 // request send of one parameters
                 mavlink_msg_param_request_read_decode(&mavlink_rx_msg, &mavlink_param_request_read);
 			
-				if (mavlink_param_request_read.target_system == mavlinkID) {
+				if(mavlink_param_request_read.target_system == mavlinkID) {
 					if(mavlink_param_request_read.target_component == MAV_COMP_ID_IMU) {
 						// remote params
 						
@@ -710,11 +675,11 @@ void MAVLinkParse(unsigned char UARTData) {
 						for (i=0; i<paramCount; i++){
 							match = 1;
 							for (j=0; j<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; j++) {
-								if (paramStorage[i].name[j] !=  mavlink_param_request_read.param_id[i]) {
+								if(paramStorage[i].name[j] !=  mavlink_param_request_read.param_id[i]) {
 									match = 0;
 									break;
 								}
-								if (paramStorage[i].name[j] == '\0') break;
+								if(paramStorage[i].name[j] == '\0') break;
 							}
 							
 							if(match == 1) {
@@ -749,11 +714,11 @@ void MAVLinkParse(unsigned char UARTData) {
 						for (i=0; i<paramCount; i++){
 							match = 1;
 							for (j=0; j<MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN; j++) {
-								if (paramStorage[i].name[j] !=  mavlink_param_set.param_id[j]) {
+								if(paramStorage[i].name[j] !=  mavlink_param_set.param_id[j]) {
 									match = 0;
 									break;
 								}
-								if (paramStorage[i].name[j] == '\0') break;
+								if(paramStorage[i].name[j] == '\0') break;
 							}
 							
 							if(match == 1) {
@@ -782,7 +747,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_SET_GPS_GLOBAL_ORIGIN:
                 mavlink_msg_set_gps_global_origin_decode(&mavlink_rx_msg, &mavlink_set_gps_global_origin);
-                if (mavlink_set_gps_global_origin.target_system == mavlinkID) {
+                if(mavlink_set_gps_global_origin.target_system == mavlinkID) {
                         home_X = (double)mavlink_set_gps_global_origin.latitude / 10000000.0d;
                         home_Y = (double)mavlink_set_gps_global_origin.longitude / 10000000.0d;
                         home_Z = (double)mavlink_set_gps_global_origin.altitude / 1000.0d;
@@ -790,7 +755,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
             case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:
                 mavlink_msg_mission_clear_all_decode(&mavlink_rx_msg, &mavlink_mission_clear_all);
-                if (mavlink_mission_clear_all.target_system == mavlinkID) {
+                if(mavlink_mission_clear_all.target_system == mavlinkID) {
                     waypointCurrent = 0;
                     waypointCount = 0;
                     waypointValid = 0;
@@ -803,7 +768,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_MISSION_SET_CURRENT:
                 mavlink_msg_mission_set_current_decode(&mavlink_rx_msg, &mavlink_mission_set_current);
-                if (mavlink_mission_set_current.target_system == mavlinkID) {
+                if(mavlink_mission_set_current.target_system == mavlinkID) {
                     waypointCurrent = mavlink_mission_set_current.seq;
                     mavlink_mission_current.seq = waypointCurrent;
                     mavlink_msg_mission_current_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_mission_current);
@@ -813,7 +778,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_MISSION_COUNT:
                 mavlink_msg_mission_count_decode(&mavlink_rx_msg, &mavlink_mission_count);
-                if (mavlink_mission_count.target_system == mavlinkID) {
+                if(mavlink_mission_count.target_system == mavlinkID) {
                     waypointCount = mavlink_mission_count.count;
                     waypointReceiveIndex = 0;
                     waypointTimer = WAYPOINT_TIMEOUT; // set waypoint timeout to timed out so that request is immediate
@@ -826,7 +791,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:
                 mavlink_msg_mission_request_list_decode(&mavlink_rx_msg, &mavlink_mission_request_list);
-                if (mavlink_mission_request_list.target_system == mavlinkID) {
+                if(mavlink_mission_request_list.target_system == mavlinkID) {
                     if(waypointValid == 0) {
                         mavlink_mission_count.count = 0;
                     }
@@ -843,7 +808,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_MISSION_REQUEST:
                 mavlink_msg_mission_request_decode(&mavlink_rx_msg, &mavlink_mission_request);
-                if (mavlink_mission_request.target_system == mavlinkID) {
+                if(mavlink_mission_request.target_system == mavlinkID) {
                     if(waypointValid != 0) {
                         mavlink_mission_item.target_system = mavlink_rx_msg.sysid;
                         mavlink_mission_item.target_component = mavlink_rx_msg.compid;    
@@ -875,7 +840,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_MISSION_ITEM:
                 mavlink_msg_mission_item_decode(&mavlink_rx_msg, &mavlink_mission_item);
-                if (mavlink_mission_item.target_system == mavlinkID) {
+                if(mavlink_mission_item.target_system == mavlinkID) {
                     mavlink_mission_ack.type = MAV_MISSION_ERROR;
                     if(mavlink_mission_item.frame == MAV_FRAME_GLOBAL) {
                         if(mavlink_mission_item.seq < MAX_WAYPOINTS) {
@@ -933,7 +898,7 @@ void MAVLinkParse(unsigned char UARTData) {
             case MAVLINK_MSG_ID_REQUEST_DATA_STREAM:
                 // Sets the output data rates
                 mavlink_msg_request_data_stream_decode(&mavlink_rx_msg, &mavlink_request_data_stream);
-                if (mavlink_request_data_stream.target_system == mavlinkID) {
+                if(mavlink_request_data_stream.target_system == mavlinkID) {
                     if(mavlink_request_data_stream.req_message_rate > 255) mavlink_request_data_stream.req_message_rate = 255;
                     dataRate[mavlink_request_data_stream.req_stream_id] = mavlink_request_data_stream.req_message_rate;
                 }

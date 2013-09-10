@@ -18,7 +18,7 @@
 #define MAVLINK_MSG_ID_EXTENDED_MESSAGE 255
 #define MAVLINK_EXTENDED_HEADER_LEN 14
 
-#if (defined _MSC_VER) | ((defined __APPLE__) & (defined __MACH__)) | (defined __linux__)
+#if(defined _MSC_VER) | ((defined __APPLE__) & (defined __MACH__)) | (defined __linux__)
   /* full fledged 32bit++ OS */
   #define MAVLINK_MAX_EXTENDED_PACKET_LEN 65507
 #else
@@ -120,7 +120,7 @@ typedef enum {
  * a stack overrun
  */
 #ifndef MAVLINK_COMM_NUM_BUFFERS
-#if (defined linux) | (defined __linux) | (defined  __MACH__) | (defined _WIN32)
+#if(defined linux) | (defined __linux) | (defined  __MACH__) | (defined _WIN32)
 # define MAVLINK_COMM_NUM_BUFFERS 16
 #else
 # define MAVLINK_COMM_NUM_BUFFERS 4

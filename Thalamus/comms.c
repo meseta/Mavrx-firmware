@@ -95,17 +95,21 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 					eeprom_save_all();
 					ilink_thalctrl_tx.command = THALCTRL_EEPROM_SAVEOK;
 					ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
+					ilink_thalctrl_rx.isNew = 0;
 					break;
 				case THALCTRL_EEPROM_LOAD: // reload all
 					eeprom_load_all();
 					ilink_thalctrl_tx.command = THALCTRL_EEPROM_LOADOK;
 					ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
+					ilink_thalctrl_rx.isNew = 0;
 					// fallthrough! to get all
 				case THALCTRL_EEPROM_READALL: // get all parameters
 					paramSendCount = 0;
 					paramSendSingle = 0;
+					ilink_thalctrl_rx.isNew = 0;
 					break;
 				case THALCTRL_RESET:
+					ilink_thalctrl_rx.isNew = 0;
 					Delay(100);
 					Reset();
 					break;
@@ -117,11 +121,11 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 				for (i=0; i<paramCount; i++){
 					unsigned char match = 1;
 					for (j=0; j<PARAMNAMELEN; j++) {
-						if (paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
+						if(paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
 							match = 0;
 							break;
 						}
-						if (paramStorage[i].name[j] == '\0') break;
+						if(paramStorage[i].name[j] == '\0') break;
 					}
 					
 					if(match == 1) {
@@ -152,12 +156,12 @@ void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short len
 					for (i=0; i<paramCount; i++){
 						unsigned char match = 1;
 						for (j=0; j<PARAMNAMELEN; j++) {
-							if (paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
+							if(paramStorage[i].name[j] !=  ilink_thalparam_rx.paramName[j]) {
 
 								match = 0;
 								break;
 							}
-							if (paramStorage[i].name[j] == '\0') break;
+							if(paramStorage[i].name[j] == '\0') break;
 						}
 						
 						if(match == 1) {

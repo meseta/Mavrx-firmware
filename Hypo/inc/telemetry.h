@@ -79,6 +79,7 @@ void MAVSendFloat(char * name, float value);
 void MAVSendInt(char * name, int value);
 void MAVSendVector(char * name, float valX, float valY, float valZ);
 void MAVSendText(unsigned char severity, char * text);
+void MAVSendTextFrom(unsigned char severity, char * text, unsigned char from);
 void MAVLinkParse(unsigned char UARTData);
 
 #endif

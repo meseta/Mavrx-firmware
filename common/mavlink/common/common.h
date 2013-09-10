@@ -406,7 +406,7 @@ enum MAV_SEVERITY
 #define MAVLINK_VERSION 3
 #endif
 
-#if (MAVLINK_VERSION == 0)
+#if(MAVLINK_VERSION == 0)
 #undef MAVLINK_VERSION
 #define MAVLINK_VERSION 3
 #endif

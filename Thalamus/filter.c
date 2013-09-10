@@ -44,13 +44,13 @@ void filter_gps_baro(void){
 	alt.gps = ilink_gpsfly.altitude;
 	
 	// Old Barometer which is too poor to use for altitude hold
-	if (FUNCBaro_type == 1) {
+	if(FUNCBaro_type == 1) {
 		// The old barometer was too poor to use for altitude hold so we use gps only.
 		alt.filtered = alt.gps;
 		alt.vel = -ilink_gpsfly.velD;
 	}
 	// New barometer 
-	if (FUNCBaro_type == 2) {
+	if(FUNCBaro_type == 2) {
 		
 		
 		// We Offset the Barometer Data When Arming to get a roughly globally correct altitude.
@@ -200,14 +200,14 @@ void a_h_r_s(){
 		q4 = ( M2 - M4 ) * s;
 	} 
 	else {
-		if ( M1 > M5 && M1 > M9 ) {
+		if( M1 > M5 && M1 > M9 ) {
 			float s = 2.0f * sqrt( 1.0f + M1 - M5 - M9);
 			q1 = (M6 - M8 ) / s;
 			q2 = 0.25f * s;
 			q3 = (M4 + M2 ) / s;
 			q4 = (M7 + M3 ) / s;
 		} 
-		else if (M5 > M9) {
+		else if(M5 > M9) {
 			float s = 2.0f * sqrt( 1.0f + M5 - M1 - M9);
 			q1 = (M7 - M3 ) / s;
 			q2 = (M4 + M2 ) / s;
@@ -248,12 +248,12 @@ void a_h_r_s(){
 	float Tq13Mq23 = 2 * (q13 - q23);
 	float Tq34Pq12 = 2 * (q34 + q12);
 	// avoid gimbal lock at singularity points
-	if (Tq13Mq23 == 1) {
+	if(Tq13Mq23 == 1) {
 		psiAngle = 2 * fatan2(q2, q1);
 		thetaAngle = M_PI_2;
 		phiAngle = 0;
 	}
-	else if (Tq13Mq23 == -1) {
+	else if(Tq13Mq23 == -1) {
 		psiAngle = -2 * fatan2(q2, q1);
 		thetaAngle = - M_PI_2;
 		phiAngle = 0;

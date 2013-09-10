@@ -19,7 +19,6 @@ double home_Y;
 double home_Z;
 float home_valid=0;
 
-
 unsigned short waypointCurrent=0, waypointCount=0, waypointReceiveIndex=0;
 unsigned char waypointTries, waypointValid=0, waypointGo=0, waypointReached;
 unsigned short waypointTimer=0;
@@ -120,24 +119,38 @@ void gps_navigate(void) {
                     home_Y = craft_Y;
                     home_Z = craft_Z;
                     home_valid = 1;
+					
+					mavlink_gps_global_origin.latitude = craft_X * 10000000;
+					mavlink_gps_global_origin.longitude = craft_Y * 10000000;
+					mavlink_gps_global_origin.altitude = craft_Z * 1000;
+					mavlink_msg_gps_global_origin_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_gps_global_origin);
+					mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+					XBeeInhibit();
+					XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+					XBeeAllow();
+					
+					MAVSendTextFrom(MAV_SEVERITY_INFO, "Home position set", MAV_COMP_ID_MISSIONPLANNER);
+					
                     gps_action = 0;
                     break;
                 case 2: // take off - sets target to GPS_SAFE_ALT above current location 
                     target_X = craft_X;
                     target_Y = craft_Y;
-                    target_Z = craft_Z + GPS_SAFE_ALT;
                     target_set = 1;
                     interpolator_X = craft_X; // reset interpolator
                     interpolator_Y = craft_Y;
                     interpolator_Z = craft_Z;
                     
-                    if(waypointValid == 1 && waypointCurrent < waypointCount) { // overwrite Z target with Z of next waypoint if set
-                        if(waypoint[waypointCurrent].z > craft_Z) {
-                            target_Z = waypoint[waypointCurrent].z;
-                            target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
-                        }
-                    }
-                    
+                    if(waypointValid == 1 && waypointCurrent < waypointCount && waypoint[waypointCurrent].z > craft_Z) { // overwrite Z target with Z of next waypoint if set
+						target_Z = waypoint[waypointCurrent].z;
+						target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
+						MAVSendTextFrom(MAV_SEVERITY_INFO, "Taking off to first waypoint altitude", MAV_COMP_ID_MISSIONPLANNER);
+					}
+					else {
+						target_Z = craft_Z + GPS_SAFE_ALT;
+						MAVSendTextFrom(MAV_SEVERITY_INFO, "Taking off to preset safe altitude", MAV_COMP_ID_MISSIONPLANNER);
+					}
+					
                     interpolator_mode = INTMODE_UP_AND_GO;
                     waypointGo = 0;
                     gps_action = 0;
@@ -152,11 +165,19 @@ void gps_navigate(void) {
                     interpolator_Z = craft_Z;
                     
                     interpolator_mode = INTMODE_OFF;
-                    waypointGo = 0;
+					if(waypointGo == 1) {
+						waypointGo = 0;
+						MAVSendTextFrom(MAV_SEVERITY_INFO, "Waypoint execution paused, position hold", MAV_COMP_ID_MISSIONPLANNER);
+					}
+					else {
+						MAVSendTextFrom(MAV_SEVERITY_INFO, "Position hold", MAV_COMP_ID_MISSIONPLANNER);
+					}
                     gps_action = 0;
                     break;
                 case 4: // resume - resume current waypoint
                     if(waypointValid == 1 && waypointCurrent < waypointCount) {
+						MAVSendTextFrom(MAV_SEVERITY_INFO, "Waypoint execution resumed", MAV_COMP_ID_MISSIONPLANNER);
+					
                         // if we're already going, check if we're stuck at a LOITER_UNLIM position, and break out of it
                         if(waypointGo == 1 && waypointReached == 1 && waypoint[waypointCurrent].command == MAV_CMD_NAV_LOITER_UNLIM) {
                             waypointCurrent++;
@@ -172,6 +193,8 @@ void gps_navigate(void) {
                         waypointGo = 1;
                     }
                     else {
+						MAVSendTextFrom(MAV_SEVERITY_WARNING, "No valid waypoints to resume, position hold", MAV_COMP_ID_MISSIONPLANNER);
+					
                         target_X = craft_X;
                         target_Y = craft_Y;
                         target_Z = craft_Z;
@@ -185,7 +208,8 @@ void gps_navigate(void) {
                     interpolator_Z = craft_Z;
                     gps_action = 0;
                     break;
-                case 5: // unscheduled land - sets target to current location, and sets the incrementer mode to "landing"
+                case 5: // land here - sets target to current location, and sets the incrementer mode to "landing"
+					MAVSendTextFrom(MAV_SEVERITY_INFO, "Landing here", MAV_COMP_ID_MISSIONPLANNER);
                     target_X = craft_X;
                     target_Y = craft_Y;
                     target_Z = craft_Z;
@@ -199,12 +223,14 @@ void gps_navigate(void) {
                     break;
                 case 6: // return to home - sets waypoint to home, unsets the "land when reached" flag
                     if(home_valid == 1) {
+						MAVSendTextFrom(MAV_SEVERITY_INFO, "Returning to home position", MAV_COMP_ID_MISSIONPLANNER);
                         target_X = home_X;
                         target_Y = home_Y;
                         target_Z = home_Z + GPS_SAFE_ALT;
                         interpolator_mode = INTMODE_SEQUENCE_UP; // this sets the interpolator onto the RTL sequence: rise to target altitude, fly to home position, then land
-                    }
+					}
                     else { // no home waypoint set, land here
+						MAVSendTextFrom(MAV_SEVERITY_WARNING, "No home position set, landing here", MAV_COMP_ID_MISSIONPLANNER);
                         target_X = craft_X;
                         target_Y = craft_Y;
                         target_Z = craft_Z;
@@ -220,6 +246,7 @@ void gps_navigate(void) {
                     gps_action = 0;
                     break;
                 case 7: // go IDLE - velocity kill
+					MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Craft going IDLE!", MAV_COMP_ID_MISSIONPLANNER);
                     target_set = 0;
                     gps_action = 0;
                     break;
@@ -278,7 +305,7 @@ void gps_navigate(void) {
                             interpolator_mode = INTMODE_SEQUENCE_3D;
                         }
                         else if(interpolator_mode == INTMODE_UP_AND_GO) {
-                            if(waypointValid == 1 && waypointCurrent < waypointCount) { // overwrite Z target with Z of next waypoint if set
+                            if(waypointValid == 1 && waypointCurrent < waypointCount) {
                                 gps_action = 4;
                             }
                             else {
@@ -424,7 +451,7 @@ void gps_navigate(void) {
                     
                     // report waypoint reached to GCS
                     mavlink_mission_item_reached.seq = waypointCurrent;
-                    mavlink_msg_mission_item_reached_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_mission_item_reached);
+                    mavlink_msg_mission_item_reached_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_mission_item_reached);
                     mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
                     XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
                     XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
@@ -456,7 +483,6 @@ void gps_navigate(void) {
                         case MAV_CMD_NAV_RETURN_TO_LAUNCH:
                             gps_action = 6;
                             break;
-                            
                         case MAV_CMD_NAV_LAND:
                             gps_action = 5;
                             break;

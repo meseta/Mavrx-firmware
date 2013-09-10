@@ -135,23 +135,23 @@ float finvSqrt(float x) {
 }
 
 float fatan2(float y, float x) {
-	if (x == 0.0f) {
-		if (y > 0.0f) return M_PI_2;
-		if (y == 0.0f) return 0.0f;
+	if(x == 0.0f) {
+		if(y > 0.0f) return M_PI_2;
+		if(y == 0.0f) return 0.0f;
 		return -M_PI_2;
 	}
 	float atan;
 	float z = y/x;
-	if (fabsf(z) < 1.0f) {
+	if(fabsf(z) < 1.0f) {
 		atan = z/(1.0f + 0.28f*z*z);
-		if (x < 0.0f) {
-			if (y < 0.0f) return atan - M_PI;
+		if(x < 0.0f) {
+			if(y < 0.0f) return atan - M_PI;
 			return atan + M_PI;
 		}
 	}
 	else {
 		atan = M_PI_2 - z/(z*z + 0.28f);
-		if (y < 0.0f) return atan - M_PI;
+		if(y < 0.0f) return atan - M_PI;
 	}
 	return atan;
 }
@@ -203,7 +203,7 @@ float fcos(float x) {
     unsigned int Random(void) {
         unsigned int i, y;
         
-        if (FUNCMersenneIndex > MERSENNE_N-1) {
+        if(FUNCMersenneIndex > MERSENNE_N-1) {
             for (i=0;i<MERSENNE_N-MERSENNE_M;i++) {
                 y = (FUNCMersenne[i]&0x80000000UL)|(FUNCMersenne[i+1]&0x7fffffffUL);
                 FUNCMersenne[i] = FUNCMersenne[i+MERSENNE_M] ^ (y >> 1) ^ FUNCMersenneMag[y & 0x1UL];
@@ -1277,10 +1277,10 @@ void PIOINT3_IRQHandler(void) {
                 if(VCOM_isbridge) {
                   lsr = LPC_USART->LSR;
                       /* There are errors or break interrupt update serial_state */
-                  if (lsr & 0x02) serial_state |= CDC_SERIAL_STATE_OVERRUN;
-                  if (lsr & 0x04) serial_state |= CDC_SERIAL_STATE_PARITY;
-                  if (lsr & 0x08) serial_state |= CDC_SERIAL_STATE_FRAMING;
-                  if (lsr & 0x10) serial_state |= CDC_SERIAL_STATE_BREAK;
+                  if(lsr & 0x02) serial_state |= CDC_SERIAL_STATE_OVERRUN;
+                  if(lsr & 0x04) serial_state |= CDC_SERIAL_STATE_PARITY;
+                  if(lsr & 0x08) serial_state |= CDC_SERIAL_STATE_FRAMING;
+                  if(lsr & 0x10) serial_state |= CDC_SERIAL_STATE_BREAK;
 
                   USBROM->cdc->SendNotification(pVcom->hCdc, CDC_NOTIFICATION_SERIAL_STATE, serial_state);  
                 }
@@ -1301,7 +1301,7 @@ void PIOINT3_IRQHandler(void) {
                                 #if WHO_AM_I == I_AM_THALAMUS && RX_EN
                                 RXUARTInterrupt(byte);
                                 #endif
-                                #if (WHO_AM_I == I_AM_HYPO || WHO_AM_I == I_AM_HYPX) && UART_EN && SYSTICK_EN && XBEE_EN
+                                #if(WHO_AM_I == I_AM_HYPO || WHO_AM_I == I_AM_HYPX) && UART_EN && SYSTICK_EN && XBEE_EN
                                 XBUARTInterrupt(byte);
                                 #endif
                             }
@@ -1336,7 +1336,7 @@ void PIOINT3_IRQHandler(void) {
                             #if WHO_AM_I == I_AM_THALAMUS && RX_EN
                             RXUARTInterrupt(byte);
                             #endif
-                            #if (WHO_AM_I == I_AM_HYPO || WHO_AM_I == I_AM_HYPX) && UART_EN && SYSTICK_EN && XBEE_EN
+                            #if(WHO_AM_I == I_AM_HYPO || WHO_AM_I == I_AM_HYPX) && UART_EN && SYSTICK_EN && XBEE_EN
                             XBUARTInterrupt(byte);
                             #endif
                         }
@@ -1355,7 +1355,7 @@ void PIOINT3_IRQHandler(void) {
             case 0x1:   // 3 - THRE interrupt
                 //lsr = LPC_USART->LSR;
                 if(VCOM_isbridge) {
-                    if (pVcom->rxlen) {
+                    if(pVcom->rxlen) {
                         #if CDC_USE_PLED
                             LEDOn(PLED);
                         #endif
@@ -1482,10 +1482,10 @@ void PIOINT3_IRQHandler(void) {
         
 		while(1) {
 			// loop until start condition transmit detected or timeout and send stop
-			if (FUNCI2CMasterState == I2C_STARTED) {
+			if(FUNCI2CMasterState == I2C_STARTED) {
 				while (1) {
 					// once start state is transmitted, loop until NACK state then send stop
-					if (FUNCI2CMasterState2 == I2C_NACK){
+					if(FUNCI2CMasterState2 == I2C_NACK){
 						LPC_I2C->CONSET = I2C_STO;	// set stop condition
 						LPC_I2C->CONCLR = I2C_SI;	// clear interrupt flag
                         
@@ -1496,7 +1496,7 @@ void PIOINT3_IRQHandler(void) {
 				}
 				break;	
 			}
-			if (timeout++ > I2C_TIMEOUT) {
+			if(timeout++ > I2C_TIMEOUT) {
 				// timeout, send stop
 				LPC_I2C->CONSET = I2C_STO;	// set stop condition
 				LPC_I2C->CONCLR = I2C_SI;	// clear interrupt flag
@@ -1536,7 +1536,7 @@ void PIOINT3_IRQHandler(void) {
                     break;
 
                 case 0x18:	// SLA+W has been transmitted; ACK has been received
-                    if (FUNCI2CMasterState == I2C_STARTED) {
+                    if(FUNCI2CMasterState == I2C_STARTED) {
                         LPC_I2C->DAT = FUNCI2CBuffer[FUNCI2CWrIndex++];
                         FUNCI2CMasterState = I2C_ACK;
                     }
@@ -1550,12 +1550,12 @@ void PIOINT3_IRQHandler(void) {
                     break;
                     
                 case 0x28:	// Data byte in I2DAT has been transmitted; ACK has been received
-                    if (FUNCI2CWrIndex < FUNCI2CWrLength) {   
+                    if(FUNCI2CWrIndex < FUNCI2CWrLength) {   
                         LPC_I2C->DAT = FUNCI2CBuffer[FUNCI2CWrIndex++];
                         FUNCI2CMasterState = I2C_ACK;
                     }
                     else {
-                        if (FUNCI2CRdLength > 0) {
+                        if(FUNCI2CRdLength > 0) {
                             LPC_I2C->CONSET = I2C_STA;
                             FUNCI2CMasterState = I2C_REPEATED_START;
                         }
@@ -1581,7 +1581,7 @@ void PIOINT3_IRQHandler(void) {
                     break;
 
                 case 0x40:	// SLA+R has been trnasmitted; ACK has been received
-                    if (FUNCI2CRdLength == 1) {
+                    if(FUNCI2CRdLength == 1) {
                         LPC_I2C->CONCLR = I2C_AA;
                     }
                     else {
@@ -1597,7 +1597,7 @@ void PIOINT3_IRQHandler(void) {
                     
                 case 0x50:	// Data byte has been receievd; ACK has been returned
                     FUNCI2CBuffer[FUNCI2CRdIndex++] = LPC_I2C->DAT;
-                    if (FUNCI2CRdIndex + 1 < FUNCI2CRdLength) {   
+                    if(FUNCI2CRdIndex + 1 < FUNCI2CRdLength) {   
                         FUNCI2CMasterState = I2C_ACK;
                         LPC_I2C->CONSET = I2C_AA;
                     }
@@ -1646,7 +1646,7 @@ void PIOINT3_IRQHandler(void) {
                 
                 case 0x80:  // Previously addressed with own SLV address; DATA has been received, ACK has been returned
                 case 0x90:  // Previously addressed with General Call; DATA byte has been received; ACK has been returned
-                    if (FUNCI2CSlaveState == I2C_WR_STARTED) {
+                    if(FUNCI2CSlaveState == I2C_WR_STARTED) {
                         FUNCI2CBuffer[FUNCI2CWrIndex++] = LPC_I2C->DAT;
                         LPC_I2C->CONSET = I2C_AA;
                     }
@@ -1669,7 +1669,7 @@ void PIOINT3_IRQHandler(void) {
                 
                 case 0xB8:  // Data byte in I2DAT has been transmitted; ACK has been received
                 case 0xC8:  // Data byte in I2DAT has been transmitted; NOT ACK has been received.
-                    if (FUNCI2CSlaveState == I2C_RD_STARTED) {
+                    if(FUNCI2CSlaveState == I2C_RD_STARTED) {
                         LPC_I2C->DAT = FUNCI2CBuffer[FUNCI2CRdIndex++];
                         LPC_I2C->CONSET = I2C_AA;
                     }
@@ -2602,7 +2602,7 @@ void MSCInit(unsigned int deviceCapacity) {
     msc_param.BlockSize = MSC_BLOCK_SIZE;
     msc_param.MemorySize = deviceCapacity;
 
-    if ((pIntfDesc == 0) ||
+    if((pIntfDesc == 0) ||
     (pIntfDesc->bInterfaceClass != USB_DEVICE_CLASS_STORAGE) ||
     (pIntfDesc->bInterfaceSubClass != MSC_SUBCLASS_SCSI) )
     return;
@@ -2669,7 +2669,7 @@ void HIDInit(void) {
     reports_data[0].idle_time = 0;
     reports_data[0].desc = (uint8_t *)&HID_ReportDescriptor[0];
 
-    if ((pIntfDesc == 0) || (pIntfDesc->bInterfaceClass != USB_DEVICE_CLASS_HUMAN_INTERFACE)) return;
+    if((pIntfDesc == 0) || (pIntfDesc->bInterfaceClass != USB_DEVICE_CLASS_HUMAN_INTERFACE)) return;
 
     hid_param.mem_base = usb_param.mem_base;
     hid_param.mem_size = usb_param.mem_size;
@@ -2698,7 +2698,7 @@ void HIDInit(void) {
 
 ErrorCode_t USB_Configure_Event (USBD_HANDLE_T hUsb) {
     USB_CORE_CTRL_T* pCtrl = (USB_CORE_CTRL_T*)hUsb;
-    if (pCtrl->config_value) {                   /* Check if USB is configured */
+    if(pCtrl->config_value) {                   /* Check if USB is configured */
         USBROM->hw->WriteEP(hUsb, HID_EP_IN, report_buffer, 1);
     }
     return LPC_OK;
@@ -2724,7 +2724,7 @@ ErrorCode_t HID_GetReport( USBD_HANDLE_T hHid, USB_SETUP_PACKET* pSetup, uint8_t
 
 ErrorCode_t HID_SetReport( USBD_HANDLE_T hHid, USB_SETUP_PACKET* pSetup, uint8_t** pBuffer, uint16_t length) {
     
-    if (length == 0) return LPC_OK;
+    if(length == 0) return LPC_OK;
 
     switch (pSetup->wValue.WB.H) {
         case HID_REPORT_FEATURE:
@@ -2906,7 +2906,7 @@ void VCOM_uart_write(VCOM_DATA_T* pVcom) {
     /* find space in TX fifo */
     tx_cnt = 0xF - (tx_cnt & 0xF);
 
-    if (tx_cnt > (pVcom->rxlen - pVcom->ser_pos)) {
+    if(tx_cnt > (pVcom->rxlen - pVcom->ser_pos)) {
         tx_cnt = (pVcom->rxlen - pVcom->ser_pos);
     }
 
@@ -2918,7 +2918,7 @@ void VCOM_uart_write(VCOM_DATA_T* pVcom) {
     }
 
     /* if done check anything pending */
-    if (pVcom->ser_pos == pVcom->rxlen) {
+    if(pVcom->ser_pos == pVcom->rxlen) {
         /* Tx complete free the buffer */
         pVcom->ser_pos = 0;
         pVcom->rxlen = 0;
@@ -2939,7 +2939,7 @@ void VCOM_uart_read(VCOM_DATA_T* pVcom) {
         pbuf[pVcom->txlen++] = LPC_USART->RBR;
     } 
 
-    if (pVcom->txlen == USB_MAX_BULK_PACKET) {
+    if(pVcom->txlen == USB_MAX_BULK_PACKET) {
         VCOM_usb_send(pVcom);
     }
     pVcom->last_ser_rx = pVcom->sof_counter;
@@ -2952,7 +2952,7 @@ void CDCWriteByte(unsigned char byte) {
         pVcom->txBuf[pVcom->txlen++] = byte;
     }
 
-    if (pVcom->txlen == USB_MAX_BULK_PACKET) {
+    if(pVcom->txlen == USB_MAX_BULK_PACKET) {
         VCOM_usb_send(pVcom);
     }
     pVcom->last_ser_rx = pVcom->sof_counter;
@@ -3016,12 +3016,12 @@ ErrorCode_t VCOM_sof_event(USBD_HANDLE_T hUsb) {
 
     pVcom->sof_counter++;
 
-    if (pVcom->break_time) {
+    if(pVcom->break_time) {
         pVcom->break_time--;
-        if (pVcom->break_time == 0) {
+        if(pVcom->break_time == 0) {
             if(VCOM_isbridge) {
                 lcr = LPC_USART->LCR;
-                if (lcr & (1 << 6)) {
+                if(lcr & (1 << 6)) {
                     lcr &= ~(1 << 6);
                     LPC_USART->LCR = lcr;
                 }
@@ -3029,7 +3029,7 @@ ErrorCode_t VCOM_sof_event(USBD_HANDLE_T hUsb) {
         }
     }
 
-    if ( pVcom->last_ser_rx && (diff > 5)) {
+    if( pVcom->last_ser_rx && (diff > 5)) {
         VCOM_usb_send(pVcom);
     }
 
@@ -3043,7 +3043,7 @@ ErrorCode_t VCOM_SendBreak(USBD_HANDLE_T hCDC, uint16_t mstime) {
 
     if(VCOM_isbridge) {
         lcr = LPC_USART->LCR;
-        if ( mstime) {
+        if( mstime) {
             lcr |= (1 << 6);
         } else {
             lcr &= ~(1 << 6);
@@ -3065,7 +3065,7 @@ ErrorCode_t VCOM_bulk_out_hdlr(USBD_HANDLE_T hUsb, void* data, uint32_t event) {
     VCOM_DATA_T* pVcom = (VCOM_DATA_T*) data;
 
     if(event == USB_EVT_OUT) {
-        if (pVcom->rxlen == 0) {
+        if(pVcom->rxlen == 0) {
         pVcom->rxlen = USBROM->hw->ReadEP(hUsb, USB_CDC_EP_BULK_OUT, pVcom->rxBuf);
         pVcom->send_fn(pVcom);
         }
@@ -3944,7 +3944,7 @@ unsigned char PRGPoll(void) {
 		unsigned char i;
 		n_rem ^= (unsigned short) byte;
 		for (i=0; i<8; i++){
-			if (n_rem & 0x8000) {
+			if(n_rem & 0x8000) {
 				n_rem = (n_rem << 1) ^ 0x3000;
 			}
 			else {

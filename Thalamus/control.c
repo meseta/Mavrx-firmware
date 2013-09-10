@@ -43,13 +43,13 @@ void control_throttle(void)	{
 	
 	//Hysteresis has been implemented
 	static float ultTouchdownHyst = 0;
-	if (alt.ult_conf > (0.90 - ultTouchdownHyst)) {
+	if(alt.ult_conf > (0.90 - ultTouchdownHyst)) {
 		
 		ultTouchdownHyst = 10;
 
 		// When we enter the confidence range, we store the ultrasound altitude and attempt to hold it.
 		/*! \todo Work out what happens if move out of the ultrasound confidence zone again. */
-		if (got_setpoint == 0) {
+		if(got_setpoint == 0) {
 			targetZ_ult = alt.ultra;
 			got_setpoint = 1;
 			oldUltra = alt.ultra;
@@ -59,7 +59,7 @@ void control_throttle(void)	{
 			
 		
 		// If the allowLand flag is set and we have confidence in the ultrasound readings, we lower the craft onto the ground by decrementing the ultrasound altitude.
-		if (ilink_gpsfly.flags & 0x02) {
+		if(ilink_gpsfly.flags & 0x02) {
 			targetZ_ult -= 100 * (1/(float)FAST_RATE); // -100 mm/second
 			// targetAltVel = -0.2;
 		}
@@ -96,15 +96,15 @@ void control_throttle(void)	{
 
 	/*! \todo Diagnose throttle jumps while in GPS hold mode. */
 	// This section of code limits the rate at which the craft is allowed to change the throttle according to GPS and Barometer Demands
-	// if ((gpsThrottle - gpsThrottleold) > LIM_THRO) gpsThrottle = gpsThrottleold + LIM_THRO;
-	// if ((gpsThrottle - gpsThrottleold) < -LIM_THRO) gpsThrottle = gpsThrottleold - LIM_THRO;
+	// if((gpsThrottle - gpsThrottleold) > LIM_THRO) gpsThrottle = gpsThrottleold + LIM_THRO;
+	// if((gpsThrottle - gpsThrottleold) < -LIM_THRO) gpsThrottle = gpsThrottleold - LIM_THRO;
 	// gpsThrottleold = gpsThrottle;
 	
 	
 	// If Thalamus is allowed to overwrite throttle
-	if (thal_throt_cont == 1) {
+	if(thal_throt_cont == 1) {
 		//Use largest throttle output, and cross-feed the integrals for step free transition
-		if (ultraThrottle > gpsThrottle){
+		if(ultraThrottle > gpsThrottle){
 			GPS_KerrI = ULT_KerrI;
 			throttle = ultraThrottle;
 		} else {
@@ -115,17 +115,17 @@ void control_throttle(void)	{
 	
 	
 	// If Thalamus is allowed to shut off the motors
-	if (thal_motor_off == 1) {
+	if(thal_motor_off == 1) {
 	
 		///////////// Set Airborne if takeoff value is read/////////////////
-		if (alt.ultra > ULTRA_TKOFF) airborne = 1;
+		if(alt.ultra > ULTRA_TKOFF) airborne = 1;
 		
 		///////////////////////////////// LANDING MOTOR SHUT OFF, 1-Ultrasound Driven  2-GPS Driven ////////////////////////
 		//1 - Ultrasound driven
 		// If ultrasound reading is valid and less than landing threshold (ULTRA_LD_TD) and we are airborne
 		// then increase landing counter
 		static int ult_landing = 0;
-		if ((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) ult_landing++;
+		if((ultra > 0) && (ultra < ULTRA_LND) && (airborne == 1)) ult_landing++;
 		// If consecutive run of readings is broken, reset the landing counter.
 		else ult_landing = 0;
 		
@@ -144,7 +144,7 @@ void control_throttle(void)	{
 		// 2 - GPS driven
 		// If the GPS altitude integral stays maxed out at minimum value, increment the landing counter
 		static int gps_landing = 0;
-		if ((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
+		if((GPS_KerrI == -1000) && (alt.vel < 1) && (alt.vel > -1)) gps_landing++;
 		// If consecutive run of readings is broken, reset the landing counter.
 		else gps_landing = 0;
 		
@@ -179,7 +179,7 @@ void control_motors(void){
 		case 5:	// R10 Kickstarter
 		
 			// Stops yawing on slippery ground to ensure magneto compensation is correct.
-			if (throttle < 380) attitude_demand_body.yaw = -psiAngle;
+			if(throttle < 380) attitude_demand_body.yaw = -psiAngle;
 			
 			// We have to rotate the frame of reference as Thalamus is mounted at 45 degrees.
 			attitude_demand_body.pitch = fsin(0.78539816339744830962+M_PI_2) * user.pitch - fsin(0.78539816339744830962) * user.roll;
@@ -190,24 +190,24 @@ void control_motors(void){
 
 	// This section of code applies some throttle increase with high tilt angles to help reduce descent on angle increase
 	float M9temp;
-	if (M9 > 0) M9temp = M9;
+	if(M9 > 0) M9temp = M9;
 	else M9temp = -M9;
 	throttle_angle = ((throttle / M9temp) - throttle); 
-	if (throttle_angle < 0) throttle_angle = 0;
+	if(throttle_angle < 0) throttle_angle = 0;
 
 	static float rollold = 0;
 	static float pitchold = 0;
 	static float yawold = 0;
 	
 	// This section of code limits the rate at which the craft is allowed to track angle demand changes
-	if ((attitude_demand_body.pitch - pitchold) > PITCH_SPL) attitude_demand_body.pitch = pitchold + PITCH_SPL;
-	if ((attitude_demand_body.pitch - pitchold) < -PITCH_SPL) attitude_demand_body.pitch = pitchold - PITCH_SPL;
+	if((attitude_demand_body.pitch - pitchold) > PITCH_SPL) attitude_demand_body.pitch = pitchold + PITCH_SPL;
+	if((attitude_demand_body.pitch - pitchold) < -PITCH_SPL) attitude_demand_body.pitch = pitchold - PITCH_SPL;
 	pitchold = attitude_demand_body.pitch;
-	if ((attitude_demand_body.roll - rollold) > ROLL_SPL) attitude_demand_body.roll = rollold + ROLL_SPL;
-	if ((attitude_demand_body.roll - rollold) < -ROLL_SPL) attitude_demand_body.roll = rollold - ROLL_SPL;
+	if((attitude_demand_body.roll - rollold) > ROLL_SPL) attitude_demand_body.roll = rollold + ROLL_SPL;
+	if((attitude_demand_body.roll - rollold) < -ROLL_SPL) attitude_demand_body.roll = rollold - ROLL_SPL;
 	rollold = attitude_demand_body.roll;
-	if ((attitude_demand_body.yaw - yawold) > YAW_SPL) attitude_demand_body.yaw = yawold + YAW_SPL;
-	if ((attitude_demand_body.yaw - yawold) < -YAW_SPL) attitude_demand_body.yaw = yawold - YAW_SPL;
+	if((attitude_demand_body.yaw - yawold) > YAW_SPL) attitude_demand_body.yaw = yawold + YAW_SPL;
+	if((attitude_demand_body.yaw - yawold) < -YAW_SPL) attitude_demand_body.yaw = yawold - YAW_SPL;
 	yawold = attitude_demand_body.yaw;
 	
 	// This part of the code makes the yaw demand loop around and not exceed Pi or -Pi bounds
@@ -267,7 +267,7 @@ void control_motors(void){
 	static float rollIntegral = 0;
 	static float yawIntegral = 0;
 	
-	if (rcInput[RX_THRO] - throttletrim > OFFSTICK){
+	if(rcInput[RX_THRO] - throttletrim > OFFSTICK){
 		pitchIntegral += pitcherror;
 		rollIntegral += rollerror;
 		yawIntegral += yawerror;
@@ -313,7 +313,7 @@ void control_motors(void){
 	
 	// If the craft is upsidedown, turn off yaw control until control brings it back upright.
 	/*! \todo Test this code */
-	if (M9 < 0) {
+	if(M9 < 0) {
 		yawcorrection = 0;
 	}
 	
@@ -375,7 +375,7 @@ void control_motors(void){
 	
 		
 	/*! \todo Add Auto Land on rxLoss! */
-	if (((rcInput[RX_THRO] - throttletrim) <  OFFSTICK) || (hold_thro_off > 0)) {
+	if(((rcInput[RX_THRO] - throttletrim) <  OFFSTICK) || (hold_thro_off > 0)) {
 		
 		// Set Airborne = 0
 		airborne = 0;
@@ -401,7 +401,7 @@ void control_motors(void){
 		
 		// Reset the throttle hold variable, this prevents reactivation of the throttle until 
 		// the input is dropped and re-applied
-		if (rcInput[RX_THRO] - throttletrim  < OFFSTICK) hold_thro_off = 0;
+		if(rcInput[RX_THRO] - throttletrim  < OFFSTICK) hold_thro_off = 0;
 		
 		// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
 		if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);

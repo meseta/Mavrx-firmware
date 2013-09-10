@@ -23,7 +23,7 @@ Have added code on line 51 of control.h to try and solve this problem
 Rescues craft if error gets too large at high throttles by detecting roll and pitch error getting too large and reducing the throttle.
 
 \todo Test to see if this code solves the problem
-Tried this: if (((pitcherror > 0.08) || (pitcherror < -0.08) || (rollerror > 0.08) || (rollerror < -0.08)) && (throttle > 600)) throttle -= 200;
+Tried this: if(((pitcherror > 0.08) || (pitcherror < -0.08) || (rollerror > 0.08) || (rollerror < -0.08)) && (throttle > 600)) throttle -= 200;
 Should really be able to solve with better PID tuning.}
 
 \todo check all integrators for decoupling, and make sure they are locked in this case

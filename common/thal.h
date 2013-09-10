@@ -976,6 +976,8 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_identify_t;
     
+	#define THALCTRL_ARM					0x0001
+	#define THALCTRL_DISARM					0x0002
 	#define THALCTRL_ORIOK					0x0078
 	#define THALCTRL_ORIBAD					0x0079
 	#define THALCTRL_EEPROM_READALL			0x0100

@@ -159,7 +159,7 @@ static inline void byte_copy_8(char *dst, const char *src)
 */
 static void mav_array_memcpy(void *dest, const void *src, size_t n)
 {
-	if (src == NULL) {
+	if(src == NULL) {
 		memset(dest, 0, n);
 	} else {
 		memcpy(dest, src, n);
@@ -197,7 +197,7 @@ static inline void _mav_put_int8_t_array(char *buf, uint8_t wire_offset, const i
 #define _MAV_PUT_ARRAY(TYPE, V) \
 static inline void _mav_put_ ## TYPE ##_array(char *buf, uint8_t wire_offset, const TYPE *b, uint8_t array_length) \
 { \
-	if (b == NULL) { \
+	if(b == NULL) { \
 		memset(&buf[wire_offset], 0, array_length*sizeof(TYPE)); \
 	} else { \
 		uint16_t i; \
