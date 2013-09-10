@@ -9,7 +9,6 @@ void calibrate_ori(void);
 
 void calibrate_mag(void);
 
-void sensor_zero(void);
 void calibrate_gyr(void);
 void calibrate_gyr_temporary(unsigned int seconds);
 

@@ -70,6 +70,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -92,7 +93,7 @@ $(document).ready(function(){initNavTree('structthree_axis_sensor_struct_accel.h
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -108,22 +109,78 @@ $(document).ready(function(){initNavTree('structthree_axis_sensor_struct_accel.h
 <div class="title">threeAxisSensorStructAccel Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Accel data struct (three axis)  
+ <a href="structthree_axis_sensor_struct_accel.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="globals_8h_source.html">globals.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:ad3e4754e08e597a14a5c68be32518702"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad3e4754e08e597a14a5c68be32518702"></a>
-<a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a>&#160;</td><td class="memItemRight" valign="bottom"><b>X</b></td></tr>
+<tr class="memitem:ad3e4754e08e597a14a5c68be32518702"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthree_axis_sensor_struct_accel.html#ad3e4754e08e597a14a5c68be32518702">X</a></td></tr>
 <tr class="separator:ad3e4754e08e597a14a5c68be32518702"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00cd5b32abd30fbdd539819124aa8e93"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a00cd5b32abd30fbdd539819124aa8e93"></a>
-<a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Y</b></td></tr>
+<tr class="memitem:a00cd5b32abd30fbdd539819124aa8e93"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthree_axis_sensor_struct_accel.html#a00cd5b32abd30fbdd539819124aa8e93">Y</a></td></tr>
 <tr class="separator:a00cd5b32abd30fbdd539819124aa8e93"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a434ebad0b26171c10fc99354fe88176e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a434ebad0b26171c10fc99354fe88176e"></a>
-<a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Z</b></td></tr>
+<tr class="memitem:a434ebad0b26171c10fc99354fe88176e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthree_axis_sensor_struct_accel.html#a434ebad0b26171c10fc99354fe88176e">Z</a></td></tr>
 <tr class="separator:a434ebad0b26171c10fc99354fe88176e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16ff2d8e15ade4948398b0aeb80124a8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a16ff2d8e15ade4948398b0aeb80124a8"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>count</b></td></tr>
+<tr class="memitem:a16ff2d8e15ade4948398b0aeb80124a8"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthree_axis_sensor_struct_accel.html#a16ff2d8e15ade4948398b0aeb80124a8">count</a></td></tr>
 <tr class="separator:a16ff2d8e15ade4948398b0aeb80124a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Accel data struct (three axis) </p>
+</div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="a16ff2d8e15ade4948398b0aeb80124a8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int count</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Accel running average counter </p>
+
+</div>
+</div>
+<a class="anchor" id="ad3e4754e08e597a14a5c68be32518702"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a> X</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Accel X data </p>
+
+</div>
+</div>
+<a class="anchor" id="a00cd5b32abd30fbdd539819124aa8e93"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a> Y</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Accel Y data </p>
+
+</div>
+</div>
+<a class="anchor" id="a434ebad0b26171c10fc99354fe88176e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a> Z</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Accel Z data </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Thalamus/inc/<a class="el" href="globals_8h_source.html">globals.h</a></li>
 </ul>
@@ -133,7 +190,7 @@ unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>count</b></td
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="structthree_axis_sensor_struct_accel.html">threeAxisSensorStructAccel</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 19:24:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Tue Sep 10 2013 00:27:26 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

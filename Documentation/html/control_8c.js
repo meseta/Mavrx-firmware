@@ -1,5 +1,5 @@
 var control_8c =
 [
-    [ "control_motors", "control_8c.html#a3e76a14d433c187c06fc0531c2e98955", null ],
-    [ "control_throttle", "control_8c.html#aa239da247d76688b4ae3e5375acede47", null ]
+    [ "control_motors", "control_8c.html#abb9bac63b73330ebe25df944a9e9fedf", null ],
+    [ "control_throttle", "control_8c.html#afaf768d6c85a3e7a8e2fc5ec17bc3d8b", null ]
 ];

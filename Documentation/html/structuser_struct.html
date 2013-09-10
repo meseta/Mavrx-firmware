@@ -70,6 +70,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -92,7 +93,7 @@ $(document).ready(function(){initNavTree('structuser_struct.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -108,22 +109,78 @@ $(document).ready(function(){initNavTree('structuser_struct.html','');});
 <div class="title">userStruct Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>User demand struct.  
+ <a href="structuser_struct.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="globals_8h_source.html">globals.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a26fd84d522945b6038221d9e38c7cc39"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26fd84d522945b6038221d9e38c7cc39"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>roll</b></td></tr>
+<tr class="memitem:a26fd84d522945b6038221d9e38c7cc39"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser_struct.html#a26fd84d522945b6038221d9e38c7cc39">roll</a></td></tr>
 <tr class="separator:a26fd84d522945b6038221d9e38c7cc39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a282e7d4378d4a18a805b8980295ac86c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a282e7d4378d4a18a805b8980295ac86c"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>pitch</b></td></tr>
+<tr class="memitem:a282e7d4378d4a18a805b8980295ac86c"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser_struct.html#a282e7d4378d4a18a805b8980295ac86c">pitch</a></td></tr>
 <tr class="separator:a282e7d4378d4a18a805b8980295ac86c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7efc219781df4a1e281cb5d348b7fbf9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7efc219781df4a1e281cb5d348b7fbf9"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>yaw</b></td></tr>
+<tr class="memitem:a7efc219781df4a1e281cb5d348b7fbf9"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser_struct.html#a7efc219781df4a1e281cb5d348b7fbf9">yaw</a></td></tr>
 <tr class="separator:a7efc219781df4a1e281cb5d348b7fbf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adca97acc6b0ff71f782f9c8a484a47b8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adca97acc6b0ff71f782f9c8a484a47b8"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>throttle</b></td></tr>
+<tr class="memitem:adca97acc6b0ff71f782f9c8a484a47b8"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser_struct.html#adca97acc6b0ff71f782f9c8a484a47b8">throttle</a></td></tr>
 <tr class="separator:adca97acc6b0ff71f782f9c8a484a47b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>User demand struct. </p>
+</div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="a282e7d4378d4a18a805b8980295ac86c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float pitch</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>user pitch demand </p>
+
+</div>
+</div>
+<a class="anchor" id="a26fd84d522945b6038221d9e38c7cc39"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float roll</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>user roll demand </p>
+
+</div>
+</div>
+<a class="anchor" id="adca97acc6b0ff71f782f9c8a484a47b8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float throttle</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>user throttle demand </p>
+
+</div>
+</div>
+<a class="anchor" id="a7efc219781df4a1e281cb5d348b7fbf9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float yaw</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>user yaw demand </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Thalamus/inc/<a class="el" href="globals_8h_source.html">globals.h</a></li>
 </ul>
@@ -133,7 +190,7 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>throttle</b></td></t
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="structuser_struct.html">userStruct</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 19:24:16 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Tue Sep 10 2013 00:27:26 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

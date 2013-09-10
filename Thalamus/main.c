@@ -55,7 +55,7 @@ Throttle blips when flying normally
 This is the first user function called after the initialisation is complete.
 All the hardware peripherals and stuff are initialised here.
 */
-void setup() {	
+void setup(void) {	
 	// *** Startup PWM
 		// the ESC will beep when it doesn not receive a PWM signal, we use this to indicate that the craft is powered but disarmed
 		// however, the ESC will not beep the first time it is powered, so we start up the PWM here and turn it off quickly so that
@@ -75,7 +75,7 @@ void setup() {
 	
 	// *** Establish ILink
 		ilink_thalstat.sensorStatus = 1; // set ilink status to boot
-		ilink_thalstat.flightMode = (0x1 << 0); // attitude control TODO: sort out these modes
+		ilink_thalstat.flightMode = (0x1 << 0); /*! \todo TODO: sort out these modes */
 		ilink_identify.deviceID = WHO_AM_I;
 		ilink_identify.firmVersion = FIRMWARE_VERSION;
 		ILinkInit(SLAVE);
@@ -94,7 +94,19 @@ void setup() {
 		
 	// *** Calibrate Sensors
 		SensorInit();
-		sensor_zero();
+		
+		// check we got all the sensors
+		signed short data[4];
+		if(!GetGyro(data) || !GetMagneto(data) || !GetAccel(data)/* || GetBaro() == 0*/) {
+			LEDInit(PLED | VLED);
+			LEDOn(PLED);
+			LEDOff(VLED);
+			flashPLED = 2;
+			flashVLED = 2;
+			while(1);
+		}
+		
+		ilink_thalstat.sensorStatus |= (0xf << 3);
 		
 		TrigBaroTemp(); // get parometer temperature for temperature compensation.
 		Delay(15);
@@ -125,12 +137,12 @@ void setup() {
 }
 
 /*!
-\brief Main loop
+\brief Main loop (idle loop, doesn't do much)
 
 This is the main loop, the processor sits in here when it's not dealing with 
 interrupts.  This loop's only purpose right now is to deal with button presses.
 */
-void loop() {
+void loop(void) {
 	//if(idleCount < IDLE_MAX) idleCount++; // this is the counter for CPU idle time
 	//Deal with button push for entering bind mode for RX
 		if(PRGBlankTimer == 0) {
@@ -146,13 +158,15 @@ void loop() {
 }
 
 /*!
-\brief System Tick Timer user-supplied ISR
+\brief System Tick Timer, deals with timing, flashing, pushing.
 
 This function is triggered by interrupt every 1ms, its purpose is to keep
 timings, flash LEDs, and time button pushes.
 */
-// SysTick timer: deals with general timing
 void SysTickInterrupt(void) {
+	static unsigned int sysMS=0;
+	static unsigned long long sysUS=0;
+	
 	sysMS += 1;
 	sysUS += 1000;
 	
@@ -179,7 +193,13 @@ void SysTickInterrupt(void) {
 		}
 }
 
-// RIT interrupt, deal with timed iLink messages.
+/*!
+\brief Repetitive Interrput Timer, deals with EEPROM parameters over ilink.
+
+This function is triggered by interrupt every few tens of ms (actual speed, is 
+defined by MESSAGE_LOOP_HZ), its purpose is to shunt out EEPROM parameters
+over ilink to Hypo.
+*/
 void RITInterrupt(void) {
 	
 	// Deal with iLink parameter transmission
@@ -189,7 +209,7 @@ void RITInterrupt(void) {
 			ilink_thalparam_tx.paramID = thisParam;
 			ilink_thalparam_tx.paramValue = paramStorage[thisParam].value;
 			ilink_thalparam_tx.paramCount = paramCount;
-			for(i=0; i<16; i++) {
+			for(i=0; i<PARAMNAMELEN; i++) {
 				ilink_thalparam_tx.paramName[i] = paramStorage[thisParam].name[i];
 				if(paramStorage[thisParam].name[i] == '\0') break;
 			}
@@ -207,9 +227,17 @@ void RITInterrupt(void) {
 
 
 
-//Main functional periodic loop
-void Timer0Interrupt0() {
+/*!
+\brief Main code loop, all the flight control stuff is in here.
 
+This function is triggered by interrupt from timer 0, should be about 400Hz,
+actual speed is defined by FAST_RATE.  The function also contains a software 
+postscaler to run a set of functions at a slower rate defined by SLOW_RATE
+
+The functions called here are part of the main flight code.
+*/
+void Timer0Interrupt0(void) {
+	static unsigned short slowSoftscale=0;
 	
 	if(++slowSoftscale >= SLOW_DIVIDER) {
 		slowSoftscale = 0;

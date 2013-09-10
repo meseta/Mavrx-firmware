@@ -1,22 +1,12 @@
 var searchData=
 [
-  ['ack',['ack',['../struct____mavlink__change__operator__control__ack__t.html#a14dbae2f3dab6a22c58072df0fc13ff6',1,'__mavlink_change_operator_control_ack_t']]],
-  ['acr',['ACR',['../struct_l_p_c___u_s_a_r_t___type.html#a9cb55206b29a8c16354747c556ab8bea',1,'LPC_USART_Type']]],
-  ['actlr',['ACTLR',['../struct_interrupt_type___type.html#a9a73f00a0223775caeb09c5c6abb3087',1,'InterruptType_Type']]],
-  ['address',['address',['../struct____mavlink__memory__vect__t.html#a643d30df67a67c5915fde941c934f9f8',1,'__mavlink_memory_vect_t']]],
-  ['adr',['ADR',['../struct_l_p_c___i2_c___type.html#a14c400e3dfbcb53147a74fbd05eb70df',1,'LPC_I2C_Type::ADR()'],['../struct_s_c_b___type.html#a5c0e2e1c7195d4dc09a5ca077c596318',1,'SCB_Type::ADR()']]],
-  ['adr0',['ADR0',['../struct_l_p_c___i2_c___type.html#a9270d13a7f2f6699e6850efd2da81408',1,'LPC_I2C_Type']]],
-  ['afsr',['AFSR',['../struct_s_c_b___type.html#ab9176079ea223dd8902589da91af63a2',1,'SCB_Type']]],
-  ['aircr',['AIRCR',['../struct_s_c_b___type.html#aaec159b48828355cb770049b8b2e8d91',1,'SCB_Type']]],
-  ['airspeed',['airspeed',['../struct____mavlink__vfr__hud__t.html#a2a48553c0ca332797b83fc7147f15679',1,'__mavlink_vfr_hud_t']]],
-  ['alt',['alt',['../struct____mavlink__global__position__int__t.html#a677cbc2ca7dc4e9f0516bd42110f0062',1,'__mavlink_global_position_int_t::alt()'],['../struct____mavlink__gps__raw__int__t.html#a677cbc2ca7dc4e9f0516bd42110f0062',1,'__mavlink_gps_raw_int_t::alt()'],['../struct____mavlink__hil__state__t.html#a677cbc2ca7dc4e9f0516bd42110f0062',1,'__mavlink_hil_state_t::alt()'],['../struct____mavlink__vfr__hud__t.html#adbf37c628254d78394e4533464a31a8a',1,'__mavlink_vfr_hud_t::alt()']]],
-  ['alt_5ferror',['alt_error',['../struct____mavlink__nav__controller__output__t.html#ad63a054872a5ba1e4494686da5002cf0',1,'__mavlink_nav_controller_output_t']]],
-  ['altitude',['altitude',['../struct____mavlink__global__position__setpoint__int__t.html#a5402881d7f8a92e6838995507bf2e7f9',1,'__mavlink_global_position_setpoint_int_t::altitude()'],['../struct____mavlink__gps__global__origin__t.html#a5402881d7f8a92e6838995507bf2e7f9',1,'__mavlink_gps_global_origin_t::altitude()'],['../struct____mavlink__set__global__position__setpoint__int__t.html#a5402881d7f8a92e6838995507bf2e7f9',1,'__mavlink_set_global_position_setpoint_int_t::altitude()'],['../struct____mavlink__set__gps__global__origin__t.html#a5402881d7f8a92e6838995507bf2e7f9',1,'__mavlink_set_gps_global_origin_t::altitude()']]],
-  ['aspd_5ferror',['aspd_error',['../struct____mavlink__nav__controller__output__t.html#a84d5f1ada3e43ded0ae0949bcb1ece09',1,'__mavlink_nav_controller_output_t']]],
-  ['autocontinue',['autocontinue',['../struct____mavlink__mission__item__t.html#a452a7419e65a96e39663cde437451882',1,'__mavlink_mission_item_t']]],
-  ['autopilot',['autopilot',['../struct____mavlink__heartbeat__t.html#a081b1dee547a4fb4499588542427d139',1,'__mavlink_heartbeat_t']]],
-  ['aux1',['aux1',['../struct____mavlink__hil__controls__t.html#a236feb6a68debe6bdb5dce4165da6aa5',1,'__mavlink_hil_controls_t']]],
-  ['aux2',['aux2',['../struct____mavlink__hil__controls__t.html#a08dcfa7a137e00a7f223d8be0c0f658d',1,'__mavlink_hil_controls_t']]],
-  ['aux3',['aux3',['../struct____mavlink__hil__controls__t.html#af8a6972a61368084c71c40e9e8b51e38',1,'__mavlink_hil_controls_t']]],
-  ['aux4',['aux4',['../struct____mavlink__hil__controls__t.html#a034b87298a05e403d626b033c11ce5d1',1,'__mavlink_hil_controls_t']]]
+  ['accel',['Accel',['../globals_8c.html#a9ef0cde845380053dd5aa78932332bef',1,'globals.c']]],
+  ['ailestate',['aileState',['../globals_8c.html#a80c97fdfa3d709659e4a3a599c62941e',1,'globals.c']]],
+  ['airborne',['airborne',['../globals_8c.html#a7c83d685e4af9e24249849d17a4a536e',1,'globals.c']]],
+  ['alt',['alt',['../globals_8c.html#abffc5ca516aa3689a057ad62c0017996',1,'globals.c']]],
+  ['alt_5ftkoff',['alt_tkoff',['../globals_8c.html#a85ade37c173579462477ca8046873e94',1,'globals.c']]],
+  ['armed',['armed',['../globals_8c.html#a168423e0a952a2d8282653cd352e2aa0',1,'globals.c']]],
+  ['attitude_5fdemand_5fbody',['attitude_demand_body',['../globals_8c.html#a6f596748487ffec0524ca6a85e7d54d7',1,'globals.c']]],
+  ['auxstate',['auxState',['../globals_8c.html#a0283296cf987ab548bf85e24d194add0',1,'globals.c']]],
+  ['av',['av',['../structsensor_struct_gyro.html#a2881a46d81dfc6beed451dccfd6c9339',1,'sensorStructGyro::av()'],['../structsensor_struct_accel.html#a2881a46d81dfc6beed451dccfd6c9339',1,'sensorStructAccel::av()'],['../structsensor_struct_mag.html#a2881a46d81dfc6beed451dccfd6c9339',1,'sensorStructMag::av()']]]
 ];

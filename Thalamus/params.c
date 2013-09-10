@@ -1,11 +1,22 @@
+/*!
+\file Thalamus/params.c
+\brief Tuning parameters
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #include "all.h"
 
+/*!
+\brief This large array contains all the tuning parameter defaults.
 
-
-
-
-
-
+Tuning parameters are stored in EEPROM, this array contains the defaults, 
+which are overwritten by the EEPROM values on startup if the EEPROM checksum
+is valid.
+*/
 struct paramStorage_struct paramStorage[] = {
 	[ 0] = {"DRIFT_AKp",       0.2f}, 
     [ 1] = {"DRIFT_MKp",       0.2f}, 
@@ -45,7 +56,7 @@ struct paramStorage_struct paramStorage[] = {
     [35] = {"ULTRA_Kd",        0.1f},
     [36] = {"ULTRA_Ki",    0.00001f},
     [37] = {"ULTRA_De",     0.9999f},
-    [38] = {"ULTRA_TKOFF",   200.0f}, 
+    [38] = {"ULTRA_TKOF",   200.0f}, 
     [39] = {"ULTRA_LND",     150.0f}, 
     [40] = {"CAL_GYROX",       0.0f},
     [41] = {"CAL_GYROY",       0.0f},
@@ -56,14 +67,14 @@ struct paramStorage_struct paramStorage[] = {
     [46] = {"ULTRA_DRMP",      3.0f}, 
     [47] = {"ULTRA_DTCT",      6.0f},
     [48] = {"LIM_THROT",       0.3f},
-    [49] = {"ULTRA_OVDEC",    0.01f},
+    [49] = {"ULTRA_OVDC",    0.01f},
     [50] = {"ULTRA_DEAD",    100.0f},
     [51] = {"ULTRA_OVTH",     40.0f},
     [52] = {"CAL_AUTO",        1.0f},
     [53] = {"LPF_OUT",         0.6f},
     [54] = {"BAT_LOW",     11000.0f},
     [55] = {"BAT_CRIT",    10000.0f},
-    [56] = {"ULTRA_OFFSET",  350.0f},
+    [56] = {"ULTRA_OFST",  350.0f},
     [57] = {"ROLL_SPL",       0.02f},
     [58] = {"PITCH_SPL",      0.02f},
     [59] = {"YAW_Ki",          0.0f},
@@ -79,14 +90,22 @@ struct paramStorage_struct paramStorage[] = {
     [69] = {"ORI",            0.00f},
 };
 
+unsigned char paramSendSingle = 0; /*!< boolean to control whether to send a single param or not */
+unsigned int paramCount = sizeof(paramStorage)/(PARAMNAMELEN+4);  /*!< contains the number of parametrs */
 
-unsigned int paramCount = sizeof(paramStorage)/20;
-unsigned int paramSendCount = sizeof(paramStorage)/20; // needs to be initialised to paramCount so that parameters aren't sent on startup
-unsigned char paramSendSingle = 0;
+/*! \brief used to count the ID of parametr to be sent
+Needs to be initialised to paramCount so that parameters aren't sent on startup
+*/
+unsigned int paramSendCount = sizeof(paramStorage)/(PARAMNAMELEN+4);
 
-// *** This function loads all parameters from EEPROM.  First it loads the
-// parameters into temporary storage to verify the checksum.  Only if the
-// checksums are correct will the function update the parameters in RAM.
+
+
+/*!
+\brief Loads all parametrs from EEPRM (this is deprecated)
+
+First it loads the parameters into temporary storage to verify the checksum.  
+Only if the checksums are correct will the function update the parameters in RAM
+*/
 void eeprom_load_all_old(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
@@ -114,7 +133,11 @@ void eeprom_load_all_old(void) {
 	}
 }
 
-// *** This function saves all parameters to EEPROM.
+
+/*!
+\brief Saves all parameters to EEPRM (this is deprecated)
+
+*/
 void eeprom_save_all_old(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
@@ -146,8 +169,12 @@ void eeprom_save_all_old(void) {
 }
 
 
-// does the same as eeprom_load_all_old() but uses less RAM but many more EEPROM read operations
-// should be safer to use because of lower RAM usage
+/*!
+\brief Does the same as eeprom_load_all_old() but uses less RAM
+
+Optimised to use less RAM but at the expense of more EEPROM read operations.
+Should be safer to use because of the lower RAM usage
+*/
 void eeprom_load_all(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;
@@ -182,8 +209,13 @@ void eeprom_load_all(void) {
 	}
 }
 
-// does the same as eeprom_save_all_old(), involves fewer EEPROM write operations and less RAM usage but many more EEPROM read operations
-// should be better to use because of better EEPROM wear (assuming that the microcontroller doesn't automatically detect writing the same data to EEPROM)
+/*!
+\brief Does the same as eeprom_save_all_old() but uses less RAM
+
+Optimised to use less RAM but at the expense of more EEPROM read operations.
+should be better to use because of better EEPROM wear (assuming that the
+microcontroller doesn't automatically detect writing the same data to EEPROM)
+*/
 void eeprom_save_all(void) {
 	unsigned char chkA, chkB;
 	unsigned int i;

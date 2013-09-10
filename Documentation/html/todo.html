@@ -86,7 +86,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -102,10 +102,11 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <div class="contents">
 <div class="textblock"><dl class="reflist">
 <dt><a class="anchor" id="_todo000001"></a>Global <a class="el" href="calibrate_8c.html#a36fabae6abbd94eeb1a86e2be5ec096d">calibrate_mag</a>  (void)</dt>
-<dd><p class="startdd">filter out spikes </p>
+<dd><p class="startdd">soft iron calibration on the navy craft </p>
+<p>filter out spikes </p>
 <p class="enddd">Inline delay  </p>
 </dd>
-<dt><a class="anchor" id="_todo000006"></a>Global <a class="el" href="control_8c.html#a3e76a14d433c187c06fc0531c2e98955">control_motors</a>  ()</dt>
+<dt><a class="anchor" id="_todo000008"></a>Global <a class="el" href="control_8c.html#abb9bac63b73330ebe25df944a9e9fedf">control_motors</a>  (void)</dt>
 <dd><p class="startdd">Is this the cause of poor leveling on takeoff? (took out wierd throttle dependent rates) </p>
 <p>Check to see if added Yaw integral solves yaw offsets in autonomous flight </p>
 <p>Check direction of yaw integral </p>
@@ -113,27 +114,34 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <p>fill these in properly </p>
 <p class="enddd">Add Auto Land on rxLoss!  </p>
 </dd>
-<dt><a class="anchor" id="_todo000003"></a>Global <a class="el" href="control_8c.html#aa239da247d76688b4ae3e5375acede47">control_throttle</a>  ()</dt>
+<dt><a class="anchor" id="_todo000004"></a>Global <a class="el" href="control_8c.html#afaf768d6c85a3e7a8e2fc5ec17bc3d8b">control_throttle</a>  (void)</dt>
 <dd><p class="startdd">Work out what happens if move out of the ultrasound confidence zone again. </p>
 <p>Hypo should set ilink_gpsfly.altitudeDemand to zero when it recieves the airborne flag from Thalamus </p>
+<p>Set this back when COde finished </p>
 <p class="enddd">Diagnose throttle jumps while in GPS hold mode.  </p>
 </dd>
-<dt><a class="anchor" id="_todo000012"></a>File <a class="el" href="_thalamus_2main_8c.html">main.c</a>  </dt>
+<dt><a class="anchor" id="_todo000016"></a>File <a class="el" href="main_8c.html">main.c</a>  </dt>
 <dd><p class="startdd">Diagnose loss of control experienced at full throttle. I ascended at full throttle while probably applying some pitch and roll demands and suddenly the craft just seemed to loose stability. It rolled/ pitched upside down a few times, luckily it recovered and I was able to bring it back safely. However, have heard that a backer had a similar problem. Possible causes are Yuan's Max throttle stuff, my roll angle prioritisation (less likely as wasn't in the backers code), ROLL/ PITCH SPL (spin limit). Or other! Have done some test flights and witnessed the loss of control at high throttles, it only does it when applying a high throttle and a large attitude demand, it inverts then enters a continual spin at high throttle Have added code on line 51 of <a class="el" href="control_8h_source.html">control.h</a> to try and solve this problem Rescues craft if error gets too large at high throttles by detecting roll and pitch error getting too large and reducing the throttle.</p>
 <p>Test to see if this code solves the problem Tried this: if (((pitcherror &gt; 0.08) || (pitcherror &lt; -0.08) || (rollerror &gt; 0.08) || (rollerror &lt; -0.08)) &amp;&amp; (throttle &gt; 600)) throttle -= 200; Should really be able to solve with better PID tuning.}</p>
 <p>check all integrators for decoupling, and make sure they are locked in this case</p>
 <p>Assess and Improve leveling on take off and leveling in flight Key areas to investigate are integral gain on takeoff Accelerometer feedback gain Accelerometer feedback method - additional filtering needed? Landing Gear separation seems to play a large part, it causes undesired integral wind-up before the craft is in the air Landing gear would need switches or be sprung and damped with longish travel</p>
 <p>Measure loop rates instead of just assuming it The control needs to know how fast they're going, right now we assume the loops are going at their specified rate however, it would be better to just time instead. Use one of the hardware timers to get sub-ms resolution.</p>
 <p>Check for some discontinuities in flight Throttle and attitude blips when flying under GPS Throttle blips when flying normally</p>
-<p class="enddd">clean up globals</p>
+<p class="enddd">clean up globals </p>
 </dd>
+<dt><a class="anchor" id="_todo000014"></a>Global <a class="el" href="inputs_8c.html#a1b83a366a672f3dc32fbed71e5ebe077">read_rx_input</a>  (void)</dt>
+<dd>Perform RC signal loss state setting  </dd>
+<dt><a class="anchor" id="_todo000015"></a>Global <a class="el" href="inputs_8c.html#aabf836b0ea199cde8e1082eeb6e1dff8">read_ultrasound</a>  (void)</dt>
+<dd>Improve ultrasound confidence estimator  </dd>
+<dt><a class="anchor" id="_todo000023"></a>Global <a class="el" href="main_8c.html#a7dfd9b79bc5a37d7df40207afbc5431f">setup</a>  (void)</dt>
+<dd>TODO: sort out these modes </dd>
 </dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 9 2013 19:24:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Tue Sep 10 2013 00:27:26 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

@@ -10,7 +10,14 @@
 
 #include "all.h"
 
+/*!
+\brief Detects orientation of craft, used for selecting the right axis mixings
 
+The same code can be used on several different craft, some of which mount the
+flight controller in a different orientation.  This function detects which
+orientation Thalamus is in so that the correct axes can be used.  This
+function simply calculates this from which axis is down.
+*/
 unsigned char detect_ori(void) {
     signed short data[3];
     signed short x_axis, y_axis, z_axis;
@@ -41,6 +48,13 @@ unsigned char detect_ori(void) {
     return 7; // orientation not detected - this will happen if two of the highest axes are equal
 }
 
+/*!
+\brief Detects and stores the orientation of the craft.
+
+This function detects and then stores the orientation of the craft in EEPROM.
+(and then plays an animation on the props to notify of this).  This function
+only needs to be run once (or after a firmware update with a  different EEPROM version)
+*/
 void calibrate_ori(void) {
     ORI = detect_ori();
     eeprom_save_all();
@@ -69,6 +83,18 @@ void calibrate_ori(void) {
 	PWMSetNESW(0, 0, 0, 0);
 }
 
+
+/*!
+\brief Calibrates magnetometers (hard iron calibration)
+
+This function does a hard iron calibration of the magnetometers, this is
+achieved simply by swinging the magnetometers around and measuring the maximum
+and minimum axis readings.
+
+Soft iron calibrations are hard-coded.
+
+\todo soft iron calibration on the navy craft
+*/
 void calibrate_mag(void) {
 		unsigned int i;
 		unsigned int  good;
@@ -167,86 +193,11 @@ void calibrate_mag(void) {
 	}
 }
 
+/*!
+\brief Calibrates gyro offsets and saves results
 
-
-void sensor_zero(void) {
-	unsigned int i;
-	signed short data[4];
-	
-	if(!GetGyro(data) || !GetMagneto(data) || !GetAccel(data)/* || GetBaro() == 0*/) {
-		LEDInit(PLED | VLED);
-		LEDOn(PLED);
-		LEDOff(VLED);
-		flashPLED = 2;
-		flashVLED = 2;
-		while(1);
-	}
-	
-	// *** Zero totals
-	Gyro.X.total = 0;
-	Gyro.Y.total = 0;
-	Gyro.Z.total = 0;
-	Accel.X.total = 0;
-	Accel.Y.total = 0;
-	Accel.Z.total = 0;
-	Mag.X.total = 0;
-	Mag.Y.total = 0;
-	Mag.Z.total = 0;
-	
-	alt.total = 0;
-	alt.dtotal = 0;
-	
-
-
-	for(i=0; (i<GAV_LEN); i++) {
-		Gyro.X.history[i] = 0;
-		Gyro.Y.history[i] = 0;
-		Gyro.Z.history[i] = 0;
-	}
-	
-	for(i=0; (i<AAV_LEN); i++) {
-		Accel.X.history[i] = 0;
-		Accel.Y.history[i] = 0;
-		Accel.Z.history[i] = 0;
-	}
-	
-	for(i=0; (i<MAV_LEN); i++) {
-		Mag.X.history[i] = 0;
-		Mag.Y.history[i] = 0;
-		Mag.Z.history[i] = 0;
-	}
-	
-	for(i=0; (i<ALTAV_LEN); i++) {
-		alt.history[i] = 0;
-	}
-	
-	for(i=0; (i<ALTDAV_LEN); i++) {
-		alt.dhistory[i] = 0;
-	}
-	
-	
-	Gyro.X.offset = 0;
-	Gyro.Y.offset = 0;
-	Gyro.Z.offset = 0;
-	
-	// pre-seed averages
-	for(i=0; (i<GAV_LEN); i++) {
-		read_gyr_sensors();
-	}
-	
-	for(i=0; (i<AAV_LEN); i++) {
-		read_acc_sensors();
-	}
-	
-	for(i=0; (i<MAV_LEN); i++) {
-		read_mag_sensors();
-	}
-
-	ilink_thalstat.sensorStatus |= (0xf << 3);
-}
-
-
-
+Performs a calibrate_gyr_temporary() and then saves to EEPROM
+*/
 void calibrate_gyr(void) {
 	calibrate_gyr_temporary(6);
 	CAL_GYROX = Gyro.X.offset;
@@ -255,8 +206,13 @@ void calibrate_gyr(void) {
 	eeprom_save_all();
 }
 
+/*!
+\brief Calibrates gyro offsets but don't save it
 
+Performs gyro offset calibration, but don't save it to EEPROM.
 
+\param seconds number of seconds to take calibration for
+*/
 void calibrate_gyr_temporary(unsigned int seconds) {
 	unsigned int i;
 	// *** Calibrate Gyro

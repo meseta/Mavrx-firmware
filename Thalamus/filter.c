@@ -1,6 +1,44 @@
+/*!
+\file Thalamus/filter.c
+\brief Filters and AHRS
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #include "all.h"
 
-void filter_gps_baro(){
+// Filters/AHRS
+float thetaAngle;						/*!< Pitch angle */
+float phiAngle;							/*!< Roll angle */
+float psiAngle;							/*!< Yaw angle */
+float psiAngleinit;						/*!< Initial yaw angle used for simplicity mode*/
+
+userStruct user;						/*!< User demand data */
+attitude_demand_body_struct attitude_demand_body;	/*!< Body demand data */
+float q1=1;								/*!< Quaternion element 1 */
+float q2=0;								/*!< Quaternion element 2 */
+float q3=0;								/*!< Quaternion element 3 */
+float q4=0;								/*!< Quaternion element 4 */
+
+float M1=1;								/*!< DCM element 1,1 */
+float M2=0;								/*!< DCM element 1,2 */
+float M3=0;								/*!< DCM element 1,3 */
+float M4=0;								/*!< DCM element 2,1 */
+float M5=1;								/*!< DCM element 2,2 */
+float M6=0;								/*!< DCM element 2,3 */
+float M7=0;								/*!< DCM element 3,1 */
+float M8=0;								/*!< DCM element 3,2 */
+float M9=1;								/*!< DCM element 3,3 */
+
+
+/*!
+\brief Filters GPS and barometer altitude
+
+*/
+void filter_gps_baro(void){
 
 	// GPS Altitude in Metres
 	alt.gps = ilink_gpsfly.altitude;
@@ -46,23 +84,24 @@ void filter_gps_baro(){
 			
 	}
 	
-	
-	
-	
-	
-	
-	
-
-	
 }
 
+/*!
+\brief ATTITUDE HEADING REFERENCE SYSTEM
+
+*/
 void a_h_r_s(){
 
-// ****************************************************************************
-// *** ATTITUDE HEADING REFERENCE SYSTEM
-// ****************************************************************************
-	
 	// CREATE THE MEASURED ROTATION MATRIX //
+	static float RM1=1;
+	static float RM2=0;
+	static float RM3=0;
+	static float RM4=0;
+	static float RM5=1;
+	static float RM6=0;
+	static float RM7=0;
+	static float RM8=0;
+	static float RM9=1;
 	
 	//Both mag and acc are normalized in their Read functions
 	

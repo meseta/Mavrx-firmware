@@ -1,5 +1,27 @@
+/*!
+\file Thalamus/states.c
+\brief The State Machine (and Arm/Disarm functions)
+
+The state machine deals with which mode the craft is currently in.
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #include "all.h"
 
+// State
+unsigned char armed=0;					/*!< State variable boolean for armed/disarmed */
+unsigned char state=STATE_DISARMED;		/*!< State variable for state machine */
+unsigned char airborne=0;				/*!< State variable for being ariborne or not */
+
+
+/*!
+\brief This is the state machine
+
+*/
 void state_machine()	{
 	static unsigned char auto_lock = 0;
 	static unsigned int throttle_on_count = 0;
@@ -389,8 +411,6 @@ void state_machine()	{
 					attitude_demand_body.yaw += tempf;
 				}
 		
-				// TODO: Prevent Hypo from transmitting yaw demands when no waypoints set.
-				// If Hypo is transmitting yaw demands we allow it to overwrite the pilots yaw demands
 				//if (!(ilink_gpsfly.flags & 0x04)) attitude_demand_body.yaw =  ilink_gpsfly.headingDemand;
 				
 				// We make the craft change attitude slower when flying autonomously
@@ -414,7 +434,12 @@ void state_machine()	{
 	
 }
 
+/*!
+\brief Arms the craft.
 
+A short gyro calibration is taken at the beginning of the function.
+An animation is played on the motors
+*/
 void arm(void) {
 
 	if(CAL_AUTO > 0) {
@@ -422,7 +447,7 @@ void arm(void) {
 	}
 	
 	PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-	//TODO: inline Delays cause system hang.
+
 	if(armed == 0) {
 		Delay(500);
 		PWMSetNESW(THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE, THROTTLEOFFSET + IDLETHROTTLE);
@@ -442,12 +467,14 @@ void arm(void) {
 	ilink_thalstat.sensorStatus |= 4; // active/armed
 }
 
+/*!
+\brief Disarms the craft.
 
-
+An animation is played on the motors
+*/
 void disarm(void) {
 	if(armed) {
 		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-		//TODO: inline Delays cause system hang.
 		Delay(100);
 		
 		PWMSetN(THROTTLEOFFSET + IDLETHROTTLE);
