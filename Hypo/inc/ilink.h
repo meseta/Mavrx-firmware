@@ -15,10 +15,10 @@ extern ilink_thalparam_t ilink_thalparam_tx;
 extern ilink_thalpareq_t ilink_thalpareq;
 extern ilink_iochan_t ilink_inputs0;
 extern ilink_iochan_t ilink_outputs0;
-extern ilink_atdemand_t ilink_atdemand;
 extern ilink_gpsfly_t ilink_gpsfly;
 extern ilink_gpsreq_t ilink_gpsreq;
 extern ilink_debug_t ilink_debug;
+extern ilink_mancon_t ilink_mancon;
 
 
 #endif

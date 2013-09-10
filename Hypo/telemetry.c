@@ -145,63 +145,52 @@ void mavlink_telemetry(void) {
 		if(ilink_thalstat.isNew) {
 			ilink_thalstat.isNew = 0;
 			
-			switch(ilink_thalstat.sensorStatus & 0x7) {
-				case 0:
-					mavlink_heartbeat.system_status = MAV_STATE_UNINIT;
-					mavlink_heartbeat.base_mode = MAV_MODE_PREFLIGHT;
-					break;
-				case 1:
-					mavlink_heartbeat.system_status = MAV_STATE_BOOT;
-					mavlink_heartbeat.base_mode = MAV_MODE_PREFLIGHT;
-					break;
-				case 2:
-					mavlink_heartbeat.system_status = MAV_STATE_CALIBRATING;
-					mavlink_heartbeat.base_mode = MAV_MODE_PREFLIGHT;
-					break;
-				case 3:
-					mavlink_heartbeat.system_status = MAV_STATE_STANDBY;
-					mavlink_heartbeat.base_mode &= ~MAV_MODE_FLAG_DECODE_POSITION_SAFETY;
-					break;
-				case 4:
-					mavlink_heartbeat.system_status = MAV_STATE_ACTIVE; 
-					mavlink_heartbeat.base_mode |= MAV_MODE_FLAG_DECODE_POSITION_SAFETY;
-					break;
-				case 5:     mavlink_heartbeat.system_status = MAV_STATE_CRITICAL;        break;
-				default:    mavlink_heartbeat.system_status = MAV_STATE_UNINIT;         break;
-			}
-			
-			if(ilink_thalstat.sensorStatus & (0x1 << 3)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_ACCEL;
-			else mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_SENSOR_ACCEL;
-			if(ilink_thalstat.sensorStatus & (0x1 << 4)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_GYRO;
-			else mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_SENSOR_GYRO;
-			if(ilink_thalstat.sensorStatus & (0x1 << 5)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_MAGNETO;
-			else mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_SENSOR_MAGNETO;
-			if(ilink_thalstat.sensorStatus & (0x1 << 6)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_BARO;
-			else mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_SENSOR_BARO;
-			
-			if(ilink_thalstat.flightMode & (0x1 << 0)) {
-				mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_ATTITUDE;
-				mavlink_heartbeat.base_mode |= MAV_MODE_FLAG_DECODE_POSITION_STABILIZE;
-			}
-			else {
-				mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_CONTROL_ATTITUDE;
-				mavlink_heartbeat.base_mode &= ~MAV_MODE_FLAG_DECODE_POSITION_STABILIZE;
-			}
-			if(ilink_thalstat.flightMode & (0x1 << 1)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_ANGLERATE;
-			else mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_CONTROL_ANGLERATE;
-			if(ilink_thalstat.flightMode & (0x1 << 2)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_YAW;
-			else mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_CONTROL_YAW;
-			if(ilink_thalstat.flightMode & (0x1 << 3)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_Z;
-			else mavlink_sys_status.onboard_control_sensors_enabled &= ~MAVLINK_CONTROL_Z;
-			if(ilink_thalstat.flightMode & (0x1 << 4)) {
-				mavlink_heartbeat.base_mode |= MAV_MODE_FLAG_DECODE_POSITION_GUIDED;
-			}
-			else {
-				mavlink_heartbeat.base_mode &= ~MAV_MODE_FLAG_DECODE_POSITION_GUIDED;
-			}
-			
+			// do a conversion between ILINK values and MAVLINK for sensor status
+			mavlink_sys_status.onboard_control_sensors_enabled = 0;
+			if(ilink_thalstat.sensorStatus & (0x1 << 0)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_GYRO;
+			if(ilink_thalstat.sensorStatus & (0x1 << 1)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_ACCEL;
+			if(ilink_thalstat.sensorStatus & (0x1 << 2)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_MAGNETO;
+			if(ilink_thalstat.sensorStatus & (0x1 << 3)) mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_SENSOR_BARO;
 			mavlink_sys_status.onboard_control_sensors_health = mavlink_sys_status.onboard_control_sensors_enabled;
-			mavlink_sys_status.voltage_battery = ilink_thalstat.battVoltage;
+			
+			// do a conversion between ILINK values and MAVLINK for system status
+			switch(ilink_thalstat.systemStatus) {
+				default:
+				case THALSTAT_SYSTEMSTATUS_UNINIT:	mavlink_heartbeat.system_status = MAV_STATE_UNINIT;			break;
+				case THALSTAT_SYSTEMSTATUS_BOOT:	mavlink_heartbeat.system_status = MAV_STATE_BOOT;			break;
+				case THALSTAT_SYSTEMSTATUS_CALIB:	mavlink_heartbeat.system_status = MAV_STATE_CALIBRATING;	break;
+				case THALSTAT_SYSTEMSTATUS_STANDBY:	mavlink_heartbeat.system_status = MAV_STATE_STANDBY;		break;
+				case THALSTAT_SYSTEMSTATUS_ACTIVE:	mavlink_heartbeat.system_status = MAV_STATE_ACTIVE; 		break;
+				case THALSTAT_SYSTEMSTATUS_CRITICAL:mavlink_heartbeat.system_status = MAV_STATE_CRITICAL;		break;
+			}
+			
+			// do a conversion between ILINK values and MAVLINK for flight status, refer to Thalamus/inc/state.h for details
+			switch(ilink_thalstat.systemStatus) {
+				default:
+				case 0: // uninitialised
+				case 1: // disarmed
+					mavlink_heartbeat.base_mode = MAV_MODE_PREFLIGHT;
+					break;
+				case 2: // manual
+				case 3: // manual with GPS
+					mavlink_heartbeat.base_mode = MAV_MODE_STABILIZE_ARMED;
+					break;
+				case 4: // simplicity
+					mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_YAW;
+					mavlink_heartbeat.base_mode = MAV_MODE_STABILIZE_ARMED;
+					break;
+				case 5: // auto
+					mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_ATTITUDE | MAVLINK_CONTROL_YAW | MAVLINK_CONTROL_Z;
+					mavlink_heartbeat.base_mode |= MAV_MODE_GUIDED_ARMED;
+					break;
+				case 6: // acro mode
+					mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_ANGLERATE;
+					mavlink_heartbeat.base_mode = MAV_MODE_MANUAL_ARMED;
+					break;
+			}
+
+			mavlink_sys_status.voltage_battery = ilink_thalstat.battVoltage;			
+			mavlink_vfr_hud.throttle = ilink_thalstat.throttle;
 		}
 		XBeeInhibit();
 		ILinkPoll(ID_ILINK_THALSTAT);
@@ -215,7 +204,11 @@ void mavlink_telemetry(void) {
 		XBeeAllow();
 		
 		
-		
+		mavlink_msg_vfr_hud_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL,  &mavlink_tx_msg, &mavlink_vfr_hud);
+		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+		XBeeAllow();
 	}
 	else if(dataRate[MAV_DATA_STREAM_RC_CHANNELS] && rcChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RC_CHANNELS]) {
 		// RC_CHANNELS_SCALED, RC_CHANNELS_RAW, SERVO_OUTPUT_RAW
@@ -331,15 +324,6 @@ void mavlink_telemetry(void) {
 		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
 		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
 		XBeeAllow();
-		
-		// mavlink_vfr_hud.throttle = ;
-		
-		mavlink_msg_vfr_hud_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL,  &mavlink_tx_msg, &mavlink_vfr_hud);
-		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-		XBeeAllow();
-		
 	}
 	else if(dataRate[MAV_DATA_STREAM_EXTRA1] && extra1ChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA1]) {
 		extra1ChannelCounter = 0;
@@ -561,11 +545,11 @@ void MAVLinkParse(unsigned char UARTData) {
              case MAVLINK_MSG_ID_MANUAL_CONTROL:
                 mavlink_msg_manual_control_decode(&mavlink_rx_msg, &mavlink_manual_control);
                 if(mavlink_manual_control.target == mavlinkID) {
-                    ilink_atdemand.roll = mavlink_manual_control.roll;
-                    ilink_atdemand.pitch = mavlink_manual_control.pitch;
-                    ilink_atdemand.yaw = mavlink_manual_control.yaw;
-                    ilink_atdemand.thrust = mavlink_manual_control.thrust;
-                    ILinkSendMessage(ID_ILINK_ATDEMAND, (unsigned short *) & ilink_atdemand, sizeof(ilink_atdemand)/2-1);
+                    ilink_mancon.roll = mavlink_manual_control.roll;
+                    ilink_mancon.pitch = mavlink_manual_control.pitch;
+                    ilink_mancon.yaw = mavlink_manual_control.yaw;
+                    ilink_mancon.thrust = mavlink_manual_control.thrust;
+                    ILinkSendMessage(ID_ILINK_MANCON, (unsigned short *) & ilink_mancon, sizeof(ilink_mancon)/2-1);
                 }
                 break;
             case MAVLINK_MSG_ID_SET_MODE:

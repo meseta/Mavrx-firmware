@@ -363,7 +363,10 @@ void control_motors(void){
 	motorWav *= LPF_OUT;
 	motorWav += (1-LPF_OUT) * motorW;
 
-
+	// Limit the maximum throttle output to a percentage of the highest throttle available 
+	// to allow additional throttle for manouevering
+	if(throttle > MAXTHROTTLE*MAXTHROTTLEPERCENT) throttle = MAXTHROTTLE*MAXTHROTTLEPERCENT;
+	
 	// Combine attitude stabilisation demands from PID loop with throttle demands
 	float tempN=0, tempE=0, tempS=0, tempW=0;
 	tempN = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
@@ -410,42 +413,32 @@ void control_motors(void){
 		ilink_outputs0.channel[2] = THROTTLEOFFSET;
 		ilink_outputs0.channel[3] = THROTTLEOFFSET;
 		
-
+		
+		ilink_thalstat.throttle = 0;
 	}
 	else if(armed) {
-		
-		float temp;
-		
-		// Limit the maximum throttle output to a percentage of the highest throttle available 
-		// to allow additional throttle for manouevering
-		if(throttle > MAXTHROTTLE*MAXTHROTTLEPERCENT) throttle = MAXTHROTTLE*MAXTHROTTLEPERCENT;
-		
+		ilink_thalstat.throttle = (throttle + throttle_angle)/10;
+
 		// Set the PWM channels. Maximum of MAXTHROTTLE + THROTTLEOFFSET, MINMUM OF IDLETHROTTLE + THROTTLE OFFSET
 		// Throttle offset offsets the throttle readings (which start at 0) to the PWM values (in ms?) which need to start at around 1000
-		temp = tempN;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-		PWMSetN(temp);
-		ilink_outputs0.channel[0] = temp;
+		if(tempN > (MAXTHROTTLE + THROTTLEOFFSET)) tempN = (MAXTHROTTLE + THROTTLEOFFSET);
+		else if(tempN < (IDLETHROTTLE + THROTTLEOFFSET)) tempN = (IDLETHROTTLE + THROTTLEOFFSET);
+		PWMSetN(tempN);
+		ilink_outputs0.channel[0] = tempN;
 		
-		temp = tempE;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-		PWMSetE(temp);
-		ilink_outputs0.channel[1] = temp;
+		if(tempE > (MAXTHROTTLE + THROTTLEOFFSET)) tempE = (MAXTHROTTLE + THROTTLEOFFSET);
+		else if(tempE < (IDLETHROTTLE + THROTTLEOFFSET)) tempE = (IDLETHROTTLE + THROTTLEOFFSET);
+		PWMSetE(tempE);
+		ilink_outputs0.channel[1] = tempE;
 		
-		temp = tempS;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-		PWMSetS(temp);
-		ilink_outputs0.channel[2] = temp;
+		if(tempS > (MAXTHROTTLE + THROTTLEOFFSET)) tempS = (MAXTHROTTLE + THROTTLEOFFSET);
+		else if(tempS < (IDLETHROTTLE + THROTTLEOFFSET)) tempS = (IDLETHROTTLE + THROTTLEOFFSET);
+		PWMSetS(tempS);
+		ilink_outputs0.channel[2] = tempS;
 		
-		temp = tempW;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
-		PWMSetW(temp);
-		ilink_outputs0.channel[3] = temp;
-		ilink_outputs0.isNew = 1; 
-
+		if(tempW > (MAXTHROTTLE + THROTTLEOFFSET)) tempW = (MAXTHROTTLE + THROTTLEOFFSET);
+		else if(tempW < (IDLETHROTTLE + THROTTLEOFFSET)) tempW = (IDLETHROTTLE + THROTTLEOFFSET);
+		PWMSetW(tempW);
+		ilink_outputs0.channel[3] = tempW;
 	}
 }

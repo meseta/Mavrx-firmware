@@ -16,7 +16,6 @@ ilink_imu_t 		ilink_rawimu={0};			/**< Telemetry: raw IMU */
 ilink_imu_t 		ilink_scaledimu={0};		/**< Telemetry: scaled IMU */
 ilink_altitude_t 	ilink_altitude={0};			/**< Telemetry: altitude */
 ilink_attitude_t 	ilink_attitude={0};			/**< Telemetry: attitude */
-ilink_attitude_t 	ilink_attitude_demand={0};	/**< External attitude demand */
 ilink_thalparam_t 	ilink_thalparam_tx={0};		/**< Transmit parameters */
 ilink_thalparam_t 	ilink_thalparam_rx={0};		/**< Receive parametrs */
 ilink_thalpareq_t 	ilink_thalpareq={0};		/**< Parameter request control */
@@ -25,6 +24,7 @@ ilink_iochan_t 		ilink_outputs0={{0}};		/**< Telemetry: outputs */
 ilink_gpsfly_t 		ilink_gpsfly={0};			/**< GPS autofly PID stuff */
 ilink_gpsreq_t 		ilink_gpsreq={0};			/**< GPS control */		
 ilink_debug_t 		ilink_debug={0};			/**< Debugging parameters */
+ilink_mancon_t 		ilink_mancon={0};			/**< External control over SPI */
 
 /*!
 \brief Deals with message requests over ilink for messages received

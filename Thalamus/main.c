@@ -74,8 +74,7 @@ void setup(void) {
 		eeprom_load_all();
 	
 	// *** Establish ILink
-		ilink_thalstat.sensorStatus = 1; // set ilink status to boot
-		ilink_thalstat.flightMode = (0x1 << 0); /*! \todo TODO: sort out these modes */
+		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_BOOT; // set ilink status to boot
 		ilink_identify.deviceID = WHO_AM_I;
 		ilink_identify.firmVersion = FIRMWARE_VERSION;
 		ILinkInit(SLAVE);
@@ -97,7 +96,12 @@ void setup(void) {
 		
 		// check we got all the sensors
 		signed short data[4];
-		if(!GetGyro(data) || !GetMagneto(data) || !GetAccel(data)/* || GetBaro() == 0*/) {
+		if(GetGyro(data)) ilink_thalstat.sensorStatus |= (0x01 << 0);
+		if(GetAccel(data)) ilink_thalstat.sensorStatus |= (0x01 << 1);
+		if(GetMagneto(data)) ilink_thalstat.sensorStatus |= (0x01 << 2);
+		if(GetBaro()) ilink_thalstat.sensorStatus |= (0x01 << 3);
+
+		if((ilink_thalstat.sensorStatus & 0x07) != 0x07) {
 			LEDInit(PLED | VLED);
 			LEDOn(PLED);
 			LEDOff(VLED);
@@ -105,8 +109,6 @@ void setup(void) {
 			flashVLED = 2;
 			while(1);
 		}
-		
-		ilink_thalstat.sensorStatus |= (0xf << 3);
 		
 		TrigBaroTemp(); // get parometer temperature for temperature compensation.
 		Delay(15);

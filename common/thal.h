@@ -934,7 +934,7 @@ static inline void RSTReset(void) { ResetInit(); }
     #define ID_ILINK_POSITION   0x7d00
     #define ID_ILINK_ALTITUDE   0x7e00
     #define ID_ILINK_ATTITUDE   0x7f00
-    #define ID_ILINK_ATDEMAND   0x7f01
+    #define ID_ILINK_MANCON   	0x7f01
     #define ID_ILINK_MODEMAND   0x7f02
     #define ID_ILINK_GPSFLY     0x7f03
     #define ID_ILINK_GPSREQ     0x7f04
@@ -983,9 +983,18 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_thalctrl_t;
     
+	#define THALSTAT_SYSTEMSTATUS_UNINIT	0
+	#define THALSTAT_SYSTEMSTATUS_BOOT		1
+	#define THALSTAT_SYSTEMSTATUS_CALIB		2
+	#define THALSTAT_SYSTEMSTATUS_STANDBY	3
+	#define THALSTAT_SYSTEMSTATUS_ACTIVE	4
+	#define THALSTAT_SYSTEMSTATUS_CRITICAL	5
+	
     typedef struct ilink_thalstat_struct {  // Flight status
-        unsigned short flightMode;          // Bitfield, bit 4 is GPS mode, bit 3 is altitude control, bit 2 is yaw control, bit 1 is anglerate control, bit 0 is stabilization
-        unsigned short sensorStatus;        // Bitfield, bit 6 is Baro status, bit5 is magneto status, bit 4 is Gyro status, bit 3 is Accel status, bit 2-0 flight status (corresponds to MAV_STATE)    
+		unsigned char sensorStatus;			// Bitfield for sensor stuff.  0:Gyro, 1:Accel, 2:Magneto, 3:Baro, 4:Ultra, 5:RXin
+        unsigned char systemStatus;        	// System status
+        unsigned char flightStatus;        	// Flight status
+        unsigned char throttle;        		// Throttle percentage
         unsigned short battVoltage;         // Battery voltage
         unsigned short isNew;
     } PACKED ilink_thalstat_t; 
@@ -1032,13 +1041,13 @@ static inline void RSTReset(void) { ResetInit(); }
         unsigned short isNew;
     } PACKED ilink_payldctrl_t;
     
-    typedef struct ilink_atdemand_struct {  // Attitude data
+    typedef struct ilink_mancon_struct {  // Manual Control
         float roll;
         float pitch;
         float yaw;
         float thrust;
         unsigned short isNew;
-    } PACKED ilink_atdemand_t;
+    } PACKED ilink_mancon_t;
     
     typedef struct ilink_thalparam_struct { // Parameters
         unsigned short paramID;

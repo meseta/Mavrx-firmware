@@ -12,7 +12,6 @@ extern ilink_imu_t ilink_rawimu;
 extern ilink_imu_t ilink_scaledimu;
 extern ilink_altitude_t ilink_altitude;
 extern ilink_attitude_t ilink_attitude;
-extern ilink_attitude_t ilink_attitude_demand;
 extern ilink_thalparam_t ilink_thalparam_tx;
 extern ilink_thalparam_t ilink_thalparam_rx;
 extern ilink_thalpareq_t ilink_thalpareq;

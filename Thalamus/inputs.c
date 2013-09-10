@@ -81,7 +81,10 @@ void gps_status(void) {
 void read_rx_input(void) {			
 
 	if(RXGetData(rcInput)) {
-		if(rxLoss > 10) rxLoss -= 10;
+		if(rxLoss > 10) {
+			rxLoss -= 10;
+			if(armed && ilink_thalstat.systemStatus == THALSTAT_SYSTEMSTATUS_CRITICAL) ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_ACTIVE;
+		}
 		ilink_inputs0.channel[0] = rcInput[RX_THRO];
 		ilink_inputs0.channel[1] = rcInput[RX_AILE];
 		ilink_inputs0.channel[2] = rcInput[RX_ELEV];
@@ -165,15 +168,19 @@ void read_rx_input(void) {
 	}
 	else {
 		rxLoss ++;
-		if(rxLoss > 50) {
-			rxLoss = 50;
+		if(rxLoss > RX_PANIC) {
+			rxLoss = RX_PANIC;
 			// RC signal lost
-			/*! \todo Perform RC signal loss state setting */
-			if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
-			ilink_outputs0.channel[0] = THROTTLEOFFSET;
-			ilink_outputs0.channel[1] = THROTTLEOFFSET;
-			ilink_outputs0.channel[2] = THROTTLEOFFSET;
-			ilink_outputs0.channel[3] = THROTTLEOFFSET;
+			/*! \todo Perform RC signal loss state setting and stuff like autoland */
+			if(armed) {
+				PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+				ilink_outputs0.channel[0] = THROTTLEOFFSET;
+				ilink_outputs0.channel[1] = THROTTLEOFFSET;
+				ilink_outputs0.channel[2] = THROTTLEOFFSET;
+				ilink_outputs0.channel[3] = THROTTLEOFFSET;
+				
+				ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_CRITICAL;
+			}
 			flashVLED = 2;
 		}
 	}			

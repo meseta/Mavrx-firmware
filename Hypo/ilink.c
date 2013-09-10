@@ -13,10 +13,10 @@ ilink_thalparam_t ilink_thalparam_tx;
 ilink_thalpareq_t ilink_thalpareq;
 ilink_iochan_t ilink_inputs0;
 ilink_iochan_t ilink_outputs0;
-ilink_atdemand_t ilink_atdemand;
 ilink_gpsfly_t ilink_gpsfly;
 ilink_gpsreq_t ilink_gpsreq;
 ilink_debug_t ilink_debug;
+ilink_mancon_t ilink_mancon;
 
 
 void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short length) {

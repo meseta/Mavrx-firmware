@@ -106,7 +106,7 @@ void calibrate_mag(void) {
 		unsigned int started;
 	
 		if(armed == 0) {
-			ilink_thalstat.sensorStatus = 2; // calibrating
+			ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_CALIB;
 		
 			started = 0;
 			
@@ -188,8 +188,7 @@ void calibrate_mag(void) {
 			flashPLED = 0;
 			LEDOff(PLED);
 		
-			ilink_thalstat.sensorStatus &= ~(0x7); // mask status
-			ilink_thalstat.sensorStatus |= 3; // standby
+			ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_STANDBY; // standby
 	}
 }
 
@@ -264,8 +263,7 @@ void calibrate_gyr_temporary(unsigned int seconds) {
 			Delay(3);
 		}
 		
-		ilink_thalstat.sensorStatus &= ~(0x7); // mask status
-		ilink_thalstat.sensorStatus |= 2; // calibrating
+		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_CALIB; // calibrating
 
 		flashPLED=2;
 		LEDOn(PLED);
@@ -290,8 +288,7 @@ void calibrate_gyr_temporary(unsigned int seconds) {
 
 		LEDOff(PLED);
 	
-		ilink_thalstat.sensorStatus &= ~(0x7); // mask status
-		ilink_thalstat.sensorStatus |= 3; // standby
+		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_STANDBY;
 		
 	}
 }
