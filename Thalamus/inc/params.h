@@ -1,7 +1,8 @@
 #ifndef __PARAMS_H__
 #define __PARAMS_H__
 
-#define PARAMNAMELEN	10
+#include "mavlink.h"
+#define PARAMNAMELEN	MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN
 
 /*! \brief Parameter storage structure */
 typedef struct paramStorage_struct {
@@ -91,9 +92,6 @@ extern unsigned char paramSendSingle;
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
 #define EEPROM_VERSION	10 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
-// *** This function loads all parameters from EEPROM.  First it loads the
-// parameters into temporary storage to verify the checksum.  Only if the
-// checksums are correct will the function update the parameters in RAM.
 void eeprom_load_all(void);
 void eeprom_save_all(void);
 

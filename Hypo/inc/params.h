@@ -1,9 +1,13 @@
 #ifndef __PARAMS_H__
 #define __PARAMS_H__
 
+#include "mavlink.h"
+#define PARAMNAMELEN	MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN
+
+/*! \brief Parameter storage structure */
 typedef struct paramStorage_struct {
-	char name[16];
-	float value;
+	char name[PARAMNAMELEN];	/*!< Parameter name */
+	float value;				/*!< Parameter value */
 } paramStorage_t;
 
 extern struct paramStorage_struct paramStorage[];
@@ -14,12 +18,24 @@ extern struct paramStorage_struct paramStorage[];
 #define GPS_MAX_ROTATE  paramStorage[4].value	// Maximum rotation rate in rad/s    
 #define GPS_MAX_ALTDIFF paramStorage[5].value	// Maximum altitude demanded in m
 #define GPS_MIN_RADIUS	paramStorage[6].value	// Default (minimum) detection radius for waypoint in meters
-
-
+#define GPS_Kp			paramStorage[7].value
+#define GPS_Ki			paramStorage[8].value
+#define GPS_Kd			paramStorage[9].value
 
 extern unsigned int paramCount;
 extern unsigned int paramSendCount;
 extern unsigned char paramSendSingle;
+
+typedef struct paramBuffer_struct {
+    char name[PARAMNAMELEN];
+    float value;
+    unsigned short id;
+} paramBuffer_t;
+
+#define PARAMBUFFER_SIZE 50
+extern paramBuffer_t paramBuffer[PARAMBUFFER_SIZE];
+extern unsigned int paramPointer;
+extern unsigned char paramWaitForRemote;
 
 
 // EEPROM STUFF
@@ -37,5 +53,6 @@ void eeprom_save_all(void);
 void eeprom_load_all_old(void);
 void eeprom_save_all_old(void);
 
+void paramater_transmit(void);
 
 #endif

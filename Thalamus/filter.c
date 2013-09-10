@@ -10,6 +10,30 @@
 
 #include "all.h"
 
+// Filters/AHRS
+float thetaAngle;						/*!< Pitch angle */
+float phiAngle;							/*!< Roll angle */
+float psiAngle;							/*!< Yaw angle */
+float psiAngleinit;						/*!< Initial yaw angle used for simplicity mode*/
+
+userStruct user;						/*!< User demand data */
+attitude_demand_body_struct attitude_demand_body;	/*!< Body demand data */
+float q1=1;								/*!< Quaternion element 1 */
+float q2=0;								/*!< Quaternion element 2 */
+float q3=0;								/*!< Quaternion element 3 */
+float q4=0;								/*!< Quaternion element 4 */
+
+float M1=1;								/*!< DCM element 1,1 */
+float M2=0;								/*!< DCM element 1,2 */
+float M3=0;								/*!< DCM element 1,3 */
+float M4=0;								/*!< DCM element 2,1 */
+float M5=1;								/*!< DCM element 2,2 */
+float M6=0;								/*!< DCM element 2,3 */
+float M7=0;								/*!< DCM element 3,1 */
+float M8=0;								/*!< DCM element 3,2 */
+float M9=1;								/*!< DCM element 3,3 */
+
+
 /*!
 \brief Filters GPS and barometer altitude
 

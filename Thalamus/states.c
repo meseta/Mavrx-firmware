@@ -12,6 +12,12 @@ The state machine deals with which mode the craft is currently in.
 
 #include "all.h"
 
+// State
+unsigned char armed=0;					/*!< State variable boolean for armed/disarmed */
+unsigned char state=STATE_DISARMED;		/*!< State variable for state machine */
+unsigned char airborne=0;				/*!< State variable for being ariborne or not */
+
+
 /*!
 \brief This is the state machine
 

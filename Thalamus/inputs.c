@@ -10,6 +10,45 @@
 
 #include "all.h"
 
+
+// Inputs
+
+unsigned short rcInput[7];				/*!< Contains RX input */
+unsigned int rxLoss=1000;   			/*!< Increments if RX is not available */ // initialise to a high number to start off assuming RX is lost
+unsigned int rxFirst=0;					/*!< Counts the first few RX data, used to ignore invalid initial values */
+signed short yawtrim=0;					/*!< Initial yaw input trim */
+signed short throttletrim=0;			/*!< Initial trottle trim */
+float throttle=0;						/*!< Throttle value */
+float throttle_angle=0;					/*!< Throttle adjustment when pitch/rolled */
+unsigned char hold_thro_off=1;			/*!< Boolean for holding throttle off */ // We start with throttle hold on in case the user has forgotten to lower their throttle stick
+unsigned char auxState=0;				/*!< RX input aux switch state */
+unsigned char flapState=0;				/*!< RX input flap switch (button) state */
+unsigned char rateState=0;				/*!< RX input rate switch state */
+unsigned char throState=0;				/*!< RX input thro switch state */
+unsigned char aileState=0;				/*!< RX input aile switch state */
+unsigned char elevState=0;				/*!< RX input elev switch state */
+unsigned char ruddState=0;				/*!< RX input rudd switch state */
+unsigned int flapswitch;				/*!< RX input flap switch toggle */
+
+float pitchDemandSpin;					/*!< Pitch demand rotated to body frame */
+float rollDemandSpin;					/*!< Roll demand rotated to body frame */
+float pitchDemandSpinold;				/*!< Pitch demand rotated to body frame old value */
+float rollDemandSpinold;				/*!< Roll demand rotated to body frame old value */
+
+unsigned char gps_valid = 0;			/*!< Boolean for whether the GPS data is valid */
+
+float batteryVoltage;					/*!< Contains battery voltage in millivolts */
+float ultra;							/*!< Contains the ultrasound reading */
+float oldUltra;							/*!< Contains the previous ultrasound reading */
+unsigned int ultraLoss=1000; 			/*!< Increments if ultrasound is not available */ // initialise to a high number to start off assuming ultra is lost
+
+
+altStruct alt={0};						/*!< Struct for altitude data */
+threeAxisSensorStructGyro Gyro={{0}};	/*!< Struct for gyro data */
+threeAxisSensorStructAccel Accel={{0}};	/*!< Struct for accel data */
+threeAxisSensorStructMag Mag={{0}};		/*!< Struct for magneto data */
+
+
 /*!
 \brief Filters GPS and barometer altitude
 

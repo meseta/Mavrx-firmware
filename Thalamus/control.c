@@ -10,6 +10,22 @@
 
 #include "all.h"
 
+// Control/PID
+unsigned char got_setpoint=0; 			/*!< Boolean for indication whether to store the first ultrasound altitude when re-entering the confidence range */
+
+unsigned char thal_throt_cont;  		/*!< Boolean for Thalamus allowed to control throttle */
+unsigned char thal_motor_off;  			/*!< Boolean for Thalamus allowed to turn motors off */
+
+float GPS_KerrI;						/*!< GPS altitude integral value for PID */
+float ULT_KerrI;						/*!< Ultrasound altitude integral value for PID */
+float targetZ_ult;						/*!< Ultrasound target height */
+float alt_tkoff;						/*!< Takeoff altitude */
+
+float ROLL_SPL_set;						/*!< Temporary value for adjusting roll rate limits */
+float PITCH_SPL_set;					/*!< Temporary value for adjusting pitch rate limits */
+float YAW_SPL_set;						/*!< Temporary value for adjusting yaw rate limits */
+
+
 /*!
 \brief Controls the throttle for altitude control
 
