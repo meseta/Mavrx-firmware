@@ -2,13 +2,14 @@
 #define __PARAMS_H__
 
 #include "mavlink.h"
+#include "thal.h"
 #define PARAMNAMELEN	MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN
 
 /*! \brief Parameter storage structure */
 typedef struct paramStorage_struct {
 	char name[PARAMNAMELEN];	/*!< Parameter name */
 	float value;				/*!< Parameter value */
-} paramStorage_t;
+} PACKED paramStorage_t;
 
 extern struct paramStorage_struct paramStorage[];
 #define DRIFT_AccelKp   paramStorage[0].value
