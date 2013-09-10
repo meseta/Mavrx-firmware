@@ -17,7 +17,7 @@ is valid.
 */
 struct paramStorage_struct paramStorage[] = {
 	[ 0] = {"MAV_ID",         0.0f}, 
-    [ 1] = {"GPS_SAFALT",     3.0f}, 
+    [ 1] = {"GPS_SAFALT",     20.0f}, 
     [ 2] = {"GPS_MXANGL",    0.35f}, 
     [ 3] = {"GPS_MAXSPD",     1.0f}, 
     [ 4] = {"GPS_MAXROT",     1.5f}, 
