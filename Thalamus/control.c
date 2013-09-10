@@ -302,6 +302,7 @@ void control_motors(void){
 	pitchcorrection += -thisPITCH_Kdd*((float)Gyro.Y.value - oldGyroValuePitch);
 	pitchcorrection += -PITCH_Kp*pitcherror;
 	pitchcorrection += -thisPITCH_Ki*pitchIntegral;
+	//pitchcorrection = 300;
 
 	float rollcorrection = -((float)Gyro.X.value - ROLL_Boost*deltaRoll) * thisROLL_Kd;
 	rollcorrection += -thisROLL_Kdd*((float)Gyro.X.value - oldGyroValueRoll);
@@ -339,13 +340,23 @@ void control_motors(void){
             motorS -= yawcorrection;
             motorW += yawcorrection;
             break;
-		case 5: // R10
+		case 5: // NAVY EDITION
+            motorN = pitchcorrection + rollcorrection;
+            motorE = pitchcorrection - rollcorrection;
+            motorS = -pitchcorrection - rollcorrection;
+            motorW = -pitchcorrection + rollcorrection;
+            motorN -= yawcorrection;
+            motorE += yawcorrection;
+            motorS -= yawcorrection;
+            motorW += yawcorrection;
+            break;
+		case 4: // R10
             motorN = pitchcorrection;
             motorE = -rollcorrection;
             motorS = -pitchcorrection;
             motorW = rollcorrection;
 			
-            motorN -= yawcorrection;
+            //motorN -= yawcorrection;
             motorE += yawcorrection;
             motorS -= yawcorrection;
             motorW += yawcorrection;
@@ -366,10 +377,10 @@ void control_motors(void){
 
 	// Combine attitude stabilisation demands from PID loop with throttle demands
 	float tempN=0, tempE=0, tempS=0, tempW=0;
-	tempN = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-	tempE = (signed short)motorEav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-	tempS = (signed short)motorSav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-	tempW = (signed short)motorWav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
+	tempN = (signed short)motorNav + 1500;
+	tempE = (signed short)motorEav + 1500;
+	tempS = (signed short)motorSav + 1500;
+	tempW = (signed short)motorWav + 1500;
 	
 		
 	/*! \todo Add Auto Land on rxLoss! */
@@ -378,31 +389,18 @@ void control_motors(void){
 		// Set Airborne = 0
 		airborne = 0;
 		
-		// Set throttle off
-		throttle = 0;
+		
 		
 		//Reset Launcher Button State
 		flapState = 0;
 					
-		// Reset Important variables
-		motorN = 0;
-		motorE = 0;
-		motorS = 0;
-		motorW = 0;
-		motorNav = 0;
-		motorEav = 0;
-		motorSav = 0;
-		motorWav = 0;
-		// Reseting the yaw demand to the actual yaw angle continuously helps stop yawing happening on takeoff
-		attitude_demand_body.yaw = -psiAngle;
+		
 
 		
 		// Reset the throttle hold variable, this prevents reactivation of the throttle until 
 		// the input is dropped and re-applied
 		if (rcInput[RX_THRO] - throttletrim  < OFFSTICK) hold_thro_off = 0;
 		
-		// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
-		if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
 		
 		// Output the motor PWM demand on the telemetry link
 		ilink_outputs0.channel[0] = THROTTLEOFFSET;
@@ -418,34 +416,52 @@ void control_motors(void){
 		
 		// Limit the maximum throttle output to a percentage of the highest throttle available 
 		// to allow additional throttle for manouevering
-		if(throttle > MAXTHROTTLE*MAXTHROTTLEPERCENT) throttle = MAXTHROTTLE*MAXTHROTTLEPERCENT;
+		
 		
 		// Set the PWM channels. Maximum of MAXTHROTTLE + THROTTLEOFFSET, MINMUM OF IDLETHROTTLE + THROTTLE OFFSET
 		// Throttle offset offsets the throttle readings (which start at 0) to the PWM values (in ms?) which need to start at around 1000
+		// temp = tempN;
+		// if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+		// else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+		// PWMSetN(temp);
+		// ilink_outputs0.channel[0] = temp;
+		
+		// temp = tempE;
+		// if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+		// else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+		// PWMSetE(temp);
+		// ilink_outputs0.channel[1] = temp;
+		
+		// temp = tempS;
+		// if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+		// else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+		// PWMSetS(temp);
+		// ilink_outputs0.channel[2] = temp;
+		
+		// temp = tempW;
+		// if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
+		// else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
+		// PWMSetW(temp);
+		// ilink_outputs0.channel[3] = temp;
+		// ilink_outputs0.isNew = 1; 
+		
 		temp = tempN;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
 		PWMSetN(temp);
 		ilink_outputs0.channel[0] = temp;
 		
 		temp = tempE;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
 		PWMSetE(temp);
 		ilink_outputs0.channel[1] = temp;
 		
 		temp = tempS;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
 		PWMSetS(temp);
 		ilink_outputs0.channel[2] = temp;
 		
 		temp = tempW;
-		if(temp > (MAXTHROTTLE + THROTTLEOFFSET)) temp = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(temp < (IDLETHROTTLE + THROTTLEOFFSET)) temp = (IDLETHROTTLE + THROTTLEOFFSET);
 		PWMSetW(temp);
 		ilink_outputs0.channel[3] = temp;
 		ilink_outputs0.isNew = 1; 
+		
 
 	}
 }
