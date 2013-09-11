@@ -3,7 +3,7 @@
 // *** Source and binaries are released under the BSD 3-Clause license
 // *** See readme files for the text of the license
 // ****************************************************************************
- 
+
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 

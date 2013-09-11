@@ -1,10 +1,5 @@
 var searchData=
 [
-  ['rand_5fa',['RAND_A',['../config_8h.html#a0cf433ef7673ed41cfea9ee968d63edd',1,'config.h']]],
-  ['rand_5fc',['RAND_C',['../config_8h.html#a708cc881cab66a59f661f766000d4787',1,'config.h']]],
-  ['rand_5fmersenne',['RAND_MERSENNE',['../config_8h.html#a32bf74a0864c3cc255015a288e1e82b4',1,'config.h']]],
-  ['rit_5fpriority',['RIT_PRIORITY',['../config_8h.html#a2903ba4622d75dfee6baa3c7ffd8320e',1,'config.h']]],
-  ['rit_5freset',['RIT_RESET',['../config_8h.html#a903e295da7a759bdd8d35505c252a9af',1,'config.h']]],
   ['roll_5fboost',['ROLL_Boost',['../params_8h.html#a18f24445d4a4a7e6472c8a6066ccb9ef',1,'params.h']]],
   ['roll_5fde',['ROLL_De',['../params_8h.html#a335245aa43c9998455704db1dc8f4391',1,'params.h']]],
   ['roll_5fkd',['ROLL_Kd',['../params_8h.html#a57e6e384e516d4c0e5ebc9bcd4ae495e',1,'params.h']]],
@@ -12,8 +7,6 @@ var searchData=
   ['roll_5fki',['ROLL_Ki',['../params_8h.html#aec95ac4ddb0d6d28b6c13f472617c361',1,'params.h']]],
   ['roll_5fkp',['ROLL_Kp',['../params_8h.html#a320711d7f6d0742dd3bddd076ac22901',1,'params.h']]],
   ['roll_5fsens',['ROLL_SENS',['../params_8h.html#ade8651d0e9d1668e8d36cd6ea07ed5ae',1,'params.h']]],
-  ['roll_5fspl',['ROLL_SPL',['../params_8h.html#a6f396875d08adb5f8ba8d9a8854579db',1,'params.h']]],
-  ['rx_5fen',['RX_EN',['../config_8h.html#aa970d7c18f7293a5f2bfe34b60908766',1,'config.h']]],
   ['rx_5fpanic',['RX_PANIC',['../globals_8h.html#a5c1a9b0a7cb37a6e7747cf6ce951a882',1,'globals.h']]],
-  ['rx_5ftype',['RX_TYPE',['../config_8h.html#af52ea3b48f87d2eec718288e2f0d3a2c',1,'config.h']]]
+  ['rx_5fpanic_5fseconds',['RX_PANIC_SECONDS',['../globals_8h.html#aeb798ad5c7d0c7fc01ab448264a80d7c',1,'globals.h']]]
 ];

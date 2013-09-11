@@ -43,8 +43,6 @@ however, it would be better to just time instead.  Use one of the hardware timer
 Throttle and attitude blips when flying under GPS
 Throttle blips when flying normally
 
-\todo clean up globals
-
 */
 
 #include "all.h"

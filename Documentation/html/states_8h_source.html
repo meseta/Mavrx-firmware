@@ -92,7 +92,7 @@ $(document).ready(function(){initNavTree('states_8h_source.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -106,32 +106,32 @@ $(document).ready(function(){initNavTree('states_8h_source.html','');});
 <div class="title">states.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef __STATES_H__</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define __STATES_H__</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">// State</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#define STATE_UNINIT        0       </span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#define STATE_DISARMED      1       </span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#define STATE_MANUAL        2       </span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#define STATE_MANUAL_GPS    3       </span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#define STATE_SIMPLICITY    4       </span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#define STATE_AUTO          5       </span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">extern unsigned char armed;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor"></span><span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="states_8c.html#ab12828525693568ae9c217805bea1ef9">state</a>;</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="states_8c.html#a7c83d685e4af9e24249849d17a4a536e">airborne</a>; <span class="comment">//boolean</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keywordtype">void</span> <a class="code" href="states_8c.html#a39943273f62c5b66673647a0a6cdb457" title="This is the state machine. ">state_machine</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> <a class="code" href="states_8c.html#ad7a17a77902e877cc15010153991eaa9" title="Arms the craft. ">arm</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keywordtype">void</span> <a class="code" href="states_8c.html#a6991869a6e7b9531083c89bf0cd0f6ec" title="Disarms the craft. ">disarm</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#endif</span></div>
+<a href="states_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#ifndef __STATES_H__</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define __STATES_H__</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00011"></a><span class="lineno"><a class="code" href="states_8h.html#a9f8890484e627bb3708ac75995d3560a">   11</a></span>&#160;<span class="preprocessor">#define STATE_UNINIT        0       </span></div>
+<div class="line"><a name="l00012"></a><span class="lineno"><a class="code" href="states_8h.html#a411cab1a736427a29f25cf9805f737c5">   12</a></span>&#160;<span class="preprocessor">#define STATE_DISARMED      1       </span></div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="code" href="states_8h.html#af6606bced84f23958921ccc74024ce9d">   13</a></span>&#160;<span class="preprocessor">#define STATE_MANUAL        2       </span></div>
+<div class="line"><a name="l00014"></a><span class="lineno"><a class="code" href="states_8h.html#a57d68c9f600a421234e51fac93323b10">   14</a></span>&#160;<span class="preprocessor">#define STATE_MANUAL_GPS    3       </span></div>
+<div class="line"><a name="l00015"></a><span class="lineno"><a class="code" href="states_8h.html#a6ed7171d64580c60a087228e46508760">   15</a></span>&#160;<span class="preprocessor">#define STATE_SIMPLICITY    4       </span></div>
+<div class="line"><a name="l00016"></a><span class="lineno"><a class="code" href="states_8h.html#a6a16b8b67cb1ce326bc70a4af90778f6">   16</a></span>&#160;<span class="preprocessor">#define STATE_AUTO          5       </span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">extern unsigned char armed;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor"></span><span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="states_8h.html#ab12828525693568ae9c217805bea1ef9">state</a>;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="states_8h.html#a7c83d685e4af9e24249849d17a4a536e">airborne</a>;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keywordtype">void</span> <a class="code" href="states_8h.html#a5b7665498c6c3419b3a6d53d4d2e25d9" title="This is the state machine. ">state_machine</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keywordtype">void</span> <a class="code" href="states_8h.html#ad7a17a77902e877cc15010153991eaa9" title="Arms the craft. ">arm</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keywordtype">void</span> <a class="code" href="states_8h.html#a6991869a6e7b9531083c89bf0cd0f6ec" title="Disarms the craft. ">disarm</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><b>states.h</b></li>
-    <li class="footer">Generated on Tue Sep 10 2013 23:58:08 for Mavrx Multirotor Firmware by
+    <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><a class="el" href="states_8h.html">states.h</a></li>
+    <li class="footer">Generated on Wed Sep 11 2013 13:11:54 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

@@ -1,9 +1,19 @@
+/*!
+\file Thalamus/inc/params.h
+\brief Tuning parameters
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #ifndef __PARAMS_H__
 #define __PARAMS_H__
 
 #include "mavlink.h"
 #include "thal.h"
-#define PARAMNAMELEN	MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN
+#define PARAMNAMELEN	MAVLINK_MSG_NAMED_VALUE_FLOAT_FIELD_NAME_LEN	/*!< Maximum length of param name used by MAVLink */
 
 /*! \brief Parameter storage structure */
 typedef struct paramStorage_struct {
@@ -12,93 +22,71 @@ typedef struct paramStorage_struct {
 } PACKED paramStorage_t;
 
 extern struct paramStorage_struct paramStorage[];
-#define DRIFT_AccelKp   paramStorage[0].value
-#define DRIFT_MagKp	 	paramStorage[1].value
-#define LPF_ULTRA 		paramStorage[2].value
-#define YAW_SENS		paramStorage[3].value
-#define PITCH_SENS	  	paramStorage[4].value
-#define ROLL_SENS	   	paramStorage[5].value
-#define YAW_DEADZONE	paramStorage[6].value
-#define PITCH_Kp		paramStorage[7].value
-#define PITCH_Ki		paramStorage[8].value
-#define PITCH_Kd		paramStorage[9].value
-#define PITCH_Kdd	   	paramStorage[10].value
-#define PITCH_Boost	 	paramStorage[11].value
-#define PITCH_De		paramStorage[12].value
-#define ROLL_Kp		 	paramStorage[13].value
-#define ROLL_Ki		 	paramStorage[14].value
-#define ROLL_Kd			paramStorage[15].value
-#define ROLL_Kdd		paramStorage[16].value
-#define ROLL_Boost	  	paramStorage[17].value
-#define ROLL_De		 	paramStorage[18].value
-#define YAW_Kp		  	paramStorage[19].value
-#define YAW_Kd		  	paramStorage[20].value
-#define YAW_Boost	   	paramStorage[21].value
-#define LPF_BARD		paramStorage[22].value
-#define LIM_ANGLE 		paramStorage[23].value
-#define LIM_ALT 		paramStorage[24].value
-#define MAGCOR_N1	   	paramStorage[25].value
-#define MAGCOR_N2	   	paramStorage[26].value
-#define MAGCOR_N3	   	paramStorage[27].value
-#define MAGCOR_N5	   	paramStorage[28].value
-#define MAGCOR_N6	   	paramStorage[29].value
-#define MAGCOR_N9	   	paramStorage[30].value
-#define MAGCOR_M1	   	paramStorage[31].value
-#define MAGCOR_M2	   	paramStorage[32].value
-#define MAGCOR_M3	   	paramStorage[33].value
-#define ULTRA_Kp		paramStorage[34].value
-#define ULTRA_Kd		paramStorage[35].value
-#define ULTRA_Ki		paramStorage[36].value
-#define ULTRA_De		paramStorage[37].value
-#define ULTRA_TKOFF	 	paramStorage[38].value
-#define ULTRA_LND	   	paramStorage[39].value
-#define CAL_GYROX	   	paramStorage[40].value
-#define CAL_GYROY	   	paramStorage[41].value
-#define CAL_GYROZ	   	paramStorage[42].value
-#define DETUNE			paramStorage[43].value
-#define LIM_RATE		paramStorage[44].value
-#define LIM_ULTRA		paramStorage[45].value
-#define ULTRA_DRMP	  	paramStorage[46].value
-#define ULTRA_DTCT	  	paramStorage[47].value
-#define LIM_THROT		paramStorage[48].value
-#define ULTRA_OVDEC		paramStorage[49].value
-#define ULTRA_DEAD		paramStorage[50].value
-#define ULTRA_OVTH		paramStorage[51].value
-#define CAL_AUTO		paramStorage[52].value
-#define LPF_OUT 		paramStorage[53].value
-#define BATT_LOW		paramStorage[54].value
-#define BATT_CRIT	   	paramStorage[55].value
-#define ULTRA_OFFSET	paramStorage[56].value
-#define ROLL_SPL		paramStorage[57].value
-#define PITCH_SPL		paramStorage[58].value
-#define YAW_Ki			paramStorage[59].value
-#define YAW_De			paramStorage[60].value
-#define Filt_GPS_K		paramStorage[61].value
-#define LPF_BARO  		paramStorage[62].value
-#define GPS_ALTKp 		paramStorage[63].value
-#define GPS_ALTKi 		paramStorage[64].value
-#define GPS_ALTDe 		paramStorage[65].value
-#define GPS_ALTKd 		paramStorage[66].value
-#define Filt_baroK		paramStorage[67].value
-#define YAW_SPL			paramStorage[68].value
-#define ORI				paramStorage[69].value
+#define DRIFT_AccelKp   paramStorage[0].value	/*!< Gyro drift compensation from Accelerometer */
+#define DRIFT_MagKp	 	paramStorage[1].value	/*!< Gyro drift compensation from Accelerometer */
+#define YAW_SENS		paramStorage[2].value	/*!< Yaw control sensitivity */
+#define PITCH_SENS	  	paramStorage[3].value	/*!< Pitch control sensitivity */
+#define ROLL_SENS	   	paramStorage[4].value	/*!< Roll control sensitivity */
+#define YAW_DEADZONE	paramStorage[5].value	/*!< Yaw control deadzone */
+#define PITCH_Kp		paramStorage[6].value	/*!< Pitch P gain */
+#define PITCH_Ki		paramStorage[7].value	/*!< Pitch I gain */
+#define PITCH_Kd		paramStorage[8].value	/*!< Pitch D gain */
+#define PITCH_Kdd	   	paramStorage[9].value	/*!< Pitch DD gain */
+#define PITCH_Boost	 	paramStorage[10].value	/*!< Pitch conttrol boost gain */
+#define PITCH_De		paramStorage[11].value	/*!< Pitch integral decay */
+#define ROLL_Kp		 	paramStorage[12].value	/*!< Roll P gain */
+#define ROLL_Ki		 	paramStorage[13].value	/*!< Roll I gain */
+#define ROLL_Kd			paramStorage[14].value	/*!< Roll D gain */
+#define ROLL_Kdd		paramStorage[15].value	/*!< Roll DD gain */
+#define ROLL_Boost	  	paramStorage[16].value	/*!< Roll control boost gain */
+#define ROLL_De		 	paramStorage[17].value	/*!< Roll integral decay */
+#define YAW_Kp		  	paramStorage[18].value	/*!< Yaw P gain */
+#define YAW_Kd		  	paramStorage[19].value	/*!< Yaw D gain */
+#define YAW_Boost	   	paramStorage[20].value	/*!< Yaw control boost gain */
+#define YAW_Ki			paramStorage[21].value	/*!< Yaw I gain */
+#define YAW_De			paramStorage[22].value	/*!< Yaw integral decay */
+#define LIM_ANGLE 		paramStorage[23].value	/*!< Pitch/roll angle limit */
+#define LIM_ROLL		paramStorage[24].value	/*!< Roll rate limit */
+#define LIM_PITCH		paramStorage[25].value	/*!< Roll rate limit */
+#define LIM_YAW			paramStorage[26].value	/*!< Yaw rate limit */
+#define LPF_BARD		paramStorage[27].value	/*!< Barometer derivative filter */
+#define LPF_OUT 		paramStorage[28].value	/*!< Output filters */
+#define LPF_ULTRA 		paramStorage[29].value	/*!< Ultrasound filter */
+#define MAGCOR_N1	   	paramStorage[30].value	/*!< Magneto soft iron calibration matrix element 1,1 */
+#define MAGCOR_N2	   	paramStorage[31].value	/*!< Magneto soft iron calibration matrix element 1,2 */
+#define MAGCOR_N3	   	paramStorage[32].value	/*!< Magneto soft iron calibration matrix element 1,3 */
+#define MAGCOR_N5	   	paramStorage[33].value	/*!< Magneto soft iron calibration matrix element 2,2 */
+#define MAGCOR_N6	   	paramStorage[34].value	/*!< Magneto soft iron calibration matrix element 2,3 */
+#define MAGCOR_N9	   	paramStorage[35].value	/*!< Magneto soft iron calibration matrix element 3,3 */
+#define MAGCOR_M1	   	paramStorage[36].value	/*!< Magneto hard iron calibration vector element 1 */
+#define MAGCOR_M2	   	paramStorage[37].value	/*!< Magneto hard iron calibration vector element 2 */
+#define MAGCOR_M3	   	paramStorage[38].value	/*!< Magneto hard iron calibration vector element 3 */
+#define ULTRA_Kp		paramStorage[39].value	/*!< Ultrasound P gain */
+#define ULTRA_Kd		paramStorage[40].value	/*!< Ultrasound D gain */
+#define ULTRA_Ki		paramStorage[41].value	/*!< Ultrasound I gain */
+#define ULTRA_De		paramStorage[42].value	/*!< Ultrasound integral decay */
+#define ULTRA_TKOFF	 	paramStorage[43].value	/*!< Ultrasound takeoff threshold */
+#define ULTRA_LND	   	paramStorage[44].value	/*!< Ultrasound land threshold */
+#define ULTRA_DTCT	  	paramStorage[45].value	/*!< Number of ultrasound measurements for landing detection */
+#define ULTRA_OVTH		paramStorage[46].value	/*!< Number of ultrasound measurements for considering ultrasound loss */
+#define GPS_ALTKp 		paramStorage[47].value	/*!< GPS altitude P gain */
+#define GPS_ALTKi 		paramStorage[48].value	/*!< GPS altitude I gain */
+#define GPS_ALTDe 		paramStorage[49].value	/*!< GPS altitude integral decay */
+#define GPS_ALTKd 		paramStorage[50].value	/*!< GPS altitude D gain */
+#define DETUNE			paramStorage[51].value	/*!< Detune at high throttle */
+#define BATT_LOW		paramStorage[52].value	/*!< Battery low voltage */
+#define BATT_CRIT	   	paramStorage[53].value	/*!< Battery critical voltage */
+#define ORI				paramStorage[54].value	/*!< Craft orientation/configuration */
 
 extern unsigned int paramCount;
 extern unsigned int paramSendCount;
 extern unsigned char paramSendSingle;
 
+#define EEPROM_OFFSET   0	/*!< EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess) */
+#define EEPROM_VERSION	10 	/*!< version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults */
 
-// EEPROM STUFF
-#define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
-#define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	10 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 void eeprom_load_all(void);
 void eeprom_save_all(void);
-
-// deprecated functions
-void eeprom_load_all_old(void);
-void eeprom_save_all_old(void);
-
 
 #endif

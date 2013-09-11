@@ -4,7 +4,6 @@ var comms_8h =
     [ "ILinkMessageRequest", "comms_8h.html#ad8b14158ff8b72e233271e2d0b93b4ea", null ],
     [ "ilink_altitude", "comms_8h.html#ada747c57207b53d18c6ccc84e6798bfc", null ],
     [ "ilink_attitude", "comms_8h.html#aacdc66e6eeabde118f4f67942674fc30", null ],
-    [ "ilink_attitude_demand", "comms_8h.html#ab75644a1d25dea7ef1cdd5d1832d6cdc", null ],
     [ "ilink_debug", "comms_8h.html#afcbe55af0870f29eda4558e1148d80db", null ],
     [ "ilink_gpsfly", "comms_8h.html#a073b655daf5cbf253165ff19f32efbfd", null ],
     [ "ilink_gpsreq", "comms_8h.html#a0638d7c8c968f4ff2d7f10ac8eb231c7", null ],
@@ -17,6 +16,5 @@ var comms_8h =
     [ "ilink_thalctrl_tx", "comms_8h.html#aef15e7a6f3509ec4af325a896e0cbd0d", null ],
     [ "ilink_thalparam_rx", "comms_8h.html#a24b483990e149a22217dcff219703192", null ],
     [ "ilink_thalparam_tx", "comms_8h.html#a85276f37fb3ef9f9b623ab619ccf6fc8", null ],
-    [ "ilink_thalpareq", "comms_8h.html#a63d82821f72a9c45566167faff26f375", null ],
     [ "ilink_thalstat", "comms_8h.html#abf87beb2efbaacba452aed7465b398f7", null ]
 ];

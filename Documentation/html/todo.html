@@ -86,7 +86,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -101,7 +101,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><dl class="reflist">
-<dt><a class="anchor" id="_todo000001"></a>Global <a class="el" href="calibrate_8c.html#a36fabae6abbd94eeb1a86e2be5ec096d">calibrate_mag</a>  (void)</dt>
+<dt><a class="anchor" id="_todo000001"></a>Global <a class="el" href="calibrate_8h.html#a36fabae6abbd94eeb1a86e2be5ec096d">calibrate_mag</a>  (void)</dt>
 <dd><p class="startdd">soft iron calibration on the navy craft </p>
 <p>filter out spikes </p>
 <p class="enddd">Inline delay  </p>
@@ -126,8 +126,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <p>check all integrators for decoupling, and make sure they are locked in this case</p>
 <p>Assess and Improve leveling on take off and leveling in flight Key areas to investigate are integral gain on takeoff Accelerometer feedback gain Accelerometer feedback method - additional filtering needed? Landing Gear separation seems to play a large part, it causes undesired integral wind-up before the craft is in the air Landing gear would need switches or be sprung and damped with longish travel</p>
 <p>Measure loop rates instead of just assuming it The control needs to know how fast they're going, right now we assume the loops are going at their specified rate however, it would be better to just time instead. Use one of the hardware timers to get sub-ms resolution.</p>
-<p>Check for some discontinuities in flight Throttle and attitude blips when flying under GPS Throttle blips when flying normally</p>
-<p class="enddd">clean up globals </p>
+<p class="enddd">Check for some discontinuities in flight Throttle and attitude blips when flying under GPS Throttle blips when flying normally </p>
 </dd>
 <dt><a class="anchor" id="_todo000014"></a>Global <a class="el" href="inputs_8c.html#a1b83a366a672f3dc32fbed71e5ebe077">read_rx_input</a>  (void)</dt>
 <dd>Perform RC signal loss state setting and stuff like autoland  </dd>
@@ -139,7 +138,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Sep 10 2013 23:58:08 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Wed Sep 11 2013 13:11:54 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

@@ -10,9 +10,6 @@
 
 #include "all.h"
 
-
-// Inputs
-
 unsigned short rcInput[7];				/*!< Contains RX input */
 unsigned int rxLoss=0;   				/*!< Increments if RX is not available */
 unsigned int rxFirst=0;					/*!< Counts the first few RX data, used to ignore invalid initial values */
@@ -42,12 +39,10 @@ float ultra;							/*!< Contains the ultrasound reading */
 float oldUltra;							/*!< Contains the previous ultrasound reading */
 unsigned int ultraLoss=1000; 			/*!< Increments if ultrasound is not available */ // initialise to a high number to start off assuming ultra is lost
 
-
 altStruct alt={0};						/*!< Struct for altitude data */
 threeAxisSensorStructGyro Gyro={{0}};	/*!< Struct for gyro data */
 threeAxisSensorStructAccel Accel={{0}};	/*!< Struct for accel data */
 threeAxisSensorStructMag Mag={{0}};		/*!< Struct for magneto data */
-
 
 /*!
 \brief Filters GPS and barometer altitude
@@ -201,15 +196,16 @@ void read_rx_input(void) {
 /*!
 \brief Reads and filters barometer
 
+There are two versions of Thalamus, one with a barometer chip that needs to be
+manually triggered, and temperature compensated, another with a barometer chip
+that does all this internally.
+The Thalamus library auto-detects which is in use, but the user code must
+perform the trigering.  The library is set up so that the barometer chip that
+doesn't need triggering simply ignores the trigering.  This makes it safe to
+write code that supports both barometers
 */
 void read_barometer(void) {
-    // There are two versions of Thalamus, one with a barometer chip that needs to be
-    // manually triggered, and temperature compensated, another with a barometer chip
-    // that does all this internally.
-    // The Thalamus library auto-detects which is in use, but the user code must
-    // perform the trigering.  The library is set up so that the barometer chip that
-    // doesn't need triggering simply ignores the trigering.  This makes it safe to
-    // write code that supports both barometers
+
     
     static unsigned char temperature_counter = 0; // used to count the number of samples before updating the temperature compensation
 	 

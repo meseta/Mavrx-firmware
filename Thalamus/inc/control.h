@@ -1,7 +1,16 @@
+/*!
+\file Thalamus/control.c
+\brief Output functions
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #ifndef __CONTROL_H__
 #define __CONTROL_H__
 
-// Control/PID
 extern unsigned char got_setpoint;
 
 #define THROTTLEOFFSET	950				/*!< Corresponds to less than zero output PWM. Nominally 1060=1.06ms, but lower just in case */
@@ -17,11 +26,9 @@ extern float ULT_KerrI;
 extern float targetZ_ult;
 extern float alt_tkoff;
 
-extern float ROLL_SPL_set;
-extern float PITCH_SPL_set;
-extern float YAW_SPL_set;
-
-
+extern float LIM_ROLL_set;
+extern float LIM_PITCH_set;
+extern float LIM_YAW_set;
 
 void control_throttle(void);
 void control_motors(void);

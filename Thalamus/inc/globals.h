@@ -1,3 +1,8 @@
+/*!
+\file Thalamus/inc/globals.h
+\brief Contains all the global values
+*/
+
 #ifndef __GLOBALS_H__
 #define __GLOBALS_H__
 
@@ -7,13 +12,12 @@
 
 #define FAST_RATE		   	400			/*!< Main loop rate in Hz*/
 #define SLOW_RATE		   	75			/*!< Slow rate in Hz */
-#define SLOW_DIVIDER		FAST_RATE/SLOW_RATE		/*!< The divider value that is used to obtain the slow rate from fast rate */
-#define RX_PANIC			RX_PANIC_SECONDS*SLOW_RATE
+#define SLOW_DIVIDER		FAST_RATE/SLOW_RATE		/*!< The divider value (number of loop iterations) that is used to obtain the slow rate from fast rate */
+#define RX_PANIC			RX_PANIC_SECONDS*SLOW_RATE	/*!< Number of loop iterations that is used to obtain the correct RX_PANIC period */
 
-extern unsigned int PRGBlankTimer; // Blanking time for button pushes
-extern unsigned int PRGTimer; // Timer for button pushes, continuously increments as the button is held
-extern unsigned int PRGPushTime; // Contains the time that a button was pushed for, populated after button is released
-
+extern unsigned int PRGBlankTimer;
+extern unsigned int PRGTimer;
+extern unsigned int PRGPushTime;
 extern unsigned char flashPLED, flashVLED, flashRLED;
 
 #endif

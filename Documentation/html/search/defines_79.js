@@ -6,6 +6,5 @@ var searchData=
   ['yaw_5fkd',['YAW_Kd',['../params_8h.html#a83d770093126531acbf53624a98c76e5',1,'params.h']]],
   ['yaw_5fki',['YAW_Ki',['../params_8h.html#a4014a3c29d325879d311cbde72a06e18',1,'params.h']]],
   ['yaw_5fkp',['YAW_Kp',['../params_8h.html#ab70d7fdc4470b7745605930d2ef1d960',1,'params.h']]],
-  ['yaw_5fsens',['YAW_SENS',['../params_8h.html#aea2138897de874fd157be99a743170a8',1,'params.h']]],
-  ['yaw_5fspl',['YAW_SPL',['../params_8h.html#abc91a13f0e7d96a428837134c07d5be6',1,'params.h']]]
+  ['yaw_5fsens',['YAW_SENS',['../params_8h.html#aea2138897de874fd157be99a743170a8',1,'params.h']]]
 ];

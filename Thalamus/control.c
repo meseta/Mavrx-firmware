@@ -21,9 +21,9 @@ float ULT_KerrI;						/*!< Ultrasound altitude integral value for PID */
 float targetZ_ult;						/*!< Ultrasound target height */
 float alt_tkoff;						/*!< Takeoff altitude */
 
-float ROLL_SPL_set;						/*!< Temporary value for adjusting roll rate limits */
-float PITCH_SPL_set;					/*!< Temporary value for adjusting pitch rate limits */
-float YAW_SPL_set;						/*!< Temporary value for adjusting yaw rate limits */
+float LIM_ROLL_set;						/*!< Temporary value for adjusting roll rate limits */
+float LIM_PITCH_set;					/*!< Temporary value for adjusting pitch rate limits */
+float LIM_YAW_set;						/*!< Temporary value for adjusting yaw rate limits */
 
 
 /*!
@@ -200,14 +200,14 @@ void control_motors(void){
 	static float yawold = 0;
 	
 	// This section of code limits the rate at which the craft is allowed to track angle demand changes
-	if((attitude_demand_body.pitch - pitchold) > PITCH_SPL) attitude_demand_body.pitch = pitchold + PITCH_SPL;
-	if((attitude_demand_body.pitch - pitchold) < -PITCH_SPL) attitude_demand_body.pitch = pitchold - PITCH_SPL;
+	if((attitude_demand_body.pitch - pitchold) > LIM_PITCH) attitude_demand_body.pitch = pitchold + LIM_PITCH;
+	if((attitude_demand_body.pitch - pitchold) < -LIM_PITCH) attitude_demand_body.pitch = pitchold - LIM_PITCH;
 	pitchold = attitude_demand_body.pitch;
-	if((attitude_demand_body.roll - rollold) > ROLL_SPL) attitude_demand_body.roll = rollold + ROLL_SPL;
-	if((attitude_demand_body.roll - rollold) < -ROLL_SPL) attitude_demand_body.roll = rollold - ROLL_SPL;
+	if((attitude_demand_body.roll - rollold) > LIM_ROLL) attitude_demand_body.roll = rollold + LIM_ROLL;
+	if((attitude_demand_body.roll - rollold) < -LIM_ROLL) attitude_demand_body.roll = rollold - LIM_ROLL;
 	rollold = attitude_demand_body.roll;
-	if((attitude_demand_body.yaw - yawold) > YAW_SPL) attitude_demand_body.yaw = yawold + YAW_SPL;
-	if((attitude_demand_body.yaw - yawold) < -YAW_SPL) attitude_demand_body.yaw = yawold - YAW_SPL;
+	if((attitude_demand_body.yaw - yawold) > LIM_YAW) attitude_demand_body.yaw = yawold + LIM_YAW;
+	if((attitude_demand_body.yaw - yawold) < -LIM_YAW) attitude_demand_body.yaw = yawold - LIM_YAW;
 	yawold = attitude_demand_body.yaw;
 	
 	// This part of the code makes the yaw demand loop around and not exceed Pi or -Pi bounds
@@ -290,7 +290,7 @@ void control_motors(void){
 	float thisPITCH_Ki = PITCH_Ki;
 	float thisROLL_Ki = ROLL_Ki;
 	
-			
+	
 	// Attitude control PID Assembly - We use a proportional, derivative, and integral on pitch roll and yaw
 	// we add a double derivative term for pitch and roll.
 	static float oldGyroValuePitch = 0;

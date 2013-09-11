@@ -1,3 +1,13 @@
+/*!
+\file Thalamus/inc/inputs.h
+\brief Sensor and user inputs
+
+\author Yuan Gao
+\author Henry Fletcher
+\author Oskar Weigl
+
+*/
+
 #ifndef __INPUTS_H__
 #define __INPUTS_H__
 
@@ -111,18 +121,11 @@ typedef struct{
 } threeAxisSensorStructMag;
 extern threeAxisSensorStructMag Mag;
 
-
-// grabs GPS status
-
 void gps_status(void);
-
-
-// Ultrasound
 
 void read_barometer(void);
 void read_ultrasound(void);
 
-// battery sensor
 void trig_batt_voltage(void);
 void read_batt_voltage(void);
 
@@ -130,9 +133,7 @@ void read_gyr_sensors(void);
 void read_acc_sensors(void);
 void read_mag_sensors(void);
 
-// sensor orientation
 void convert_ori(volatile signed short * X, volatile signed short * Y, volatile signed short * Z, signed short * data);
-
 
 void read_rx_input(void);
 

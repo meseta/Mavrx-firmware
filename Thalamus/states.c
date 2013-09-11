@@ -144,9 +144,9 @@ void state_machine()	{
 			thal_motor_off = 1;
 			auto_lock = 0;
 			
-			ROLL_SPL_set = ROLL_SPL;
-			PITCH_SPL_set = PITCH_SPL;
-			YAW_SPL_set = YAW_SPL;
+			LIM_ROLL_set = LIM_ROLL;
+			LIM_PITCH_set = LIM_PITCH;
+			LIM_YAW_set = LIM_YAW;
 			
 			// In manual mode, set pitch and roll demands based on the user commands collected from the rx unit
 			user.pitch = -((float)MIDSTICK - (float)rcInput[RX_ELEV])*PITCH_SENS; 
@@ -240,9 +240,9 @@ void state_machine()	{
 					got_setpoint = 1;
 				}
 			
-				ROLL_SPL_set = ROLL_SPL;
-				PITCH_SPL_set = PITCH_SPL;
-				YAW_SPL_set = YAW_SPL;
+				LIM_ROLL_set = LIM_ROLL;
+				LIM_PITCH_set = LIM_PITCH;
+				LIM_YAW_set = LIM_YAW;
 			}
 			
 			// We always set pitch, roll and throttle from manual demands, but they can be overwritten in other situations
@@ -264,9 +264,9 @@ void state_machine()	{
 			if((flapState == 2) || (flapState == 1)) {
 				
 				// We make the craft change attitude slower when flying autonomously
-				ROLL_SPL_set = 0.002;
-				PITCH_SPL_set = 0.002;
-				YAW_SPL_set = YAW_SPL/2;
+				LIM_ROLL_set = 0.002;
+				LIM_PITCH_set = 0.002;
+				LIM_YAW_set = LIM_YAW/2;
 				
 				// then Hypo controls attitude.
 				user.pitch = fsin(-psiAngle+M_PI_2) * ilink_gpsfly.northDemand - fsin(-psiAngle) * ilink_gpsfly.eastDemand;
@@ -385,9 +385,9 @@ void state_machine()	{
 					//if(!(ilink_gpsfly.flags & 0x04)) attitude_demand_body.yaw =  ilink_gpsfly.headingDemand;
 					
 					// We make the craft change attitude slower when flying autonomously
-					ROLL_SPL_set = 0.002;
-					PITCH_SPL_set = 0.002;
-					YAW_SPL_set = YAW_SPL/2;
+					LIM_ROLL_set = 0.002;
+					LIM_PITCH_set = 0.002;
+					LIM_YAW_set = LIM_YAW/2;
 						
 					
 					// And Thalamus controls the throttle
@@ -414,9 +414,7 @@ An animation is played on the motors
 */
 void arm(void) {
 
-	if(CAL_AUTO > 0) {
-		calibrate_gyr_temporary(1);
-	}
+	calibrate_gyr_temporary(1);
 	
 	PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
 

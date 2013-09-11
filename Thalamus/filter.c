@@ -2,15 +2,12 @@
 \file Thalamus/filter.c
 \brief Filters and AHRS
 
-\author Yuan Gao
 \author Henry Fletcher
-\author Oskar Weigl
 
 */
 
 #include "all.h"
 
-// Filters/AHRS
 float thetaAngle;						/*!< Pitch angle */
 float phiAngle;							/*!< Roll angle */
 float psiAngle;							/*!< Yaw angle */

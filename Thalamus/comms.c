@@ -7,7 +7,6 @@
 
 #include "all.h"
 
-
 ilink_identify_t 	ilink_identify={0};			/**< Identity */
 ilink_thalstat_t 	ilink_thalstat={0};			/**< Thalamus status */
 ilink_thalctrl_t 	ilink_thalctrl_rx={0};		/**< Thalamus control receive */

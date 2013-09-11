@@ -110,11 +110,14 @@ $(document).ready(function(){initNavTree('calibrate_8h.html','');});
 </div><!--header-->
 <div class="contents">
 
+<p>Functions for zeroing and calibrating sensors.  
+<a href="#details">More...</a></p>
+
 <p><a href="calibrate_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a7ecaef9373ee2a3d2ce418831f51f782"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="calibrate_8h.html#a7ecaef9373ee2a3d2ce418831f51f782">STILL_THRESH</a>&#160;&#160;&#160;8000</td></tr>
+<tr class="memitem:a7ecaef9373ee2a3d2ce418831f51f782"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="calibrate_8h.html#a7ecaef9373ee2a3d2ce418831f51f782">STILL_THRESH</a>&#160;&#160;&#160;16000</td></tr>
 <tr class="separator:a7ecaef9373ee2a3d2ce418831f51f782"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -135,16 +138,24 @@ Functions</h2></td></tr>
 <tr class="memdesc:a3c788f773c9afb71d43cd7864f165e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calibrates gyro offsets but don't save it.  <a href="#a3c788f773c9afb71d43cd7864f165e61">More...</a><br/></td></tr>
 <tr class="separator:a3c788f773c9afb71d43cd7864f165e61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Macro Definition Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Functions for zeroing and calibrating sensors. </p>
+<dl class="section author"><dt>Author</dt><dd>Yuan Gao </dd>
+<dd>
+Henry Fletcher </dd>
+<dd>
+Oskar Weigl </dd></dl>
+</div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="a7ecaef9373ee2a3d2ce418831f51f782"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define STILL_THRESH&#160;&#160;&#160;8000</td>
+          <td class="memname">#define STILL_THRESH&#160;&#160;&#160;16000</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>this value is used to detect whether the craft is still or not for the purpose of calibration, it's the square of the euclidian distance of the maximum expected gyro noise in raw </p>
 
 </div>
 </div>
@@ -260,7 +271,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><a class="el" href="calibrate_8h.html">calibrate.h</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 23:46:17 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Wed Sep 11 2013 13:11:54 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

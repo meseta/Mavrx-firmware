@@ -18,6 +18,5 @@ var globals_dup =
     [ "s", "globals_0x73.html", null ],
     [ "t", "globals_0x74.html", null ],
     [ "u", "globals_0x75.html", null ],
-    [ "w", "globals_0x77.html", null ],
     [ "y", "globals_0x79.html", null ]
 ];

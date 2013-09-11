@@ -103,27 +103,46 @@ $(document).ready(function(){initNavTree('inputs_8h.html','');});
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Data Structures</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">inputs.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
+<p>Sensor and user inputs.  
+<a href="#details">More...</a></p>
+
 <p><a href="inputs_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structalt_struct.html">altStruct</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Altitude data struct.  <a href="structalt_struct.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsensor_struct_gyro.html">sensorStructGyro</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gyro data struct (single axis)  <a href="structsensor_struct_gyro.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthree_axis_sensor_struct_gyro.html">threeAxisSensorStructGyro</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gyro data struct (three axis)  <a href="structthree_axis_sensor_struct_gyro.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsensor_struct_accel.html">sensorStructAccel</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accel data struct (single axis)  <a href="structsensor_struct_accel.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthree_axis_sensor_struct_accel.html">threeAxisSensorStructAccel</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accel data struct (three axis)  <a href="structthree_axis_sensor_struct_accel.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsensor_struct_mag.html">sensorStructMag</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Magneto data struct (single axis)  <a href="structsensor_struct_mag.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthree_axis_sensor_struct_mag.html">threeAxisSensorStructMag</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Magneto data struct (three axis)  <a href="structthree_axis_sensor_struct_mag.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ad58682c6df63362359be86392252fb18"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ad58682c6df63362359be86392252fb18">GAV_LEN</a>&#160;&#160;&#160;8</td></tr>
-<tr class="separator:ad58682c6df63362359be86392252fb18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adad2e98d93241aa7c561fd652b6bd479"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#adad2e98d93241aa7c561fd652b6bd479">AAV_LEN</a>&#160;&#160;&#160;30</td></tr>
-<tr class="separator:adad2e98d93241aa7c561fd652b6bd479"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88f5f48298242f4106f4847e7810d29c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a88f5f48298242f4106f4847e7810d29c">MAV_LEN</a>&#160;&#160;&#160;30</td></tr>
-<tr class="separator:a88f5f48298242f4106f4847e7810d29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ab4bca928834f711ae3a5952c824247"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a6ab4bca928834f711ae3a5952c824247">ALTAV_LEN</a>&#160;&#160;&#160;30</td></tr>
-<tr class="separator:a6ab4bca928834f711ae3a5952c824247"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab015253acacaa8cf7c817a06cc31113b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ab015253acacaa8cf7c817a06cc31113b">ALTDAV_LEN</a>&#160;&#160;&#160;60</td></tr>
-<tr class="separator:ab015253acacaa8cf7c817a06cc31113b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65bebe1eaf7a84b23c0aa1418d5f61ec"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a65bebe1eaf7a84b23c0aa1418d5f61ec">OFFSTICK</a>&#160;&#160;&#160;50</td></tr>
 <tr class="separator:a65bebe1eaf7a84b23c0aa1418d5f61ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff9c3083cbf2ae4c581d51af4f8f1427"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#aff9c3083cbf2ae4c581d51af4f8f1427">MIDSTICK</a>&#160;&#160;&#160;512</td></tr>
@@ -134,11 +153,22 @@ Macros</h2></td></tr>
 <tr class="separator:ac8f1d00ed8418477888503cbe5a8a6df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae370b782d5d2e9535d5f99fe741cf2b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ae370b782d5d2e9535d5f99fe741cf2b2">MINTHRESH</a>&#160;&#160;&#160;250</td></tr>
 <tr class="separator:ae370b782d5d2e9535d5f99fe741cf2b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad58682c6df63362359be86392252fb18"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ad58682c6df63362359be86392252fb18">GAV_LEN</a>&#160;&#160;&#160;8</td></tr>
+<tr class="separator:ad58682c6df63362359be86392252fb18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adad2e98d93241aa7c561fd652b6bd479"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#adad2e98d93241aa7c561fd652b6bd479">AAV_LEN</a>&#160;&#160;&#160;30</td></tr>
+<tr class="separator:adad2e98d93241aa7c561fd652b6bd479"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88f5f48298242f4106f4847e7810d29c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a88f5f48298242f4106f4847e7810d29c">MAV_LEN</a>&#160;&#160;&#160;30</td></tr>
+<tr class="separator:a88f5f48298242f4106f4847e7810d29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab015253acacaa8cf7c817a06cc31113b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ab015253acacaa8cf7c817a06cc31113b">ALTDAV_LEN</a>&#160;&#160;&#160;60</td></tr>
+<tr class="separator:ab015253acacaa8cf7c817a06cc31113b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ab4bca928834f711ae3a5952c824247"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a6ab4bca928834f711ae3a5952c824247">ALTAV_LEN</a>&#160;&#160;&#160;30</td></tr>
+<tr class="separator:a6ab4bca928834f711ae3a5952c824247"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3935302654f0349bc61d4090915960e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a3935302654f0349bc61d4090915960e7">gps_status</a> (void)</td></tr>
-<tr class="memdesc:a3935302654f0349bc61d4090915960e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filters GPS and barometer altitude.  <a href="#a3935302654f0349bc61d4090915960e7">More...</a><br/></td></tr>
+<tr class="memitem:a3935302654f0349bc61d4090915960e7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3935302654f0349bc61d4090915960e7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a3935302654f0349bc61d4090915960e7">gps_status</a> (void)</td></tr>
+<tr class="memdesc:a3935302654f0349bc61d4090915960e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filters GPS and barometer altitude. <br/></td></tr>
 <tr class="separator:a3935302654f0349bc61d4090915960e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6725290e9b01a22f7007bb2811bd1e49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a6725290e9b01a22f7007bb2811bd1e49">read_barometer</a> (void)</td></tr>
 <tr class="memdesc:a6725290e9b01a22f7007bb2811bd1e49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads and filters barometer.  <a href="#a6725290e9b01a22f7007bb2811bd1e49">More...</a><br/></td></tr>
@@ -152,8 +182,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a299508501b2f693e86c625f7f0d6cf07"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a299508501b2f693e86c625f7f0d6cf07">read_batt_voltage</a> (void)</td></tr>
 <tr class="memdesc:a299508501b2f693e86c625f7f0d6cf07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads ADC for the battery voltage.  <a href="#a299508501b2f693e86c625f7f0d6cf07">More...</a><br/></td></tr>
 <tr class="separator:a299508501b2f693e86c625f7f0d6cf07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf86f7c6ce91aa7d1b2ecdcd969a8100"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#abf86f7c6ce91aa7d1b2ecdcd969a8100">read_gyr_sensors</a> (void)</td></tr>
-<tr class="memdesc:abf86f7c6ce91aa7d1b2ecdcd969a8100"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads and filters the gyroscopes.  <a href="#abf86f7c6ce91aa7d1b2ecdcd969a8100">More...</a><br/></td></tr>
+<tr class="memitem:abf86f7c6ce91aa7d1b2ecdcd969a8100"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abf86f7c6ce91aa7d1b2ecdcd969a8100"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#abf86f7c6ce91aa7d1b2ecdcd969a8100">read_gyr_sensors</a> (void)</td></tr>
+<tr class="memdesc:abf86f7c6ce91aa7d1b2ecdcd969a8100"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads and filters the gyroscopes. <br/></td></tr>
 <tr class="separator:abf86f7c6ce91aa7d1b2ecdcd969a8100"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52789b5b751a66d96efbd4affda216ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a52789b5b751a66d96efbd4affda216ba">read_acc_sensors</a> (void)</td></tr>
 <tr class="memdesc:a52789b5b751a66d96efbd4affda216ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads and filters the accelerometers.  <a href="#a52789b5b751a66d96efbd4affda216ba">More...</a><br/></td></tr>
@@ -167,8 +198,76 @@ Functions</h2></td></tr>
 <tr class="memitem:a1b83a366a672f3dc32fbed71e5ebe077"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a1b83a366a672f3dc32fbed71e5ebe077">read_rx_input</a> (void)</td></tr>
 <tr class="memdesc:a1b83a366a672f3dc32fbed71e5ebe077"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads RX data.  <a href="#a1b83a366a672f3dc32fbed71e5ebe077">More...</a><br/></td></tr>
 <tr class="separator:a1b83a366a672f3dc32fbed71e5ebe077"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a01020628802e60dee9f2e968dcab2f46"><td class="memItemLeft" align="right" valign="top">unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a01020628802e60dee9f2e968dcab2f46">rcInput</a> [7]</td></tr>
+<tr class="separator:a01020628802e60dee9f2e968dcab2f46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a078122be7eecea02fe0bdd599e46208c"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a078122be7eecea02fe0bdd599e46208c">rxLoss</a></td></tr>
+<tr class="separator:a078122be7eecea02fe0bdd599e46208c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfa8bbbd92bae257cc2aaf699f2ccaca"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#acfa8bbbd92bae257cc2aaf699f2ccaca">rxFirst</a></td></tr>
+<tr class="separator:acfa8bbbd92bae257cc2aaf699f2ccaca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14eb9bc48de692883e38db2a9a6ba75c"><td class="memItemLeft" align="right" valign="top">signed short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a14eb9bc48de692883e38db2a9a6ba75c">yawtrim</a></td></tr>
+<tr class="separator:a14eb9bc48de692883e38db2a9a6ba75c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89aca8357300b0f6d1f6257307456b54"><td class="memItemLeft" align="right" valign="top">signed short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a89aca8357300b0f6d1f6257307456b54">throttletrim</a></td></tr>
+<tr class="separator:a89aca8357300b0f6d1f6257307456b54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adca97acc6b0ff71f782f9c8a484a47b8"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#adca97acc6b0ff71f782f9c8a484a47b8">throttle</a></td></tr>
+<tr class="separator:adca97acc6b0ff71f782f9c8a484a47b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f1a6c4d695e238858619a5968ca0436"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a2f1a6c4d695e238858619a5968ca0436">throttle_angle</a></td></tr>
+<tr class="separator:a2f1a6c4d695e238858619a5968ca0436"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb66f4553a423789fdb87299e40e6b09"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#aeb66f4553a423789fdb87299e40e6b09">hold_thro_off</a></td></tr>
+<tr class="separator:aeb66f4553a423789fdb87299e40e6b09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0283296cf987ab548bf85e24d194add0"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a0283296cf987ab548bf85e24d194add0">auxState</a></td></tr>
+<tr class="separator:a0283296cf987ab548bf85e24d194add0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a214247ebd842db7f18635ef404ae477b"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a214247ebd842db7f18635ef404ae477b">flapState</a></td></tr>
+<tr class="separator:a214247ebd842db7f18635ef404ae477b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdb51ec8bebbf85c25eb1f7e95015fae"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#abdb51ec8bebbf85c25eb1f7e95015fae">rateState</a></td></tr>
+<tr class="separator:abdb51ec8bebbf85c25eb1f7e95015fae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ce0b5d8ed35efb23b7a912ea31b1921"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a0ce0b5d8ed35efb23b7a912ea31b1921">throState</a></td></tr>
+<tr class="separator:a0ce0b5d8ed35efb23b7a912ea31b1921"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80c97fdfa3d709659e4a3a599c62941e"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a80c97fdfa3d709659e4a3a599c62941e">aileState</a></td></tr>
+<tr class="separator:a80c97fdfa3d709659e4a3a599c62941e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aa6c2482ebb112498dc4470e94d1410"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a5aa6c2482ebb112498dc4470e94d1410">elevState</a></td></tr>
+<tr class="separator:a5aa6c2482ebb112498dc4470e94d1410"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6ec6ec3fa207f75f5b94ad4324a14fe"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ad6ec6ec3fa207f75f5b94ad4324a14fe">ruddState</a></td></tr>
+<tr class="separator:ad6ec6ec3fa207f75f5b94ad4324a14fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b1a189ab628486ec9b4057f31404b11"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a7b1a189ab628486ec9b4057f31404b11">flapswitch</a></td></tr>
+<tr class="separator:a7b1a189ab628486ec9b4057f31404b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb53d122bc7b4b52d53cadac559acc0b"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#adb53d122bc7b4b52d53cadac559acc0b">pitchDemandSpin</a></td></tr>
+<tr class="separator:adb53d122bc7b4b52d53cadac559acc0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace18b32da8be76b6de1b44fa4a29e755"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ace18b32da8be76b6de1b44fa4a29e755">rollDemandSpin</a></td></tr>
+<tr class="separator:ace18b32da8be76b6de1b44fa4a29e755"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a472a62edf0d509f521fca523a6b62179"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a472a62edf0d509f521fca523a6b62179">pitchDemandSpinold</a></td></tr>
+<tr class="separator:a472a62edf0d509f521fca523a6b62179"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f93ed6bfbfdf8f073f3b5962f3cd3bc"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a1f93ed6bfbfdf8f073f3b5962f3cd3bc">rollDemandSpinold</a></td></tr>
+<tr class="separator:a1f93ed6bfbfdf8f073f3b5962f3cd3bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f1bd4cbcab28f474315dc545d8f58d6"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a9f1bd4cbcab28f474315dc545d8f58d6">gps_valid</a></td></tr>
+<tr class="separator:a9f1bd4cbcab28f474315dc545d8f58d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac72c35f17f08d2e1bb10271c4fb5f2c6"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#ac72c35f17f08d2e1bb10271c4fb5f2c6">batteryVoltage</a></td></tr>
+<tr class="separator:ac72c35f17f08d2e1bb10271c4fb5f2c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cc9550b3ab20742147edf2ee0a29621"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a6cc9550b3ab20742147edf2ee0a29621">ultra</a></td></tr>
+<tr class="separator:a6cc9550b3ab20742147edf2ee0a29621"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac2f98bed4ad4ffb62cfb6b5a83115f3"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#aac2f98bed4ad4ffb62cfb6b5a83115f3">oldUltra</a></td></tr>
+<tr class="separator:aac2f98bed4ad4ffb62cfb6b5a83115f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb3279a87ce613ae9139fc7967c9a024"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#acb3279a87ce613ae9139fc7967c9a024">ultraLoss</a></td></tr>
+<tr class="separator:acb3279a87ce613ae9139fc7967c9a024"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abffc5ca516aa3689a057ad62c0017996"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structalt_struct.html">altStruct</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#abffc5ca516aa3689a057ad62c0017996">alt</a></td></tr>
+<tr class="separator:abffc5ca516aa3689a057ad62c0017996"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09e2e40716bdfd074ed214411a90c781"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structthree_axis_sensor_struct_gyro.html">threeAxisSensorStructGyro</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a09e2e40716bdfd074ed214411a90c781">Gyro</a></td></tr>
+<tr class="separator:a09e2e40716bdfd074ed214411a90c781"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ef0cde845380053dd5aa78932332bef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structthree_axis_sensor_struct_accel.html">threeAxisSensorStructAccel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#a9ef0cde845380053dd5aa78932332bef">Accel</a></td></tr>
+<tr class="separator:a9ef0cde845380053dd5aa78932332bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4e07a37f029c8bf0bfd8d1e83da4a05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structthree_axis_sensor_struct_mag.html">threeAxisSensorStructMag</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inputs_8h.html#af4e07a37f029c8bf0bfd8d1e83da4a05">Mag</a></td></tr>
+<tr class="separator:af4e07a37f029c8bf0bfd8d1e83da4a05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Macro Definition Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Sensor and user inputs. </p>
+<dl class="section author"><dt>Author</dt><dd>Yuan Gao </dd>
+<dd>
+Henry Fletcher </dd>
+<dd>
+Oskar Weigl </dd></dl>
+</div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="adad2e98d93241aa7c561fd652b6bd479"></a>
 <div class="memitem">
 <div class="memproto">
@@ -178,6 +277,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Running average length for Accel averaging </p>
 
 </div>
 </div>
@@ -190,6 +290,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Running average length for Altitude averaging </p>
 
 </div>
 </div>
@@ -202,6 +303,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Running average length for Altitude derivative averaging </p>
 
 </div>
 </div>
@@ -214,6 +316,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Running average length for Gyro averaging </p>
 
 </div>
 </div>
@@ -226,6 +329,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Running average length for Magneto averaging </p>
 
 </div>
 </div>
@@ -238,6 +342,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Corresponds to input when stick is at top (approx) </p>
 
 </div>
 </div>
@@ -250,6 +355,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>~(MAXSTICK+MIDSTICK)/2 - 50 </p>
 
 </div>
 </div>
@@ -262,6 +368,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Corresponds to input when stick is in middle (approx) </p>
 
 </div>
 </div>
@@ -274,6 +381,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>~(MIDSTICK+OFFSTICK)/2 + 50 </p>
 
 </div>
 </div>
@@ -286,6 +394,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Corresponds to input when stick is at bottom (approx) </p>
 
 </div>
 </div>
@@ -331,24 +440,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3935302654f0349bc61d4090915960e7"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void gps_status </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname">)</td><td></td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Filters GPS and barometer altitude. </p>
-
-</div>
-</div>
 <a class="anchor" id="a52789b5b751a66d96efbd4affda216ba"></a>
 <div class="memitem">
 <div class="memproto">
@@ -383,6 +474,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Reads and filters barometer. </p>
+<p>There are two versions of Thalamus, one with a barometer chip that needs to be manually triggered, and temperature compensated, another with a barometer chip that does all this internally. The Thalamus library auto-detects which is in use, but the user code must perform the trigering. The library is set up so that the barometer chip that doesn't need triggering simply ignores the trigering. This makes it safe to write code that supports both barometers </p>
 
 </div>
 </div>
@@ -402,24 +494,6 @@ Functions</h2></td></tr>
 
 <p>Reads ADC for the battery voltage. </p>
 <p>Reads the battery voltage ADC. An integer/bitwise operation can be used to obtain the battery voltage in millivolts without loosing accuracy (assuming the resistors that are part of the potential divider is ideal). But this gets filtered anyway using a SPR filter on a float. </p>
-
-</div>
-</div>
-<a class="anchor" id="abf86f7c6ce91aa7d1b2ecdcd969a8100"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void read_gyr_sensors </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname">)</td><td></td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Reads and filters the gyroscopes. </p>
 
 </div>
 </div>
@@ -457,7 +531,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Reads RX data. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Perform RC signal loss state setting </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Perform RC signal loss state setting and stuff like autoland </dd></dl>
 
 </div>
 </div>
@@ -499,13 +573,391 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a class="anchor" id="a9ef0cde845380053dd5aa78932332bef"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structthree_axis_sensor_struct_accel.html">threeAxisSensorStructAccel</a> Accel</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Struct for accel data </p>
+
+</div>
+</div>
+<a class="anchor" id="a80c97fdfa3d709659e4a3a599c62941e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char aileState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input aile switch state </p>
+
+</div>
+</div>
+<a class="anchor" id="abffc5ca516aa3689a057ad62c0017996"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structalt_struct.html">altStruct</a> alt</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Struct for altitude data </p>
+
+</div>
+</div>
+<a class="anchor" id="a0283296cf987ab548bf85e24d194add0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char auxState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input aux switch state </p>
+
+</div>
+</div>
+<a class="anchor" id="ac72c35f17f08d2e1bb10271c4fb5f2c6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float batteryVoltage</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Contains battery voltage in millivolts </p>
+
+</div>
+</div>
+<a class="anchor" id="a5aa6c2482ebb112498dc4470e94d1410"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char elevState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input elev switch state </p>
+
+</div>
+</div>
+<a class="anchor" id="a214247ebd842db7f18635ef404ae477b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char flapState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input flap switch (button) state </p>
+
+</div>
+</div>
+<a class="anchor" id="a7b1a189ab628486ec9b4057f31404b11"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int flapswitch</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input flap switch toggle </p>
+
+</div>
+</div>
+<a class="anchor" id="a9f1bd4cbcab28f474315dc545d8f58d6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char gps_valid</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Boolean for whether the GPS data is valid </p>
+
+</div>
+</div>
+<a class="anchor" id="a09e2e40716bdfd074ed214411a90c781"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structthree_axis_sensor_struct_gyro.html">threeAxisSensorStructGyro</a> Gyro</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Struct for gyro data </p>
+
+</div>
+</div>
+<a class="anchor" id="aeb66f4553a423789fdb87299e40e6b09"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char hold_thro_off</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Boolean for holding throttle off </p>
+
+</div>
+</div>
+<a class="anchor" id="af4e07a37f029c8bf0bfd8d1e83da4a05"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structthree_axis_sensor_struct_mag.html">threeAxisSensorStructMag</a> Mag</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Struct for magneto data </p>
+
+</div>
+</div>
+<a class="anchor" id="aac2f98bed4ad4ffb62cfb6b5a83115f3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float oldUltra</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Contains the previous ultrasound reading </p>
+
+</div>
+</div>
+<a class="anchor" id="adb53d122bc7b4b52d53cadac559acc0b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float pitchDemandSpin</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Pitch demand rotated to body frame </p>
+
+</div>
+</div>
+<a class="anchor" id="a472a62edf0d509f521fca523a6b62179"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float pitchDemandSpinold</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Pitch demand rotated to body frame old value </p>
+
+</div>
+</div>
+<a class="anchor" id="abdb51ec8bebbf85c25eb1f7e95015fae"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char rateState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input rate switch state </p>
+
+</div>
+</div>
+<a class="anchor" id="a01020628802e60dee9f2e968dcab2f46"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned short rcInput[7]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Contains RX input </p>
+
+</div>
+</div>
+<a class="anchor" id="ace18b32da8be76b6de1b44fa4a29e755"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float rollDemandSpin</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Roll demand rotated to body frame </p>
+
+</div>
+</div>
+<a class="anchor" id="a1f93ed6bfbfdf8f073f3b5962f3cd3bc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float rollDemandSpinold</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Roll demand rotated to body frame old value </p>
+
+</div>
+</div>
+<a class="anchor" id="ad6ec6ec3fa207f75f5b94ad4324a14fe"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char ruddState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input rudd switch state </p>
+
+</div>
+</div>
+<a class="anchor" id="acfa8bbbd92bae257cc2aaf699f2ccaca"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int rxFirst</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Counts the first few RX data, used to ignore invalid initial values </p>
+
+</div>
+</div>
+<a class="anchor" id="a078122be7eecea02fe0bdd599e46208c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int rxLoss</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Increments if RX is not available </p>
+
+</div>
+</div>
+<a class="anchor" id="a0ce0b5d8ed35efb23b7a912ea31b1921"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char throState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>RX input thro switch state </p>
+
+</div>
+</div>
+<a class="anchor" id="adca97acc6b0ff71f782f9c8a484a47b8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float throttle</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Throttle value </p>
+
+</div>
+</div>
+<a class="anchor" id="a2f1a6c4d695e238858619a5968ca0436"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float throttle_angle</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Throttle adjustment when pitch/rolled </p>
+
+</div>
+</div>
+<a class="anchor" id="a89aca8357300b0f6d1f6257307456b54"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">signed short throttletrim</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Initial trottle trim </p>
+
+</div>
+</div>
+<a class="anchor" id="a6cc9550b3ab20742147edf2ee0a29621"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float ultra</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Contains the ultrasound reading </p>
+
+</div>
+</div>
+<a class="anchor" id="acb3279a87ce613ae9139fc7967c9a024"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int ultraLoss</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Increments if ultrasound is not available </p>
+
+</div>
+</div>
+<a class="anchor" id="a14eb9bc48de692883e38db2a9a6ba75c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">signed short yawtrim</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Initial yaw input trim </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><a class="el" href="inputs_8h.html">inputs.h</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 23:46:17 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Wed Sep 11 2013 13:11:54 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

@@ -1,3 +1,8 @@
+/*!
+\file Thalamus/inc/all.h
+\brief ALL the inludes!
+*/
+
 #include "thal.h"
 #include "mavlink.h"
 #include "calibrate.h"

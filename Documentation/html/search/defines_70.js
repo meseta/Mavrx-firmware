@@ -7,18 +7,5 @@ var searchData=
   ['pitch_5fkdd',['PITCH_Kdd',['../params_8h.html#a2b527ef20ceb7b0717e1c8f7ec1cf457',1,'params.h']]],
   ['pitch_5fki',['PITCH_Ki',['../params_8h.html#a1ccbec3bd48bd5bb004199f8087e07a4',1,'params.h']]],
   ['pitch_5fkp',['PITCH_Kp',['../params_8h.html#a1987f08e195e4a83abdef1498e9dbb44',1,'params.h']]],
-  ['pitch_5fsens',['PITCH_SENS',['../params_8h.html#a99249ea00ad66e03f0c4c763ea93991b',1,'params.h']]],
-  ['pitch_5fspl',['PITCH_SPL',['../params_8h.html#aa758b8a97b8b43a4feec89a171c90eea',1,'params.h']]],
-  ['port_5fstartup_5finit',['PORT_STARTUP_INIT',['../config_8h.html#ac8f08371cfe721cb95f980e6eef4e570',1,'config.h']]],
-  ['pwm_5fdefault_5fe',['PWM_DEFAULT_E',['../config_8h.html#ab7bdc64e2feb762aebb43cdd84426d4e',1,'config.h']]],
-  ['pwm_5fdefault_5fn',['PWM_DEFAULT_N',['../config_8h.html#a1e32b973b1dca6df558e9dcdbdaf4bdc',1,'config.h']]],
-  ['pwm_5fdefault_5fs',['PWM_DEFAULT_S',['../config_8h.html#ae05d9acb9f1de2ab0357e5a46f0bf234',1,'config.h']]],
-  ['pwm_5fdefault_5fw',['PWM_DEFAULT_W',['../config_8h.html#aeb12367afed1c5327398284d2c86c8bb',1,'config.h']]],
-  ['pwm_5fdefault_5fx',['PWM_DEFAULT_X',['../config_8h.html#aeb75f0c9e5b0d21b9c07f3c9c5743861',1,'config.h']]],
-  ['pwm_5fdefault_5fy',['PWM_DEFAULT_Y',['../config_8h.html#adcdbd0165c7df5ebd5b0482adc32a7d3',1,'config.h']]],
-  ['pwm_5ffilters_5fon',['PWM_FILTERS_ON',['../config_8h.html#af0e9d8bac0c81b2de3f9c3e6aa24364f',1,'config.h']]],
-  ['pwm_5fnesw_5ffilter',['PWM_NESW_FILTER',['../config_8h.html#a1f5abaf97850db3dd76d8224189f46c0',1,'config.h']]],
-  ['pwm_5fneswfreq',['PWM_NESWFREQ',['../config_8h.html#a69717c6acfb58c178d919c86a4943900',1,'config.h']]],
-  ['pwm_5fxy_5ffilter',['PWM_XY_FILTER',['../config_8h.html#a8a0050a1c5f653249805d1946fc6cd60',1,'config.h']]],
-  ['pwm_5fxyfreq',['PWM_XYFREQ',['../config_8h.html#a122115174c4974a8474bbbd526228346',1,'config.h']]]
+  ['pitch_5fsens',['PITCH_SENS',['../params_8h.html#a99249ea00ad66e03f0c4c763ea93991b',1,'params.h']]]
 ];

@@ -199,10 +199,11 @@ Performs a calibrate_gyr_temporary() and then saves to EEPROM
 */
 void calibrate_gyr(void) {
 	calibrate_gyr_temporary(6);
-	CAL_GYROX = Gyro.X.offset;
+	// NOT USED!
+	/*CAL_GYROX = Gyro.X.offset;
 	CAL_GYROY = Gyro.Y.offset;
 	CAL_GYROZ = Gyro.Z.offset;
-	eeprom_save_all();
+	eeprom_save_all();*/
 }
 
 /*!
