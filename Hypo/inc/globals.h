@@ -9,7 +9,7 @@
 #define __GLOBALS_H__
 
 #define FIRMWARE_VERSION    1           /*!< Firmware version */
-#define MESSAGE_LOOP_HZ     25          /*!< Max frequency of message loop in Hz (keep this number low, like around 25) */
+#define MESSAGE_LOOP_HZ     50          /*!< Max frequency of message loop in Hz (keep this number low, like around 25) */
 #define XBEE_PANIC          3           /*!< Number of seconds after missing heartbeat from GCS before considering XBee fail */
 #define GPS_PANIC           3           /*!< Number of seconds after no message from GPS before considering GPS fail */
 #define THAL_PANIC          3           /*!< Number of seconds after no message from Thalamus before considering Thalamus fail */

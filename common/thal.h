@@ -989,6 +989,8 @@ static inline void RSTReset(void) { ResetInit(); }
 	#define THALCTRL_EEPROM_LOADOK			0x0104
 	#define THALCTRL_RXFOUND				0x0201
 	#define THALCTRL_RXLOST					0x0202
+	#define THALCTRL_BATTLOW				0x0301
+	#define THALCTRL_BATTCRITICAL			0x0302
 	
 	#define THALCTRL_RESET					0xffff
 	

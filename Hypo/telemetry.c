@@ -105,7 +105,48 @@ void mavlink_telemetry(void) {
 			MAVSendTextFrom(MAV_SEVERITY_NOTICE, "NOTICE: Receiving waypoint timeout!", MAV_COMP_ID_MISSIONPLANNER);
 		}
 	}
-	else if(dataRate[MAV_DATA_STREAM_RAW_SENSORS] && rawSensorStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_SENSORS]) {
+	
+	if(dataRate[MAV_DATA_STREAM_POSITION] && positionStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_POSITION]) {
+		positionStreamCounter= 0;
+
+		mavlink_gps_raw_int.time_usec = sysUS;
+		
+		mavlink_msg_gps_raw_int_encode(mavlinkID, MAV_COMP_ID_GPS, &mavlink_tx_msg, &mavlink_gps_raw_int);
+		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+		XBeeAllow();
+	}
+	
+	if(dataRate[MAV_DATA_STREAM_RAW_CONTROLLER] && rawControllerCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_CONTROLLER]) {
+		//ATTITUDE_CONTROLLER_OUTPUT, POSITION_CONTROLLER_OUTPUT, NAV_CONTROLLER_OUTPUT
+		rawControllerCounter = 0;
+		
+		if(ilink_attitude.isNew) {
+			Port0Toggle(PIN13);
+			ilink_attitude.isNew = 0;
+			mavlink_attitude.time_boot_ms = sysMS;
+			mavlink_attitude.roll = ilink_attitude.roll;
+			mavlink_attitude.pitch = ilink_attitude.pitch;
+			mavlink_attitude.yaw = ilink_attitude.yaw;
+			mavlink_attitude.rollspeed = ilink_attitude.rollRate;
+			mavlink_attitude.pitchspeed = ilink_attitude.pitchRate;
+			mavlink_attitude.yawspeed = ilink_attitude.yawRate;
+			
+			mavlink_msg_attitude_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_attitude);
+			mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+			XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+			XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+			XBeeAllow();
+		}
+		Port0Toggle(PIN14);
+		XBeeInhibit();
+		ILinkPoll(ID_ILINK_ATTITUDE);
+		XBeeAllow();
+		
+	}
+	
+	if(dataRate[MAV_DATA_STREAM_RAW_SENSORS] && rawSensorStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_SENSORS]) {
 		rawSensorStreamCounter = 0;
 		
 		if(ilink_rawimu.isNew) {
@@ -131,7 +172,8 @@ void mavlink_telemetry(void) {
 		XBeeAllow();
 		
 	}
-	else if(dataRate[MAV_DATA_STREAM_EXTENDED_STATUS] && extStatusStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTENDED_STATUS]) {
+	
+	if(dataRate[MAV_DATA_STREAM_EXTENDED_STATUS] && extStatusStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTENDED_STATUS]) {
 		extStatusStreamCounter = 0;
 		// GPS_STATUS, CONTROL_STATUS, AUX_STATUS
 		
@@ -203,7 +245,8 @@ void mavlink_telemetry(void) {
 		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
 		XBeeAllow();
 	}
-	else if(dataRate[MAV_DATA_STREAM_RC_CHANNELS] && rcChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RC_CHANNELS]) {
+	
+	if(dataRate[MAV_DATA_STREAM_RC_CHANNELS] && rcChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RC_CHANNELS]) {
 		// RC_CHANNELS_SCALED, RC_CHANNELS_RAW, SERVO_OUTPUT_RAW
 		 rcChannelCounter= 0;
 		 
@@ -275,43 +318,8 @@ void mavlink_telemetry(void) {
 		XBeeAllow();
 		 
 	}
-	else if(dataRate[MAV_DATA_STREAM_RAW_CONTROLLER] && rawControllerCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_RAW_CONTROLLER]) {
-		//ATTITUDE_CONTROLLER_OUTPUT, POSITION_CONTROLLER_OUTPUT, NAV_CONTROLLER_OUTPUT
-		rawControllerCounter = 0;
-		
-		if(ilink_attitude.isNew) {
-			ilink_attitude.isNew = 0;
-			mavlink_attitude.time_boot_ms = sysMS;
-			mavlink_attitude.roll = ilink_attitude.roll;
-			mavlink_attitude.pitch = ilink_attitude.pitch;
-			mavlink_attitude.yaw = ilink_attitude.yaw;
-			mavlink_attitude.rollspeed = ilink_attitude.rollRate;
-			mavlink_attitude.pitchspeed = ilink_attitude.pitchRate;
-			mavlink_attitude.yawspeed = ilink_attitude.yawRate;
-			
-			mavlink_msg_attitude_encode(mavlinkID, MAV_COMP_ID_IMU, &mavlink_tx_msg, &mavlink_attitude);
-			mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-			XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-			XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-			XBeeAllow();
-		}
-		XBeeInhibit();
-		ILinkPoll(ID_ILINK_ATTITUDE);
-		XBeeAllow();
-		
-	}
-	else if(dataRate[MAV_DATA_STREAM_POSITION] && positionStreamCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_POSITION]) {
-		positionStreamCounter= 0;
-
-		mavlink_gps_raw_int.time_usec = sysUS;
-		
-		mavlink_msg_gps_raw_int_encode(mavlinkID, MAV_COMP_ID_GPS, &mavlink_tx_msg, &mavlink_gps_raw_int);
-		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-		XBeeAllow();
-	}
-	else if(dataRate[MAV_DATA_STREAM_EXTRA1] && extra1ChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA1]) {
+	
+	if(dataRate[MAV_DATA_STREAM_EXTRA1] && extra1ChannelCounter >= MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA1]) {
 		extra1ChannelCounter = 0;
 				
 		if(ilink_scaledimu.isNew) {
@@ -337,7 +345,8 @@ void mavlink_telemetry(void) {
 		XBeeAllow();
 		
 	}
-	else if(dataRate[MAV_DATA_STREAM_EXTRA2] && extra2ChannelCounter > MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA2]) {
+	
+	if(dataRate[MAV_DATA_STREAM_EXTRA2] && extra2ChannelCounter > MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA2]) {
 		extra2ChannelCounter = 0;
 		
 		if(ilink_altitude.isNew) {
@@ -350,7 +359,8 @@ void mavlink_telemetry(void) {
 		ILinkPoll(ID_ILINK_ALTITUDE);
 		XBeeAllow();
 	}
-	else if(dataRate[MAV_DATA_STREAM_EXTRA3] && extra3ChannelCounter > MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA3]) {
+	
+	if(dataRate[MAV_DATA_STREAM_EXTRA3] && extra3ChannelCounter > MESSAGE_LOOP_HZ/dataRate[MAV_DATA_STREAM_EXTRA3]) {
 		extra3ChannelCounter = 0;
 		
 		if(ilink_debug.isNew) {
@@ -401,6 +411,8 @@ void mavlink_messages(void) {
 			case THALCTRL_ORIBAD:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Craft orientation does not match stored value!", MAV_COMP_ID_IMU);	break;
 			case THALCTRL_RXLOST:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Radio transmitter signal lost!", MAV_COMP_ID_IMU);	break;
 			case THALCTRL_RXFOUND:	MAVSendTextFrom(MAV_SEVERITY_INFO, "Radio transmitter signal found", MAV_COMP_ID_IMU);	break;
+			case THALCTRL_BATTLOW:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Battery low!", MAV_COMP_ID_SYSTEM_CONTROL);	break;
+			case THALCTRL_BATTCRITICAL:	MAVSendTextFrom(MAV_SEVERITY_CRITICAL, "CRITICAL: Batter critical!", MAV_COMP_ID_SYSTEM_CONTROL);	break;
 		}
 	}
 }

@@ -46,7 +46,7 @@ void setup() {
     mavlink_sys_status.onboard_control_sensors_health = mavlink_sys_status.onboard_control_sensors_enabled;
 
     // *** Establish ILink and Look for Thalamus
-    ILinkInit(6000);
+    ILinkInit(2000);
     XBeeInhibit();
     ILinkPoll(ID_ILINK_CLEARBUF); // forces Thalamus to clear its output buffers
 	unsigned int i;
@@ -60,6 +60,8 @@ void setup() {
     RITInitms(1000/MESSAGE_LOOP_HZ);  // RIT at 25Hz
     LEDOff(PLED);
     LEDInit(VLED);
+	Port0Init(PIN13 | PIN14 | PIN15 | PIN16);
+	Port0SetOut(PIN13 | PIN14 | PIN15 | PIN16);
 }
 
 /*!
@@ -148,7 +150,7 @@ defined by MESSAGE_LOOP_HZ).
 */
 void RITInterrupt(void) {
 	static unsigned char heartbeatCounter=0;
-	
+
     // *** Watchdogs
     // Incoming heartbeat watchdog
     heartbeatWatchdog++;
@@ -157,7 +159,7 @@ void RITInterrupt(void) {
         heartbeatWatchdog = MESSAGE_LOOP_HZ*(XBEE_PANIC+1); // prevent overflow
         //flashVLED = 5;
     }
-    
+	
     // GPS watchdog
     gpsWatchdog++;
     if(gpsWatchdog >= MESSAGE_LOOP_HZ*GPS_PANIC) {
@@ -195,23 +197,38 @@ void RITInterrupt(void) {
         idleCount = 0;
     }
 	
-    // *** Process GPS
-    XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
-    GPSFetchData();
+	// *** Process ILink
+    XBeeInhibit();
+    ILinkFetchData();
     XBeeAllow();
-
-    gps_navigate();
     
+	// Telemetry
     if(allowTransmit) {
 		paramater_transmit();
         mavlink_telemetry();
 		mavlink_messages();
     }
-
+	
+	// *** Process ILink
+	XBeeInhibit();
+	ILinkFetchData();
+	XBeeAllow();
+	
+	// GPS
+	static unsigned short gpsFetchCounter = 0;
+	gpsFetchCounter++;
+	if(gpsFetchCounter > MESSAGE_LOOP_HZ/10) {
+		gpsFetchCounter = 0; // fetch GPS at 10Hz
+		// *** Process GPS
+		XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
+		GPSFetchData();
+		XBeeAllow();
+	}
+    gps_navigate();
+	
     // *** Process ILink
     XBeeInhibit();
     ILinkFetchData();
     XBeeAllow();
-	
 }
 

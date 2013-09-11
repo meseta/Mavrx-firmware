@@ -186,9 +186,9 @@
 // *** ILink Config
 // ****************************************************************************
 #define ILINK_EN            1              // Enable the Interlink functions (0=off, 1=on)
-#define ILINK_TXBUFFER_SIZE 200
-#define ILINK_RXBUFFER_SIZE 200          // ILink buffer size
-#define ILINK_MAX_FETCH     128          // Maximum characters to fetch at once
+#define ILINK_TXBUFFER_SIZE 128
+#define ILINK_RXBUFFER_SIZE 256          // ILink buffer size
+#define ILINK_MAX_FETCH     200          // Maximum characters to fetch at once
 
 #if WHO_AM_I == I_AM_THALAMUS
 

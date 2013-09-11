@@ -76,15 +76,13 @@ void gps_status(void) {
 void read_rx_input(void) {			
 
 	if(RXGetData(rcInput)) {
-		if(rxLoss > 10) {
-			if(rxLoss > 50) {
-				rxLoss = 50;
-				ilink_thalctrl_tx.command = THALCTRL_RXFOUND;
-				ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
-			}
-			rxLoss -= 10;
+		if(rxLoss >= RX_PANIC) {
+			ilink_thalctrl_tx.command = THALCTRL_RXFOUND;
+			ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
 			if(armed && ilink_thalstat.systemStatus == THALSTAT_SYSTEMSTATUS_CRITICAL) ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_ACTIVE;
 		}
+		rxLoss = 0;
+		
 		ilink_inputs0.channel[0] = rcInput[RX_THRO];
 		ilink_inputs0.channel[1] = rcInput[RX_AILE];
 		ilink_inputs0.channel[2] = rcInput[RX_ELEV];
@@ -169,7 +167,7 @@ void read_rx_input(void) {
 	else {
 		rxLoss++;
 		
-		if(rxLoss >= RX_PANIC) {
+		if(rxLoss >= RX_PANIC) { // times two because we're running this function twice per slow loop
 			if(rxLoss == RX_PANIC) {
 				ilink_thalctrl_tx.command = THALCTRL_RXLOST;
 				ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
@@ -305,10 +303,24 @@ gets filtered anyway using a SPR filter on a float.
 void read_batt_voltage(void) {
 	// Because the factor is 6325/1024, we can do this in integer maths by right-shifting 10 bits instead of dividing by 1024.
 	unsigned short battV = (ADCGet() * 6325) >> 10; 
-	// battVoltage in milivolts
-	batteryVoltage *= 0.99f;
-	batteryVoltage += 0.01f * (float)battV;
-	ilink_thalstat.battVoltage = battV;
+	// battVoltage in milivolts, with a bit of filtering
+	batteryVoltage *= 0.95f;
+	batteryVoltage += 0.05f * (float)battV;
+	ilink_thalstat.battVoltage = batteryVoltage;
+	
+	static unsigned char batteryWarned = 0;
+	if(batteryVoltage < BATT_CRIT && batteryWarned == 1) {
+		ilink_thalctrl_tx.command = THALCTRL_BATTCRITICAL;
+		if(ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1)) {
+			batteryWarned = 2;
+		}
+	}
+	if(batteryVoltage < BATT_LOW && batteryWarned == 0) {
+		ilink_thalctrl_tx.command = THALCTRL_BATTLOW;
+		if(ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1)) {
+			batteryWarned = 1;
+		}
+	} 
 }
 
 /*!

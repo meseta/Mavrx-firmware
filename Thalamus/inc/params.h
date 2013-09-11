@@ -74,16 +74,16 @@ extern struct paramStorage_struct paramStorage[];
 #define GPS_ALTDe 		paramStorage[49].value	/*!< GPS altitude integral decay */
 #define GPS_ALTKd 		paramStorage[50].value	/*!< GPS altitude D gain */
 #define DETUNE			paramStorage[51].value	/*!< Detune at high throttle */
-#define BATT_LOW		paramStorage[52].value	/*!< Battery low voltage */
-#define BATT_CRIT	   	paramStorage[53].value	/*!< Battery critical voltage */
+#define BATT_LOW		paramStorage[52].value	/*!< Battery low voltage in mV */
+#define BATT_CRIT	   	paramStorage[53].value	/*!< Battery critical voltage in mV */
 #define ORI				paramStorage[54].value	/*!< Craft orientation/configuration */
 
 extern unsigned int paramCount;
 extern unsigned int paramSendCount;
 extern unsigned char paramSendSingle;
 
-#define EEPROM_OFFSET   0	/*!< EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess) */
-#define EEPROM_VERSION	10 	/*!< version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults */
+#define EEPROM_OFFSET   0x100	/*!< EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess) */
+#define EEPROM_VERSION	15 	/*!< version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults */
 
 void eeprom_load_all(void);
 void eeprom_save_all(void);

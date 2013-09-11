@@ -88,6 +88,7 @@ void setup(void) {
 		ADCTrigger(CHN7);
 		Delay(1);
 		ilink_thalstat.battVoltage = (ADCGet() * 6325) >> 10; // Because the factor is 6325/1024, we can do this in integer maths by right-shifting 10 bits instead of dividing by 1024.
+		batteryVoltage = ilink_thalstat.battVoltage;
 		
 	// *** Calibrate Sensors
 		SensorInit();
