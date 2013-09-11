@@ -1,8 +1,13 @@
+/*!
+\file Hypo/inc/ilink.h
+\brief MAVLink stuff
+
+\author Yuan Gao
+*/
+
 #ifndef __ILINK_H__
 #define __ILINK_H__
 
-
-// *** ILink stuff
 extern ilink_identify_t ilink_identify;
 extern ilink_thalstat_t ilink_thalstat;
 extern ilink_thalctrl_t ilink_thalctrl_rx;
@@ -19,6 +24,5 @@ extern ilink_gpsfly_t ilink_gpsfly;
 extern ilink_gpsreq_t ilink_gpsreq;
 extern ilink_debug_t ilink_debug;
 extern ilink_mancon_t ilink_mancon;
-
 
 #endif

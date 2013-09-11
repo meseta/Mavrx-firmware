@@ -93,7 +93,7 @@ $(document).ready(function(){initNavTree('structwaypoint_struct.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -109,39 +109,155 @@ $(document).ready(function(){initNavTree('structwaypoint_struct.html','');});
 <div class="title">waypointStruct Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Waypoint storage structure.  
+ <a href="structwaypoint_struct.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="gps_8h_source.html">gps.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:af48e0311746bc01574a90f142220e748"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af48e0311746bc01574a90f142220e748"></a>
-unsigned char&#160;</td><td class="memItemRight" valign="bottom"><b>command</b></td></tr>
+<tr class="memitem:af48e0311746bc01574a90f142220e748"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#af48e0311746bc01574a90f142220e748">command</a></td></tr>
 <tr class="separator:af48e0311746bc01574a90f142220e748"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f75709b48b5b8cb9226807ec309cc5b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7f75709b48b5b8cb9226807ec309cc5b"></a>
-unsigned char&#160;</td><td class="memItemRight" valign="bottom"><b>autocontinue</b></td></tr>
+<tr class="memitem:a7f75709b48b5b8cb9226807ec309cc5b"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#a7f75709b48b5b8cb9226807ec309cc5b">autocontinue</a></td></tr>
 <tr class="separator:a7f75709b48b5b8cb9226807ec309cc5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4837f5e157f0da9478b8e927d45e6fdd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4837f5e157f0da9478b8e927d45e6fdd"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>param1</b></td></tr>
+<tr class="memitem:a4837f5e157f0da9478b8e927d45e6fdd"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#a4837f5e157f0da9478b8e927d45e6fdd">param1</a></td></tr>
 <tr class="separator:a4837f5e157f0da9478b8e927d45e6fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15d92578c3350e0ad1c08815c02234ba"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a15d92578c3350e0ad1c08815c02234ba"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>param2</b></td></tr>
+<tr class="memitem:a15d92578c3350e0ad1c08815c02234ba"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#a15d92578c3350e0ad1c08815c02234ba">param2</a></td></tr>
 <tr class="separator:a15d92578c3350e0ad1c08815c02234ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44a2cfc549fb9caf02d4c66a25b73efd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a44a2cfc549fb9caf02d4c66a25b73efd"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>param3</b></td></tr>
+<tr class="memitem:a44a2cfc549fb9caf02d4c66a25b73efd"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#a44a2cfc549fb9caf02d4c66a25b73efd">param3</a></td></tr>
 <tr class="separator:a44a2cfc549fb9caf02d4c66a25b73efd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4467003dd21793768c431a947b684045"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4467003dd21793768c431a947b684045"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>param4</b></td></tr>
+<tr class="memitem:a4467003dd21793768c431a947b684045"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#a4467003dd21793768c431a947b684045">param4</a></td></tr>
 <tr class="separator:a4467003dd21793768c431a947b684045"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af88b946fb90d5f08b5fb740c70e98c10"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af88b946fb90d5f08b5fb740c70e98c10"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>x</b></td></tr>
+<tr class="memitem:af88b946fb90d5f08b5fb740c70e98c10"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#af88b946fb90d5f08b5fb740c70e98c10">x</a></td></tr>
 <tr class="separator:af88b946fb90d5f08b5fb740c70e98c10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab927965981178aa1fba979a37168db2a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab927965981178aa1fba979a37168db2a"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>y</b></td></tr>
+<tr class="memitem:ab927965981178aa1fba979a37168db2a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#ab927965981178aa1fba979a37168db2a">y</a></td></tr>
 <tr class="separator:ab927965981178aa1fba979a37168db2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3e6ed577a7c669c19de1f9c1b46c872"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab3e6ed577a7c669c19de1f9c1b46c872"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>z</b></td></tr>
+<tr class="memitem:ab3e6ed577a7c669c19de1f9c1b46c872"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwaypoint_struct.html#ab3e6ed577a7c669c19de1f9c1b46c872">z</a></td></tr>
 <tr class="separator:ab3e6ed577a7c669c19de1f9c1b46c872"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Waypoint storage structure. </p>
+</div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="a7f75709b48b5b8cb9226807ec309cc5b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char autocontinue</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>autocontinue comamnd </p>
+
+</div>
+</div>
+<a class="anchor" id="af48e0311746bc01574a90f142220e748"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char command</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>waypoint command </p>
+
+</div>
+</div>
+<a class="anchor" id="a4837f5e157f0da9478b8e927d45e6fdd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float param1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>parameter 1 (see MAVLink spec) </p>
+
+</div>
+</div>
+<a class="anchor" id="a15d92578c3350e0ad1c08815c02234ba"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float param2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>parameter 2 (see MAVLink spec) </p>
+
+</div>
+</div>
+<a class="anchor" id="a44a2cfc549fb9caf02d4c66a25b73efd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float param3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>parameter 3 (see MAVLink spec) </p>
+
+</div>
+</div>
+<a class="anchor" id="a4467003dd21793768c431a947b684045"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float param4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>parameter 4 (see MAVLink spec) </p>
+
+</div>
+</div>
+<a class="anchor" id="af88b946fb90d5f08b5fb740c70e98c10"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double x</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>waypoint x location (latitude) </p>
+
+</div>
+</div>
+<a class="anchor" id="ab927965981178aa1fba979a37168db2a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double y</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>waypoint y location (longitude) </p>
+
+</div>
+</div>
+<a class="anchor" id="ab3e6ed577a7c669c19de1f9c1b46c872"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double z</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>waypoint z location (altutude) </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>Hypo/main.c</li>
+<li>Hypo/inc/<a class="el" href="gps_8h_source.html">gps.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -149,7 +265,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>z</b></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="structwaypoint_struct.html">waypointStruct</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 23:33:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Wed Sep 11 2013 16:26:05 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

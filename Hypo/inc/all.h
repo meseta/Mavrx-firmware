@@ -1,3 +1,8 @@
+/*!
+\file Hypo/inc/all.h
+\brief ALL the inludes!
+*/
+
 #include "config.h"
 #include "params.h"
 #include "thal.h"

@@ -1,39 +1,52 @@
+/*!
+\file Hypo/gps.c
+\brief GPS waypoint flying
+
+\author Yuan Gao
+
+*/
+
 #include "all.h"
 
-// *** GPS stuff
-gps_nav_posecef_t gps_nav_posecef;
-gps_nav_posllh_t gps_nav_posllh;
-gps_nav_status_t gps_nav_status;
-gps_nav_sol_t gps_nav_sol;
-gps_nav_velned_t gps_nav_velned;
-gps_nav_timeutc_t gps_nav_timeutc;
+gps_nav_posecef_t gps_nav_posecef;		/*!< GPS Position in ECEF (not used) */
+gps_nav_posllh_t gps_nav_posllh;		/*!< GPS Position in LLH */	
+gps_nav_status_t gps_nav_status;		/*!< GPS navigation status */	
+gps_nav_sol_t gps_nav_sol;				/*!< GPS navigation solution */
+gps_nav_velned_t gps_nav_velned;		/*!< GPS velocity in NED */
+gps_nav_timeutc_t gps_nav_timeutc;		/*!< GPS time in UTC */
 
+unsigned int gpsSendCounter;			/*!< GPS loop counter */
 
-unsigned int gpsSendCounter;
+waypointStruct waypoint[MAX_WAYPOINTS];	/*!< Waypoint storage */
+double home_X;							/*!< Home X waypoint */
+double home_Y;							/*!< Home Y waypoint */
+double home_Z;							/*!< Home Z waypoint */
+unsigned char home_valid=0;				/*!< Boolean: whether home waypoint is valid */
 
-// ****** waypoints
+unsigned short waypointCurrent=0;		/*!< Current waypoint */
+unsigned short waypointCount=0;			/*!< Number of waypoints */
+unsigned short waypointReceiveIndex=0;	/*!< Index for receiving waypoints */
+unsigned char waypointTries;			/*!< Number of attemts to get waypoint*/
+unsigned char waypointValid=0;			/*!< Boolean: Whether waypoints are vaild */
+unsigned char waypointGo=0;				/*!< Boolean: Waypoints execution */
+unsigned char waypointReached;			/*!< Boolean: Waypoint is reached */
+unsigned int waypointLoiterTimer;		/*!< Waypoint loiter time */
+unsigned char waypointProviderID;		/*!< The provider device of the waypoints */
+unsigned char waypointProviderComp;		/*!< The provider component of the waypoints */
 
-waypointStruct waypoint[MAX_WAYPOINTS];
-double home_X;
-double home_Y;
-double home_Z;
-float home_valid=0;
+unsigned short waypointTimer=0;			/*!< Waypoint loop timer */
 
-unsigned short waypointCurrent=0, waypointCount=0, waypointReceiveIndex=0;
-unsigned char waypointTries, waypointValid=0, waypointGo=0, waypointReached;
-unsigned short waypointTimer=0;
-unsigned int waypointLoiterTimer;
-unsigned char waypointProviderID, waypointProviderComp;
-float waypointPhase;
+unsigned char gpsFixed=0;				/*!< Boolean: whether GPS is fixed */
+unsigned char gps_action = 0;			/*!< GPS Actions */
 
-float lat_diff_i=0;
-float lon_diff_i=0;
+/*!
+\brief Does the GPS navigation thing
 
-unsigned char gpsFixed=0;
-unsigned char gps_action = 0;
-
-
+Comes in five parts: collect GPS data, apply GPS action, GPS navigation
+interpolator, GPS PID, and waypoint goal detection
+*/
 void gps_navigate(void) {
+	static unsigned short gpsSendCounter = 0;
     gpsSendCounter++;
 	
 	if(gpsSendCounter >= MESSAGE_LOOP_HZ/5) {
@@ -411,6 +424,9 @@ void gps_navigate(void) {
             float lon_diff = (double)(interpolator_Y - craft_Y) * (double)111194.92664455873734580834 * fcos((float)((double)craft_X*(double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
             float alt_diff = (float)(interpolator_Z - craft_Z);
             
+			static float lat_diff_i = 0;
+			static float lon_diff_i = 0;
+			
             lat_diff_i += lat_diff;
             lon_diff_i += lon_diff;
 
@@ -506,7 +522,12 @@ void gps_navigate(void) {
 }
 
 
-// *** GPS messages
+/*!
+\brief Communications with the uBlox GPS
+
+This function is called by the GPS processing function that needs to be called
+at regular intervals to poll the GPS for data over I2C
+*/
 void GPSMessage(unsigned short id, unsigned char * buffer, unsigned short length) {
     unsigned char * ptr = 0;
     unsigned short j;

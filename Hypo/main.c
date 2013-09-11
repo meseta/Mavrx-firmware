@@ -1,5 +1,25 @@
+/*!
+\file Hypo/main.c
+\brief Hypo main file
+
+On bootup, a startup function is run (part of the function library, and 
+not	documented in this code.  The startuf function after initialising 
+the hardware proceeds to invoke the function setup() followed by loop().
+
+This file contains setup() and loop(), as well as some of the interrupt 
+service routines that are set to run repeatedly.
+
+\author Yuan Gao
+*/
+
 #include "all.h"
 
+/*!
+\brief This is the setup function, sets everything up.
+
+This is the first user function called after the initialisation is complete.
+All the hardware peripherals and stuff are initialised here.
+*/
 void setup() {
     // *** LED setup
     LEDInit(PLED);
@@ -42,6 +62,13 @@ void setup() {
     LEDInit(VLED);
 }
 
+/*!
+\brief Main loop (idle loop, doesn't do much)
+
+This is the main loop, the processor sits in here when it's not dealing with 
+interrupts.  This loop's only purpose right now is to deal with button presses,
+and XBee modem status
+*/
 void loop() {
     if(idleCount < IDLE_MAX) idleCount++; // this is the counter for CPU idle time
     
@@ -73,6 +100,12 @@ void loop() {
     }
 }
 
+/*!
+\brief System Tick Timer, deals with timing, flashing, pushing.
+
+This function is triggered by interrupt every 1ms, its purpose is to keep
+timings, flash LEDs, time button pushes, and miscellaneous other timing needs
+*/
 void SysTickInterrupt(void) {
     // deal with button(s)
     if(PRGBlankTimer) {
@@ -107,19 +140,14 @@ void SysTickInterrupt(void) {
     }
 }
 
+/*!
+\brief Repetitive Interrput Timer, this is the main action loop.
+
+This function is triggered by interrupt every few tens of ms (actual speed, is 
+defined by MESSAGE_LOOP_HZ).
+*/
 void RITInterrupt(void) {
-
-
-    waypointTimer++;
-	
-    rawSensorStreamCounter++;
-    extStatusStreamCounter++;
-    rcChannelCounter++;
-    rawControllerCounter++;
-    positionStreamCounter++;
-    extra1ChannelCounter++;
-    extra2ChannelCounter++;
-    extra3ChannelCounter++;
+	static unsigned char heartbeatCounter=0;
 	
     // *** Watchdogs
     // Incoming heartbeat watchdog

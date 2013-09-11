@@ -36,84 +36,12 @@ Needs to be initialised to paramCount so that parameters aren't sent on startup
 */
 unsigned int paramSendCount = sizeof(paramStorage)/(PARAMNAMELEN+4);
 
-paramBuffer_t paramBuffer[PARAMBUFFER_SIZE];
-unsigned int paramPointer = PARAMBUFFER_SIZE;
-unsigned char paramWaitForRemote = 0;
+paramBuffer_t paramBuffer[PARAMBUFFER_SIZE];	/*!< Parameter buffer storage */
+unsigned int paramPointer = PARAMBUFFER_SIZE;	/*!< Parameter buffer storage space */
+unsigned char paramWaitForRemote = 0;			/*!< Boolean for determining whether to wait for the remote device to transmit its parameters */
 
 /*!
-\brief Loads all parametrs from EEPRM (this is deprecated)
-
-First it loads the parameters into temporary storage to verify the checksum.  
-Only if the checksums are correct will the function update the parameters in RAM
-*/
-void eeprom_load_all_old(void) {
-	unsigned char chkA, chkB;
-	unsigned int i;
-	unsigned char * ptr;
-	float tempStorage[EEPROM_MAX_PARAMS+1];
-	
-	// Read EEPROM into some temporarily allocated space
-	EEPROMRead(EEPROM_OFFSET, (unsigned char *)&tempStorage, paramCount * 4 + 2);
-	
-	// Calculate the Fletcher-16 checksum
-	chkA=EEPROM_VERSION;
-	chkB=EEPROM_VERSION;
-	ptr = (unsigned char *)&tempStorage;
-	for(i=0; i<paramCount*4; i++) {
-		chkA += ptr[i];
-		chkB += chkA;
-	}
-	
-	// Verify the checksum is valid (at this point i points to the correct elements for chkA and chkB)
-	if(chkA == ptr[i+1] && chkB == ptr[i]) {
-		// For valid data, load into parameters in RAM
-		for(i=0; i<paramCount; i++) {
-			paramStorage[i].value = tempStorage[i];
-		}
-	}
-}
-
-
-/*!
-\brief Saves all parameters to EEPRM (this is deprecated)
-
-*/
-void eeprom_save_all_old(void) {
-	unsigned char chkA, chkB;
-	unsigned int i;
-	unsigned char * ptr;
-	float tempStorage[EEPROM_MAX_PARAMS+1];
-	
-	// Save parameters into temporary space
-	
-	chkA=EEPROM_VERSION;
-	chkB=EEPROM_VERSION;
-	for(i=0; i<paramCount && i<EEPROM_MAX_PARAMS; i++) {
-		tempStorage[i] = paramStorage[i].value;
-		ptr = (unsigned char *)&(tempStorage[i]);
-		chkA += ptr[0];
-		chkB += chkA;
-		chkA += ptr[1];
-		chkB += chkA;
-		chkA += ptr[2];
-		chkB += chkA;
-		chkA += ptr[3];
-		chkB += chkA;
-	}
-	
-	ptr = (unsigned char *)&(tempStorage[i]);
-	ptr[0] = chkA;
-	ptr[1] = chkB;
-	
-	EEPROMWrite(EEPROM_OFFSET, (unsigned char *)&tempStorage, paramCount * 4);
-}
-
-
-/*!
-\brief Does the same as eeprom_load_all_old() but uses less RAM
-
-Optimised to use less RAM but at the expense of more EEPROM read operations.
-Should be safer to use because of the lower RAM usage
+\brief Loads all parametrs from EEPRM
 */
 void eeprom_load_all(void) {
 	unsigned char chkA, chkB;
@@ -125,7 +53,7 @@ void eeprom_load_all(void) {
     chkB=EEPROM_VERSION;
     
     // Verify EEPRM
-    for(i=0; i<paramCount && i<EEPROM_MAX_PARAMS; i++) {
+    for(i=0; i<paramCount; i++) {
         EEPROMRead(EEPROM_OFFSET + i*4, (unsigned char *)&(tempStorage[0]), 4);
         
         // Calculate the Fletcher-16 checksum
@@ -143,18 +71,14 @@ void eeprom_load_all(void) {
 	// If the checksum is valid, read out values
 	if(chkA == EEPROMReadByte(EEPROM_OFFSET + paramCount*4) && chkB == EEPROMReadByte(EEPROM_OFFSET + paramCount*4 + 1)) {
 		// For valid data, load into parameters in RAM
-		for(i=0; i<paramCount && i<EEPROM_MAX_PARAMS; i++) {
+		for(i=0; i<paramCount; i++) {
             EEPROMRead(EEPROM_OFFSET + i*4, (unsigned char *)&(paramStorage[i].value), 4);
 		}
 	}
 }
 
 /*!
-\brief Does the same as eeprom_save_all_old() but uses less RAM
-
-Optimised to use less RAM but at the expense of more EEPROM read operations.
-should be better to use because of better EEPROM wear (assuming that the
-microcontroller doesn't automatically detect writing the same data to EEPROM)
+\brief Saves all the parameters to EEPROM
 */
 void eeprom_save_all(void) {
 	unsigned char chkA, chkB;
@@ -165,7 +89,7 @@ void eeprom_save_all(void) {
 	chkA=EEPROM_VERSION;
 	chkB=EEPROM_VERSION;
     
-	for(i=0; i<paramCount && i<EEPROM_MAX_PARAMS; i++) {
+	for(i=0; i<paramCount; i++) {
         EEPROMRead(EEPROM_OFFSET + i*4, (unsigned char *)&(tempStorage[0]), 4);
         if(tempStorage[0] != paramStorage[i].value) EEPROMWrite(EEPROM_OFFSET + i*4, (unsigned char *)&(paramStorage[i].value), 4);
 		ptr = (unsigned char *)&(paramStorage[i].value);
@@ -187,6 +111,9 @@ void eeprom_save_all(void) {
 	EEPROMWrite(EEPROM_OFFSET + paramCount * 4, (unsigned char *)&tempStorage, 2);
 }
 
+/*!
+\brief deals with the transmission of parameters via MAVLink
+*/
 void paramater_transmit(void) {
 	unsigned int i;
 

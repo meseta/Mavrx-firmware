@@ -92,7 +92,7 @@ $(document).ready(function(){initNavTree('_thalamus_2main_8c.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -133,8 +133,8 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>It all starts here. </p>
-<p>On bootup, a startup function is run (part of the function library, and not documented in this code. The startuf function after initialising the hardware proceeds to invoke the function <a class="el" href="_thalamus_2main_8c.html#a7dfd9b79bc5a37d7df40207afbc5431f" title="This is the setup function, sets everything up. ">setup()</a> followed by <a class="el" href="_thalamus_2main_8c.html#a0b33edabd7f1c4e4a0bf32c67269be2f" title="Main loop (idle loop, doesn&#39;t do much) ">loop()</a>.</p>
-<p>This file contains <a class="el" href="_thalamus_2main_8c.html#a7dfd9b79bc5a37d7df40207afbc5431f" title="This is the setup function, sets everything up. ">setup()</a> and <a class="el" href="_thalamus_2main_8c.html#a0b33edabd7f1c4e4a0bf32c67269be2f" title="Main loop (idle loop, doesn&#39;t do much) ">loop()</a>, as well as some of the interrupt service routines that are set to run repeatedly.</p>
+<p>On bootup, a startup function is run (part of the function library, and not documented in this code. The startuf function after initialising the hardware proceeds to invoke the function <a class="el" href="_hypo_2main_8c.html#a4fc01d736fe50cf5b977f755b675f11d" title="This is the setup function, sets everything up. ">setup()</a> followed by <a class="el" href="_hypo_2main_8c.html#afe461d27b9c48d5921c00d521181f12f" title="Main loop (idle loop, doesn&#39;t do much) ">loop()</a>.</p>
+<p>This file contains <a class="el" href="_hypo_2main_8c.html#a4fc01d736fe50cf5b977f755b675f11d" title="This is the setup function, sets everything up. ">setup()</a> and <a class="el" href="_hypo_2main_8c.html#afe461d27b9c48d5921c00d521181f12f" title="Main loop (idle loop, doesn&#39;t do much) ">loop()</a>, as well as some of the interrupt service routines that are set to run repeatedly.</p>
 <dl class="section author"><dt>Author</dt><dd>Yuan Gao </dd>
 <dd>
 Henry Fletcher </dd>
@@ -146,7 +146,6 @@ Oskar Weigl</dd></dl>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000019">Todo:</a></b></dt><dd>Assess and Improve leveling on take off and leveling in flight Key areas to investigate are integral gain on takeoff Accelerometer feedback gain Accelerometer feedback method - additional filtering needed? Landing Gear separation seems to play a large part, it causes undesired integral wind-up before the craft is in the air Landing gear would need switches or be sprung and damped with longish travel</dd></dl>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000020">Todo:</a></b></dt><dd>Measure loop rates instead of just assuming it The control needs to know how fast they're going, right now we assume the loops are going at their specified rate however, it would be better to just time instead. Use one of the hardware timers to get sub-ms resolution.</dd></dl>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000021">Todo:</a></b></dt><dd>Check for some discontinuities in flight Throttle and attitude blips when flying under GPS Throttle blips when flying normally</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000022">Todo:</a></b></dt><dd>clean up globals</dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="a0b33edabd7f1c4e4a0bf32c67269be2f"></a>
 <div class="memitem">
@@ -182,7 +181,7 @@ Oskar Weigl</dd></dl>
 </div><div class="memdoc">
 
 <p>Repetitive Interrput Timer, deals with EEPROM parameters over ilink. </p>
-<p>This function is triggered by interrupt every few tens of ms (actual speed, is defined by #MESSAGE_LOOP_HZ), its purpose is to shunt out EEPROM parameters over ilink to Hypo. </p>
+<p>This function is triggered by interrupt every few tens of ms (actual speed, is defined by MESSAGE_LOOP_HZ), its purpose is to shunt out EEPROM parameters over ilink to Hypo. </p>
 
 </div>
 </div>
@@ -202,7 +201,6 @@ Oskar Weigl</dd></dl>
 
 <p>This is the setup function, sets everything up. </p>
 <p>This is the first user function called after the initialisation is complete. All the hardware peripherals and stuff are initialised here. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000023">Todo:</a></b></dt><dd>TODO: sort out these modes </dd></dl>
 
 </div>
 </div>
@@ -240,7 +238,7 @@ Oskar Weigl</dd></dl>
 </div><div class="memdoc">
 
 <p>Main code loop, all the flight control stuff is in here. </p>
-<p>This function is triggered by interrupt from timer 0, should be about 400Hz, actual speed is defined by #FAST_RATE. The function also contains a software postscaler to run a set of functions at a slower rate defined by #SLOW_RATE</p>
+<p>This function is triggered by interrupt from timer 0, should be about 400Hz, actual speed is defined by FAST_RATE. The function also contains a software postscaler to run a set of functions at a slower rate defined by SLOW_RATE</p>
 <p>The functions called here are part of the main flight code. </p>
 
 </div>
@@ -251,7 +249,7 @@ Oskar Weigl</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="_thalamus_2main_8c.html">main.c</a></li>
-    <li class="footer">Generated on Mon Sep 9 2013 23:33:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Wed Sep 11 2013 16:26:04 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

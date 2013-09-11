@@ -122,7 +122,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ad8b14158ff8b72e233271e2d0b93b4ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deals with message requests over ilink for messages received.  <a href="#ad8b14158ff8b72e233271e2d0b93b4ea">More...</a><br/></td></tr>
 <tr class="separator:ad8b14158ff8b72e233271e2d0b93b4ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a730f89e2e9de3bcd9327e086926b8528"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="comms_8h.html#a730f89e2e9de3bcd9327e086926b8528">ILinkMessage</a> (unsigned short id, unsigned short *buffer, unsigned short length)</td></tr>
-<tr class="memdesc:a730f89e2e9de3bcd9327e086926b8528"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deals with message received over ilink.  <a href="#a730f89e2e9de3bcd9327e086926b8528">More...</a><br/></td></tr>
+<tr class="memdesc:a730f89e2e9de3bcd9327e086926b8528"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ilink data receive.  <a href="#a730f89e2e9de3bcd9327e086926b8528">More...</a><br/></td></tr>
 <tr class="separator:a730f89e2e9de3bcd9327e086926b8528"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
@@ -192,7 +192,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Deals with message received over ilink. </p>
+<p>Ilink data receive. </p>
+<p>This function is called by the ILInk processing function that needs to be called at regular intervals to transmit the Ilink buffer</p>
+<p>Ilink data receive.</p>
 <p>When a message arrives over ilink, this function is triggered by the SPI ISR, this function then shunts the data from the buffer into the relevant structs</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -240,6 +242,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Altitude data</p>
 <p>Telemetry: altitude </p>
 
 </div>
@@ -253,6 +256,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Attitude data</p>
 <p>Telemetry: attitude </p>
 
 </div>
@@ -266,6 +270,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Debugging data</p>
 <p>Debugging parameters </p>
 
 </div>
@@ -279,6 +284,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>GPS flying data</p>
 <p>GPS autofly PID stuff </p>
 
 </div>
@@ -292,6 +298,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>GPS mode switch</p>
 <p>GPS control </p>
 
 </div>
@@ -305,6 +312,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Idintity</p>
 <p>Identity </p>
 
 </div>
@@ -318,6 +326,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Input data</p>
 <p>Telemetry: inputs </p>
 
 </div>
@@ -331,6 +340,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Output data</p>
 <p>Telemetry: outputs </p>
 
 </div>
@@ -344,6 +354,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Raw IMU data</p>
 <p>Telemetry: raw IMU </p>
 
 </div>
@@ -357,6 +368,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Scale IMU data</p>
 <p>Telemetry: scaled IMU </p>
 
 </div>
@@ -370,6 +382,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Control/control status receive</p>
 <p>Thalamus control receive </p>
 
 </div>
@@ -383,6 +396,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Control transmit</p>
 <p>Thalamus control transmit </p>
 
 </div>
@@ -396,6 +410,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Parameter receive</p>
 <p>Receive parametrs </p>
 
 </div>
@@ -409,6 +424,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Parameter transmit</p>
 <p>Transmit parameters </p>
 
 </div>
@@ -432,7 +448,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bfc07db8d2defe76e29ff476daeb588c.html">Thalamus</a></li><li class="navelem"><a class="el" href="dir_a326171ed4f9e4b858eb10bd97f33303.html">inc</a></li><li class="navelem"><a class="el" href="comms_8h.html">comms.h</a></li>
-    <li class="footer">Generated on Wed Sep 11 2013 13:11:54 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Wed Sep 11 2013 16:26:05 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

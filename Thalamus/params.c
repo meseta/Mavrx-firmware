@@ -87,7 +87,6 @@ Needs to be initialised to paramCount so that parameters aren't sent on startup
 */
 unsigned int paramSendCount = sizeof(paramStorage)/(PARAMNAMELEN+4);
 
-
 /*!
 \brief Loads all parametrs from EEPRM
 */

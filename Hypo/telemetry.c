@@ -1,70 +1,93 @@
+/*!
+\file Hypo/telemetry.c
+\brief Deals with telemetry and MAVLink
+
+\author Yuan Gao
+*/
+
+
 #include "all.h"
 
-// *** MAVLINK stuff
-unsigned char mavlinkID;
+unsigned char mavlinkID;	/*!< This contains the craft's MAVID, by default it is generated from the chip ID, but is adjusted in parameters */
 
 // Sent messages
-mavlink_status_t mavlink_status;
-mavlink_message_t mavlink_tx_msg;
-mavlink_heartbeat_t mavlink_heartbeat;
-mavlink_sys_status_t mavlink_sys_status;
-mavlink_gps_raw_int_t mavlink_gps_raw_int;
-mavlink_raw_imu_t mavlink_raw_imu;
-mavlink_scaled_imu_t mavlink_scaled_imu;
-mavlink_attitude_t mavlink_attitude;
-mavlink_command_ack_t mavlink_command_ack;
-mavlink_param_value_t mavlink_param_value;
-mavlink_rc_channels_raw_t mavlink_rc_channels_raw;
-mavlink_rc_channels_scaled_t mavlink_rc_channels_scaled;
-mavlink_servo_output_raw_t mavlink_servo_output_raw;
-mavlink_gps_global_origin_t mavlink_gps_global_origin;
+mavlink_status_t mavlink_status;								/*!< Craft status */
+mavlink_message_t mavlink_tx_msg;								/*!< Transmitted message  */
+mavlink_heartbeat_t mavlink_heartbeat;							/*!< Heartbeat  */
+mavlink_sys_status_t mavlink_sys_status;						/*!< System status  */
+mavlink_gps_raw_int_t mavlink_gps_raw_int;						/*!< Raw GPS  */
+mavlink_raw_imu_t mavlink_raw_imu;								/*!< Raw IMU  */
+mavlink_scaled_imu_t mavlink_scaled_imu;						/*!< Scaled IMU  */
+mavlink_attitude_t mavlink_attitude;							/*!< Attitude  */
+mavlink_command_ack_t mavlink_command_ack;						/*!< Command acknowledgement  */
+mavlink_param_value_t mavlink_param_value;						/*!< Parameters  */
+mavlink_rc_channels_raw_t mavlink_rc_channels_raw;				/*!< RC raw data  */
+mavlink_rc_channels_scaled_t mavlink_rc_channels_scaled;		/*!< RC scaled data  */
+mavlink_servo_output_raw_t mavlink_servo_output_raw;			/*!< Servo output data  */
+mavlink_gps_global_origin_t mavlink_gps_global_origin;			/*!< GPS home location  */
+mavlink_vfr_hud_t mavlink_vfr_hud;								/*!< VFR HUD  */
 
-mavlink_named_value_float_t mavlink_named_value_float;
-mavlink_named_value_int_t mavlink_named_value_int;
-mavlink_debug_vect_t mavlink_debug_vect;
-mavlink_debug_t mavlink_debug;
-mavlink_statustext_t mavlink_statustext;
-mavlink_mission_request_t mavlink_mission_request;
-mavlink_mission_item_t mavlink_mission_item;
-mavlink_mission_ack_t mavlink_mission_ack;
-mavlink_mission_item_reached_t mavlink_mission_item_reached;
-
-mavlink_vfr_hud_t mavlink_vfr_hud;
-
+mavlink_named_value_float_t mavlink_named_value_float;			/*!< Debug float  */
+mavlink_named_value_int_t mavlink_named_value_int;				/*!< Debug int  */
+mavlink_debug_vect_t mavlink_debug_vect;						/*!< Debug vector  */
+mavlink_statustext_t mavlink_statustext;						/*!< Status text  */
+mavlink_mission_request_t mavlink_mission_request;				/*!< Mission request  */
+mavlink_mission_item_t mavlink_mission_item;					/*!< Mission waypoint item  */
+mavlink_mission_ack_t mavlink_mission_ack;						/*!< Mission acknowledgement  */
+mavlink_mission_item_reached_t mavlink_mission_item_reached;	/*!< Mission waypoint reached notification  */
 
 // Received messages
-mavlink_message_t mavlink_rx_msg;
-mavlink_request_data_stream_t mavlink_request_data_stream;
-mavlink_command_long_t mavlink_command_long;
-mavlink_param_request_list_t mavlink_param_request_list;
-mavlink_param_set_t mavlink_param_set;
-mavlink_param_request_read_t mavlink_param_request_read;
-mavlink_manual_control_t mavlink_manual_control;
-mavlink_mission_count_t mavlink_mission_count;
-mavlink_set_gps_global_origin_t mavlink_set_gps_global_origin;
-mavlink_mission_request_list_t mavlink_mission_request_list;
-mavlink_mission_count_t mavlink_mission_count;
-mavlink_mission_clear_all_t mavlink_mission_clear_all;
-mavlink_mission_set_current_t mavlink_mission_set_current;
-mavlink_mission_current_t mavlink_mission_current;
-mavlink_set_mode_t mavlink_set_mode;
+mavlink_message_t mavlink_rx_msg;								/*!< Receieved message  */
+mavlink_request_data_stream_t mavlink_request_data_stream;		/*!< Data stream rate request  */
+mavlink_command_long_t mavlink_command_long;					/*!< Commands  */
+mavlink_param_request_list_t mavlink_param_request_list;		/*!< Parameter read all reuest  */
+mavlink_param_set_t mavlink_param_set;							/*!< Parameter set request  */
+mavlink_param_request_read_t mavlink_param_request_read;		/*!< Parameter read request  */
+mavlink_manual_control_t mavlink_manual_control;				/*!< Manual control  */
+mavlink_mission_count_t mavlink_mission_count;					/*!< Mission count  */
+mavlink_set_gps_global_origin_t mavlink_set_gps_global_origin;	/*!< Set Home  */
+mavlink_mission_request_list_t mavlink_mission_request_list;	/*!< Mission request  */
+mavlink_mission_clear_all_t mavlink_mission_clear_all;			/*!< Mission clear  */
+mavlink_mission_set_current_t mavlink_mission_set_current;		/*!< Mission set current  */
+mavlink_mission_current_t mavlink_mission_current;				/*!< Mission current  */
+mavlink_set_mode_t mavlink_set_mode;							/*!< Set craft mode  */
 
-mavlink_mission_request_list_t mavlink_mission_request_list;
+unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];		/*!< Mavlink message buffer */
+unsigned short mavlink_message_len;								/*!< Mavlink message buffer length */
 
-// Variables
-unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];
-unsigned short mavlink_message_len;
+// Xbee stuff
+xbee_modem_status_t xbee_modem_status;							/*!< XBee modem status */
+xbee_at_command_t xbee_at_command;								/*!< XBee commands */
+xbee_at_response_t xbee_at_response;							/*!< XBee command response */
+xbee_receive_packet_t xbee_receive_packet;						/*!< XBee received packet */
+xbee_transmit_request_t xbee_transmit_request;					/*!< XBee transmit packet */
 
-// *** Xbee stuff
-xbee_modem_status_t xbee_modem_status;
-xbee_at_command_t xbee_at_command;
-xbee_at_response_t xbee_at_response;
-xbee_receive_packet_t xbee_receive_packet;
-xbee_transmit_request_t xbee_transmit_request;
-
-
-
+/*!
+\brief Deals with sending all the Mavlink telemetry
+*/
 void mavlink_telemetry(void) {
+	static unsigned short waypointTimer=0;
+	static unsigned short rawSensorStreamCounter=0;
+	static unsigned short extStatusStreamCounter=0;
+	static unsigned short rcChannelCounter=0;
+	static unsigned short rawControllerCounter=0;
+	static unsigned short positionStreamCounter=0;
+	static unsigned short extra1ChannelCounter=0;
+	static unsigned short extra2ChannelCounter=0;
+	static unsigned short extra3ChannelCounter=0;
+	
+    waypointTimer++;
+	
+    rawSensorStreamCounter++;
+    extStatusStreamCounter++;
+    rcChannelCounter++;
+    rawControllerCounter++;
+    positionStreamCounter++;
+    extra1ChannelCounter++;
+    extra2ChannelCounter++;
+    extra3ChannelCounter++;
+	
+
 	if(waypointReceiveIndex < waypointCount) {
 		if(waypointTimer > WAYPOINT_TIMEOUT) {
 			mavlink_mission_request.seq = waypointReceiveIndex;
@@ -350,6 +373,9 @@ void mavlink_telemetry(void) {
 	}
 }
 
+/*!
+\brief Deals with sending Mavlink messages
+*/
 void mavlink_messages(void) {
 	// remote messages
 	if(ilink_thalctrl_rx.isNew) {
@@ -379,6 +405,9 @@ void mavlink_messages(void) {
 	}
 }
 
+/*!
+\brief Initialise mavlink stuff
+*/
 void MAVLinkInit() {
     mavlinkID = (unsigned char) MAV_ID;
 	if(mavlinkID == 255) mavlinkID = 0; // 255 reserved for ground control
@@ -407,7 +436,12 @@ void MAVLinkInit() {
     dataRate[MAV_DATA_STREAM_EXTRA3] = 0;
 }
 
-// *** Mavlink messages
+/*!
+\brief Deals with receiving Mavlink
+
+This function is triggered by the Mavlink parser, which is triggered by the
+Xbee parser, which is ultimately triggered by the UART RX ISR
+*/
 void MAVSendHeartbeat(void) {
     //if(allowTransmit) {
         mavlink_msg_heartbeat_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_heartbeat);
@@ -418,6 +452,9 @@ void MAVSendHeartbeat(void) {
     //}
 }
 
+/*!
+\brief Sends a debug float
+*/
 void MAVSendFloat(char * name, float value) {
     if(allowTransmit) {
         unsigned int i;
@@ -434,7 +471,9 @@ void MAVSendFloat(char * name, float value) {
         XBeeAllow();
     }
 }
-
+/*!
+\brief Sends a debug int
+*/
 void MAVSendInt(char * name, int value) {
     if(allowTransmit) {
         unsigned int i;
@@ -451,7 +490,9 @@ void MAVSendInt(char * name, int value) {
         XBeeAllow();
     }
 }
-
+/*!
+\brief Sends a debug vector consisting of three floats
+*/
 void MAVSendVector(char * name, float valX, float valY, float valZ) {
     if(allowTransmit) {
         unsigned int i;
@@ -470,11 +511,15 @@ void MAVSendVector(char * name, float valX, float valY, float valZ) {
         XBeeAllow();
     }
 }
-
+/*!
+\brief Sends a debug text
+*/
 void MAVSendText(unsigned char severity, char * text) {
 	MAVSendTextFrom(severity, text, MAV_COMP_ID_SYSTEM_CONTROL);
 }
-
+/*!
+\brief Sends a debug text from a specific component
+*/
 void MAVSendTextFrom(unsigned char severity, char * text, unsigned char from) {
     if(allowTransmit) {
         unsigned int i;
@@ -491,7 +536,9 @@ void MAVSendTextFrom(unsigned char severity, char * text, unsigned char from) {
     }
 }
 
-// XBee interrupt (for MAVLink)
+/*!
+\brief XBee interrupt, this is triggered by the UART ISR, and decodes XBee packets
+*/
 void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length) {
     unsigned char * ptr = 0;
     unsigned int j;
@@ -525,6 +572,9 @@ void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length
     }
 }
 
+/*!
+\brief Parses MAVLink data
+*/
 void MAVLinkParse(unsigned char UARTData) {
 	unsigned int i, j, match;
     if(mavlink_parse_char(MAVLINK_COMM_0, UARTData, &mavlink_rx_msg, &mavlink_status)) {

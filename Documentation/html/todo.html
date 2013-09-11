@@ -120,7 +120,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <p>Set this back when COde finished </p>
 <p class="enddd">Diagnose throttle jumps while in GPS hold mode.  </p>
 </dd>
-<dt><a class="anchor" id="_todo000016"></a>File <a class="el" href="main_8c.html">main.c</a>  </dt>
+<dt><a class="anchor" id="_todo000016"></a>File <a class="el" href="_thalamus_2main_8c.html">main.c</a>  </dt>
 <dd><p class="startdd">Diagnose loss of control experienced at full throttle. I ascended at full throttle while probably applying some pitch and roll demands and suddenly the craft just seemed to loose stability. It rolled/ pitched upside down a few times, luckily it recovered and I was able to bring it back safely. However, have heard that a backer had a similar problem. Possible causes are Yuan's Max throttle stuff, my roll angle prioritisation (less likely as wasn't in the backers code), ROLL/ PITCH SPL (spin limit). Or other! Have done some test flights and witnessed the loss of control at high throttles, it only does it when applying a high throttle and a large attitude demand, it inverts then enters a continual spin at high throttle Have added code on line 51 of <a class="el" href="control_8h_source.html">control.h</a> to try and solve this problem Rescues craft if error gets too large at high throttles by detecting roll and pitch error getting too large and reducing the throttle.</p>
 <p>Test to see if this code solves the problem Tried this: if(((pitcherror &gt; 0.08) || (pitcherror &lt; -0.08) || (rollerror &gt; 0.08) || (rollerror &lt; -0.08)) &amp;&amp; (throttle &gt; 600)) throttle -= 200; Should really be able to solve with better PID tuning.}</p>
 <p>check all integrators for decoupling, and make sure they are locked in this case</p>
@@ -138,7 +138,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Sep 11 2013 13:11:54 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Wed Sep 11 2013 16:26:05 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.4 </li>
   </ul>

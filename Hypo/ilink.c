@@ -1,24 +1,35 @@
+/*!
+\file Hypo/ilink.c
+\brief Ilink stuff
+
+\author Yuan Gao
+
+*/
 #include "all.h"
 
-// *** ILink stuff
-ilink_identify_t ilink_identify;
-ilink_thalstat_t ilink_thalstat;
-ilink_thalctrl_t ilink_thalctrl_rx;
-ilink_thalctrl_t ilink_thalctrl_tx;
-ilink_imu_t ilink_rawimu;
-ilink_imu_t ilink_scaledimu;
-ilink_altitude_t ilink_altitude;
-ilink_attitude_t ilink_attitude;
-ilink_thalparam_t ilink_thalparam_rx;
-ilink_thalparam_t ilink_thalparam_tx;
-ilink_iochan_t ilink_inputs0;
-ilink_iochan_t ilink_outputs0;
-ilink_gpsfly_t ilink_gpsfly;
-ilink_gpsreq_t ilink_gpsreq;
-ilink_debug_t ilink_debug;
-ilink_mancon_t ilink_mancon;
+ilink_identify_t ilink_identify;		/*!< Idintity */
+ilink_thalstat_t ilink_thalstat;		/*!< Thalamus status */
+ilink_thalctrl_t ilink_thalctrl_rx;		/*!< Control/control status receive */
+ilink_thalctrl_t ilink_thalctrl_tx;		/*!< Control transmit */
+ilink_imu_t ilink_rawimu;				/*!< Raw IMU data */
+ilink_imu_t ilink_scaledimu;			/*!< Scale IMU data */
+ilink_altitude_t ilink_altitude;		/*!< Altitude data */
+ilink_attitude_t ilink_attitude;		/*!< Attitude data */
+ilink_thalparam_t ilink_thalparam_rx;	/*!< Parameter receive */
+ilink_thalparam_t ilink_thalparam_tx;	/*!< Parameter transmit */
+ilink_iochan_t ilink_inputs0;			/*!< Input data */
+ilink_iochan_t ilink_outputs0;			/*!< Output data */
+ilink_gpsfly_t ilink_gpsfly;			/*!< GPS flying data */
+ilink_gpsreq_t ilink_gpsreq;			/*!< GPS mode switch */
+ilink_debug_t ilink_debug;				/*!< Debugging data */
+ilink_mancon_t ilink_mancon;			/*!< Manual Control */
 
+/*!
+\brief Ilink data receive
 
+This function is called by the ILInk processing function that needs to be called
+at regular intervals to transmit the Ilink buffer
+*/
 void ILinkMessage(unsigned short id, unsigned short * buffer, unsigned short length) {
     unsigned short * ptr = 0;
     unsigned int j;

@@ -7,7 +7,7 @@
 #define __GLOBALS_H__
 
 #define FIRMWARE_VERSION	1			/*!< Firmware version */
-#define MESSAGE_LOOP_HZ	 	10		  	/*!< Max frequency of ilink param messages in Hz (keep this number low, like around 15) */
+#define MESSAGE_LOOP_HZ	 	25		  	/*!< Max frequency of ilink param messages in Hz (keep this number low, like around 20) */
 #define RX_PANIC_SECONDS	1		   	/*!< Number of seconds after missing RX before craft considered "disconnected" */
 
 #define FAST_RATE		   	400			/*!< Main loop rate in Hz*/
