@@ -134,7 +134,7 @@ void mavlink_telemetry(void) {
 				case THALSTAT_SYSTEMSTATUS_ACTIVE:	mavlink_heartbeat.system_status = MAV_STATE_ACTIVE; 		break;
 				case THALSTAT_SYSTEMSTATUS_CRITICAL:mavlink_heartbeat.system_status = MAV_STATE_CRITICAL;		break;
 			}
-			
+			mavlink_heartbeat.system_status = MAV_STATE_ACTIVE; 
 			// do a conversion between ILINK values and MAVLINK for flight status, refer to Thalamus/inc/state.h for details
 			switch(ilink_thalstat.flightStatus) {
 				default:
@@ -152,14 +152,14 @@ void mavlink_telemetry(void) {
 					break;
 				case 5: // auto
 					mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_ATTITUDE | MAVLINK_CONTROL_YAW | MAVLINK_CONTROL_Z;
-					mavlink_heartbeat.base_mode |= MAV_MODE_GUIDED_ARMED;
+					mavlink_heartbeat.base_mode = MAV_MODE_GUIDED_ARMED;
 					break;
 				case 6: // acro mode
 					mavlink_sys_status.onboard_control_sensors_enabled |= MAVLINK_CONTROL_ANGLERATE;
 					mavlink_heartbeat.base_mode = MAV_MODE_MANUAL_ARMED;
 					break;
 			}
-
+					
 			mavlink_sys_status.voltage_battery = ilink_thalstat.battVoltage;
 			mavlink_vfr_hud.throttle = ilink_thalstat.throttle;
 		}
@@ -377,16 +377,6 @@ void mavlink_messages(void) {
 			case THALCTRL_RXFOUND:	MAVSendTextFrom(MAV_SEVERITY_INFO, "Radio transmitter signal found", MAV_COMP_ID_IMU);	break;
 		}
 	}
-	
-	// local messages
-	/*if(debug_message) {
-		switch(debug_message) {
-			case DEBUG_AUTOTAKEOFF
-		
-		}
-		
-		debug_message = 0;
-	}*/
 }
 
 void MAVLinkInit() {
@@ -546,19 +536,22 @@ void MAVLinkParse(unsigned char UARTData) {
                 allowTransmit = 1;
                 break;
              case MAVLINK_MSG_ID_MANUAL_CONTROL:
-                mavlink_msg_manual_control_decode(&mavlink_rx_msg, &mavlink_manual_control);
+				// QGROUNDCONTROL BUG: gamepad control don't work
+                /*mavlink_msg_manual_control_decode(&mavlink_rx_msg, &mavlink_manual_control);
                 if(mavlink_manual_control.target == mavlinkID) {
                     ilink_mancon.roll = mavlink_manual_control.roll;
                     ilink_mancon.pitch = mavlink_manual_control.pitch;
                     ilink_mancon.yaw = mavlink_manual_control.yaw;
                     ilink_mancon.thrust = mavlink_manual_control.thrust;
-                    ILinkSendMessage(ID_ILINK_MANCON, (unsigned short *) & ilink_mancon, sizeof(ilink_mancon)/2-1);
-                }
+                    //ILinkSendMessage(ID_ILINK_MANCON, (unsigned short *) & ilink_mancon, sizeof(ilink_mancon)/2-1);
+                }*/
                 break;
             case MAVLINK_MSG_ID_SET_MODE:
                 mavlink_msg_set_mode_decode(&mavlink_rx_msg, &mavlink_set_mode);
                 if(mavlink_set_mode.target_system == mavlinkID) {
 					//MAVSendVector("MOD", mavlink_set_mode.custom_mode, mavlink_set_mode.base_mode, 0);
+					// QGROUNDCONTROL BUG: "Control" doesn't work, so only allowing ARM/Disarm into auto mode here.
+						//MAVSendVector("MOD", mavlink_set_mode.custom_mode, mavlink_set_mode.base_mode, 0);
 					if(mavlink_set_mode.base_mode & MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
 						ilink_thalctrl_tx.command = THALCTRL_ARM;
 						ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
@@ -620,8 +613,11 @@ void MAVLinkParse(unsigned char UARTData) {
                             break;
                         
                         case MAV_CMD_OVERRIDE_GOTO:
-                            if(mavlink_command_long.param1 == MAV_GOTO_DO_HOLD) { // QGROUNDCONTROL BUG: "Land now" issues a "hold" instruction
-                                gps_action = 3;
+							// QGROUNDCONTROL BUG: "Land now" issues a "hold" instruction
+							// QGROUNDCONTROL BUG: On gamepad, "Go Home" issues a "hold" instruction
+							
+                            if(mavlink_command_long.param1 == MAV_GOTO_DO_HOLD) { 
+                                gps_action = 3; // hold
                             }
                             else if(mavlink_command_long.param1 == MAV_GOTO_DO_CONTINUE) {
                                 gps_action = 4;
@@ -886,10 +882,11 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_MISSION_WRITE_PARTIAL_LIST:
-                mavlink_mission_ack.type = MAV_MISSION_UNSUPPORTED;
+                /*mavlink_mission_ack.type = MAV_MISSION_UNSUPPORTED;
                 mavlink_msg_mission_ack_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_mission_ack);
                 mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-                XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+                XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);*/
+				// ignored
                 break;
             case MAVLINK_MSG_ID_MISSION_ACK:
                 //ignored
@@ -904,7 +901,7 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             default:
-                MAVSendInt("CMDIGNORE", mavlink_rx_msg.msgid);
+                //MAVSendInt("CMDIGNORE", mavlink_rx_msg.msgid);
                 break;
         }
         //if(mavlink_rx_msg.msgid != 0) MAVSendInt("CMD", mavlink_rx_msg.msgid);

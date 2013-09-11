@@ -82,8 +82,8 @@ void read_rx_input(void) {
 
 	if(RXGetData(rcInput)) {
 		if(rxLoss > 10) {
-			if(rxLoss > 40) {
-				rxLoss = 40;
+			if(rxLoss > 50) {
+				rxLoss = 50;
 				ilink_thalctrl_tx.command = THALCTRL_RXFOUND;
 				ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) &ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2 - 1);
 			}

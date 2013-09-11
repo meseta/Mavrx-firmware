@@ -978,6 +978,8 @@ static inline void RSTReset(void) { ResetInit(); }
     
 	#define THALCTRL_ARM					0x0001
 	#define THALCTRL_DISARM					0x0002
+	#define THALCTRL_STATE_AUTO				0x0011
+	#define THALCTRL_STATE_MANUAL			0x0012
 	#define THALCTRL_ORIOK					0x0078
 	#define THALCTRL_ORIBAD					0x0079
 	#define THALCTRL_EEPROM_READALL			0x0100

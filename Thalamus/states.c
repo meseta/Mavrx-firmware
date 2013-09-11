@@ -23,6 +23,7 @@ void state_machine()	{
 	static unsigned char auto_lock = 0;
 	static unsigned int throttle_on_count = 0;
 	static unsigned int throttle_off_count = 0;
+	static unsigned char auxStateIgnore = 0;
 	float tempf;
 	
 	switch(state) {
@@ -77,10 +78,13 @@ void state_machine()	{
 				
 				// if left stick bottom middle, right stick top right, switch = 1 and GPS is active  then switch to full auto
 				// OR ARM request from Hypo
-/*[ . ][  `]*/	if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && auxState == 1 && gps_valid == 1 &&
-				((rcInput[RX_RUDD] < MAXTHRESH && rcInput[RX_RUDD] > MINTHRESH && rcInput[RX_ELEV] > MAXTHRESH && rcInput[RX_AILE] < MINTHRESH)
+/*[ . ][  `]*/	if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && gps_valid == 1 &&
+				((rcInput[RX_RUDD] < MAXTHRESH && rcInput[RX_RUDD] > MINTHRESH && rcInput[RX_ELEV] > MAXTHRESH && rcInput[RX_AILE] < MINTHRESH && auxState == 1)
 				|| (ilink_thalctrl_rx.isNew == 1 && ilink_thalctrl_rx.command == THALCTRL_ARM))) {
-					if(ilink_thalctrl_rx.command == THALCTRL_ARM) ilink_thalctrl_rx.isNew = 0;
+					if(ilink_thalctrl_rx.command == THALCTRL_ARM) {
+						ilink_thalctrl_rx.isNew = 0;
+						auxStateIgnore = 1;
+					}
 					if(ORI == detect_ori()) {                   
 						arm();
 						// Offset Barometer
@@ -175,7 +179,11 @@ void state_machine()	{
 			if(gps_valid == 0) state = STATE_MANUAL;
 			
 			// If the switch is flicked, we go into AUTO mode
-			if(auxState == 1) {
+			if((auxState == 1 && auxStateIgnore == 0) || (ilink_thalctrl_rx.isNew == 1 && ilink_thalctrl_rx.command == THALCTRL_STATE_AUTO)) {
+				if(ilink_thalctrl_rx.command == THALCTRL_STATE_AUTO) {
+					ilink_thalctrl_rx.isNew = 0;
+					auxStateIgnore = 1; // set ignore status otherwise mode jumps back immediately
+				}
 				state = STATE_AUTO;
 				
 				// request hold from Hypo
@@ -184,6 +192,7 @@ void state_machine()	{
 				// set button state to 1
 				flapState = 1;		
 			}
+			if(auxState == 0) auxStateIgnore = 0; // when switch is flicked, reset ignore status
 
 			// Auto Disarm
 			if(throttle == 0) {
@@ -292,7 +301,11 @@ void state_machine()	{
 			}
 			
 			// if the switch is put to zero, switch into manual_gps mode and lock out the auto code loop
-			if(auxState == 0) {
+			if((auxState == 0 && auxStateIgnore == 0) || (ilink_thalctrl_rx.isNew == 1 && ilink_thalctrl_rx.command == THALCTRL_STATE_MANUAL)) {
+				if(ilink_thalctrl_rx.command == THALCTRL_STATE_MANUAL) {
+					ilink_thalctrl_rx.isNew = 0;
+					auxStateIgnore = 1; // set ignore status otherwise mode jumps back immediately
+				}
 				state = STATE_MANUAL_GPS;
 				// ensure full manual control is engaged
 				flapState = 0;
@@ -302,6 +315,7 @@ void state_machine()	{
 				// and lock out the auto code loop
 				auto_lock = 1;
 			}
+			if(auxState == 1) auxStateIgnore = 0; // when switch is flicked, reset ignore status
 			
 			// Auto Disarm
 			if(throttle == 0) {
