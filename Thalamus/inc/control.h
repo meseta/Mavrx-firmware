@@ -8,6 +8,7 @@ extern unsigned char got_setpoint;
 #define IDLETHROTTLE		125			/*!< Minimum PWM output to ESC when in-flight to avoid motors turning off. THROTTLEOFFSET+IDLETHROTTLE > 1060 */
 #define MAXTHROTTLE	 	1000			/*!< Maximum PWM output to ESC (THROTTLEOFFSET + MAXTHROTTLE) ~= 1860 */
 #define MAXTHROTTLEPERCENT	0.9	 		/*!< Maximum percentage throttle should be (reserves some extra output for stabilisation at high throttle). */
+#define MIDDLE				1500	 		/*!< Maximum percentage throttle should be (reserves some extra output for stabilisation at high throttle). */
 
 extern unsigned char thal_throt_cont;
 extern unsigned char thal_motor_off;

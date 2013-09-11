@@ -61,7 +61,9 @@ void setup(void) {
 		// however, the ESC will not beep the first time it is powered, so we start up the PWM here and turn it off quickly so that
 		// under ALL circumstances the ESC will beep when the craft is disarmed.
 		PWMInit(PWM_ALL);
-		PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+		PWMSetNESW(MIDDLE, MIDDLE, MIDDLE, MIDDLE);
+		PWMSetY(THROTTLEOFFSET);
+		PWMSetX(THROTTLEOFFSET);
 	
 	// *** LED setup
 		LEDInit(PLED | VLED);
@@ -81,7 +83,7 @@ void setup(void) {
 	
 	// *** Initialise input
 		RXInit();
-				
+
 	// *** Initialise Ultrasound
 		UltraInit();
 
@@ -138,7 +140,9 @@ void setup(void) {
 		DRIFT_AccelKp = tempAccelKp;
 		
 	// *** Initialise timers and loops
-		PWMSetNESW(0, 0, 0, 0);
+		PWMSetNESW(MIDDLE, MIDDLE, MIDDLE, MIDDLE);
+		PWMSetX(THROTTLEOFFSET);
+		PWMSetY(THROTTLEOFFSET);
 		RITInitms(1000/MESSAGE_LOOP_HZ);
 		flashPLED = 0;
 		LEDOff(PLED);

@@ -207,16 +207,16 @@
     #define PWM_DEFAULT_E   1000            //  use low values (i.e. 1000) for ESCs
     #define PWM_DEFAULT_S   1000
     #define PWM_DEFAULT_W   1000
-    #define PWM_DEFAULT_X   1500
-    #define PWM_DEFAULT_Y   1500
+    #define PWM_DEFAULT_X   1000
+    #define PWM_DEFAULT_Y   1000
 
     #define PWM_FILTERS_ON  0               // PWM output filters (filter is SPR)
 
     #define PWM_NESW_FILTER 0               // Filter coefficients for SPR
     #define PWM_XY_FILTER   0               // value is between 0 and 1, lower is less filterig
 
-    #define PWM_NESWFREQ    400             // PWM frequency (maximum 450)
-    #define PWM_XYFREQ      100             // This value needs to be a fraction of PWM_NESWFREQ
+    #define PWM_NESWFREQ    50             // PWM frequency (maximum 450)
+    #define PWM_XYFREQ      50             // This value needs to be a fraction of PWM_NESWFREQ
 
     // ****************************************************************************
     // *** IMU Functions (Thalamus only)

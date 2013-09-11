@@ -338,6 +338,15 @@ void control_motors(void){
             motorS -= yawcorrection;
             motorW += yawcorrection;
             break;
+		case 4: // NAVY EDITION
+            motorN = -yawcorrection;
+            motorE = -(pitchcorrection + rollcorrection);
+            motorS = pitchcorrection - rollcorrection;
+			// 
+            motorW = -1.6*pitchcorrection;
+			
+
+            break;
 		case 5: // R10
             motorN = pitchcorrection;
             motorE = -rollcorrection;
@@ -367,11 +376,15 @@ void control_motors(void){
 	if(throttle > MAXTHROTTLE*MAXTHROTTLEPERCENT) throttle = MAXTHROTTLE*MAXTHROTTLEPERCENT;
 	
 	// Combine attitude stabilisation demands from PID loop with throttle demands
-	float tempN=0, tempE=0, tempS=0, tempW=0;
-	tempN = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-	tempE = (signed short)motorEav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-	tempS = (signed short)motorSav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
-	tempW = (signed short)motorWav + (signed short)throttle + THROTTLEOFFSET + (signed short)throttle_angle;
+	float tempN=0, tempE=0, tempS=0, tempW=0, tempM=0, tempX =0;
+	static float collective = 0;
+	if (throttle > 300) collective = (throttle-300)*0.3;
+	else collective = 0;
+	tempX = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET;
+	tempE = (signed short)motorEav + MIDDLE + (signed short)collective;
+	tempS = (signed short)motorSav + MIDDLE - (signed short)collective;
+	tempW = (signed short)motorWav + MIDDLE - (signed short)collective;
+	tempM = (signed short)throttle + THROTTLEOFFSET;
 	
 		
 	/*! \todo Add Auto Land on rxLoss! */
@@ -404,7 +417,7 @@ void control_motors(void){
 		if (rcInput[RX_THRO] - throttletrim  < OFFSTICK) hold_thro_off = 0;
 		
 		// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
-		if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+		if(armed) PWMSetNESW(MIDDLE, MIDDLE, MIDDLE, MIDDLE);
 		
 		// Output the motor PWM demand on the telemetry link
 		ilink_outputs0.channel[0] = THROTTLEOFFSET;
@@ -412,6 +425,8 @@ void control_motors(void){
 		ilink_outputs0.channel[2] = THROTTLEOFFSET;
 		ilink_outputs0.channel[3] = THROTTLEOFFSET;
 		
+		PWMSetY(THROTTLEOFFSET);
+		PWMSetX(THROTTLEOFFSET);
 		
 		ilink_thalstat.throttle = 0;
 	}
@@ -422,7 +437,7 @@ void control_motors(void){
 		// Throttle offset offsets the throttle readings (which start at 0) to the PWM values (in ms?) which need to start at around 1000
 		if(tempN > (MAXTHROTTLE + THROTTLEOFFSET)) tempN = (MAXTHROTTLE + THROTTLEOFFSET);
 		else if(tempN < (IDLETHROTTLE + THROTTLEOFFSET)) tempN = (IDLETHROTTLE + THROTTLEOFFSET);
-		PWMSetN(tempN);
+		PWMSetN(tempE);
 		ilink_outputs0.channel[0] = tempN;
 		
 		if(tempE > (MAXTHROTTLE + THROTTLEOFFSET)) tempE = (MAXTHROTTLE + THROTTLEOFFSET);
@@ -439,5 +454,15 @@ void control_motors(void){
 		else if(tempW < (IDLETHROTTLE + THROTTLEOFFSET)) tempW = (IDLETHROTTLE + THROTTLEOFFSET);
 		PWMSetW(tempW);
 		ilink_outputs0.channel[3] = tempW;
+		
+		if(tempM > (MAXTHROTTLE + THROTTLEOFFSET)) tempM = (MAXTHROTTLE + THROTTLEOFFSET);
+		else if(tempM < (IDLETHROTTLE + THROTTLEOFFSET)) tempM = (IDLETHROTTLE + THROTTLEOFFSET);
+		PWMSetY(tempM);
+		
+		if(tempX > (MAXTHROTTLE + THROTTLEOFFSET)) tempX = (MAXTHROTTLE + THROTTLEOFFSET);
+		else if(tempX < (IDLETHROTTLE + THROTTLEOFFSET)) tempX = (IDLETHROTTLE + THROTTLEOFFSET);
+		PWMSetX(tempX);
+		
+		
 	}
 }
