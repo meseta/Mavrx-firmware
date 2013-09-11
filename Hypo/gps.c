@@ -147,6 +147,23 @@ void gps_navigate(void) {
                     gps_action = 0;
                     break;
                 case 2: // take off - sets target to GPS_SAFE_ALT above current location 
+                    if(home_valid == 0) {
+                        home_X = craft_X;
+                        home_Y = craft_Y;
+                        home_Z = craft_Z;
+                        home_valid = 1;
+                        
+                        mavlink_gps_global_origin.latitude = craft_X * 10000000;
+                        mavlink_gps_global_origin.longitude = craft_Y * 10000000;
+                        mavlink_gps_global_origin.altitude = craft_Z * 1000;
+                        mavlink_msg_gps_global_origin_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_gps_global_origin);
+                        mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+                        XBeeInhibit();
+                        XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
+                        XBeeAllow();
+                        
+                        MAVSendTextFrom(MAV_SEVERITY_INFO, "Home position set", MAV_COMP_ID_MISSIONPLANNER);
+                    }
                     target_X = craft_X;
                     target_Y = craft_Y;
                     target_set = 1;
@@ -197,13 +214,34 @@ void gps_navigate(void) {
                         }
                         waypointGo = 1;
                         waypointReached = 0;
-                    
-                        target_X = waypoint[waypointCurrent].x;
-                        target_Y = waypoint[waypointCurrent].y;
-                        target_Z = waypoint[waypointCurrent].z;
-                        target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
+                        
+                        switch(waypoint[waypointCurrent].frame) {
+                            case MAV_FRAME_GLOBAL:
+                                target_X = waypoint[waypointCurrent].x;
+                                target_Y = waypoint[waypointCurrent].y;
+                                target_Z = waypoint[waypointCurrent].z;
+                                target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
+                                break;
+                            case MAV_FRAME_MISSION:
+                                target_X = craft_X;
+                                target_Y = craft_Y;
+                                target_Z = craft_Z;
+                                break;
+                            case MAV_FRAME_GLOBAL_RELATIVE_ALT:
+                                target_X = waypoint[waypointCurrent].x;
+                                target_Y = waypoint[waypointCurrent].y;
+                                target_Z = waypoint[waypointCurrent].z + home_Z;
+                                target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
+                                break;
+                            default:
+                                waypointGo = 0;
+                                MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Waypoint frame not supported, waypoint execution paused", MAV_COMP_ID_MISSIONPLANNER);
+                                target_X = craft_X;
+                                target_Y = craft_Y;
+                                target_Z = craft_Z;
+                                break;
+                        }
                         interpolator_mode = INTMODE_3D; // two for normal interploator
-                        waypointGo = 1;
                     }
                     else {
 						MAVSendTextFrom(MAV_SEVERITY_WARNING, "No valid waypoints to resume, position hold", MAV_COMP_ID_MISSIONPLANNER);
@@ -461,7 +499,8 @@ void gps_navigate(void) {
                 if(lon_diff < 0) lon_diff = -lon_diff;
                 if(alt_diff < 0) alt_diff = -alt_diff;
                 
-                if(waypointReached == 0 && lat_diff < radius && lon_diff < radius && alt_diff < radius) { // target reached
+                if((waypointReached == 0 && lat_diff < radius && lon_diff < radius && alt_diff < radius)
+                || waypoint[waypointCurrent].frame == MAV_FRAME_MISSION) { // target reached
                     waypointReached = 1;
                     waypointLoiterTimer = 0;
                     

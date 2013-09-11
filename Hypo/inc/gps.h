@@ -33,6 +33,7 @@ typedef struct {
     double x;						/*!< waypoint x location (latitude) */
     double y;						/*!< waypoint y location (longitude) */
     double z;						/*!< waypoint z location (altutude) */
+    unsigned char frame;            /*!< waypoint frome */    
 } waypointStruct;
 
 extern gps_nav_posecef_t gps_nav_posecef;

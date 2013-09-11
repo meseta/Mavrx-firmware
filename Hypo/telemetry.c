@@ -872,7 +872,7 @@ void MAVLinkParse(unsigned char UARTData) {
                         mavlink_mission_item.target_component = mavlink_rx_msg.compid;    
 
                         mavlink_mission_item.seq = mavlink_mission_request.seq;
-                        mavlink_mission_item.frame = MAV_FRAME_GLOBAL;
+                        mavlink_mission_item.frame = waypoint[mavlink_mission_request.seq].frame;
                         mavlink_mission_item.command = waypoint[mavlink_mission_request.seq].command;
                         mavlink_mission_item.autocontinue = waypoint[mavlink_mission_request.seq].autocontinue;
                         mavlink_mission_item.param1 = waypoint[mavlink_mission_request.seq].param1;
@@ -902,7 +902,7 @@ void MAVLinkParse(unsigned char UARTData) {
                     mavlink_mission_ack.type = MAV_MISSION_ERROR;
                     if(mavlink_mission_item.frame == MAV_FRAME_GLOBAL) {
                         if(mavlink_mission_item.seq < MAX_WAYPOINTS) {
-                            //waypoint[mavlink_mission_item.seq].frame = mavlink_mission_item.frame;
+                            waypoint[mavlink_mission_item.seq].frame = mavlink_mission_item.frame;
                             waypoint[mavlink_mission_item.seq].command = mavlink_mission_item.command;
                             waypoint[mavlink_mission_item.seq].autocontinue = mavlink_mission_item.autocontinue;
                             waypoint[mavlink_mission_item.seq].param1 = mavlink_mission_item.param1;
