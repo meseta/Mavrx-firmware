@@ -8,7 +8,6 @@ var _hypo_2inc_2globals_8h =
     [ "THAL_PANIC", "_hypo_2inc_2globals_8h.html#a865b4851d056e0166e3ad08d26bf5a59", null ],
     [ "XBEE_PANIC", "_hypo_2inc_2globals_8h.html#a2bec840cb6ee7f4a27315ae2ce58916c", null ],
     [ "allowTransmit", "_hypo_2inc_2globals_8h.html#a1758c38ed3e6b98c8733121b5a38e575", null ],
-    [ "dataRate", "_hypo_2inc_2globals_8h.html#ad01fd805f30f30bdf1f18e5cbc328beb", null ],
     [ "flashVLED", "_hypo_2inc_2globals_8h.html#a3a0718cfb3c78af1380ecf36f6d56fbc", null ],
     [ "gpsWatchdog", "_hypo_2inc_2globals_8h.html#a923f894ced4419380a13cdb520a94235", null ],
     [ "heartbeatWatchdog", "_hypo_2inc_2globals_8h.html#ac6722f026c9b1f4ff9a1e49cbbd622b1", null ],

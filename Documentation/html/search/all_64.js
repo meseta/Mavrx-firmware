@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['datarate',['dataRate',['../_hypo_2globals_8c.html#ad01fd805f30f30bdf1f18e5cbc328beb',1,'dataRate():&#160;globals.c'],['../_hypo_2inc_2globals_8h.html#ad01fd805f30f30bdf1f18e5cbc328beb',1,'dataRate():&#160;globals.c']]],
+  ['datarate',['dataRate',['../_beacon_2inc_2telemetry_8h.html#ad01fd805f30f30bdf1f18e5cbc328beb',1,'dataRate():&#160;telemetry.c'],['../_beacon_2telemetry_8c.html#ad01fd805f30f30bdf1f18e5cbc328beb',1,'dataRate():&#160;telemetry.c'],['../_hypo_2inc_2telemetry_8h.html#ad01fd805f30f30bdf1f18e5cbc328beb',1,'dataRate():&#160;telemetry.c'],['../_hypo_2telemetry_8c.html#ad01fd805f30f30bdf1f18e5cbc328beb',1,'dataRate():&#160;telemetry.c']]],
   ['dcount',['dcount',['../structalt_struct.html#a77f867934ed3f8b298393d9350fd2202',1,'altStruct']]],
   ['detect_5fori',['detect_ori',['../calibrate_8c.html#aac5716831fbfdd2f2b89346c7e77329c',1,'detect_ori(void):&#160;calibrate.c'],['../calibrate_8h.html#aac5716831fbfdd2f2b89346c7e77329c',1,'detect_ori(void):&#160;calibrate.c']]],
   ['detune',['DETUNE',['../_thalamus_2inc_2params_8h.html#a6e78e6c1c07a7e40f7f5c51900a84449',1,'params.h']]],

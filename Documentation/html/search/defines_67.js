@@ -13,6 +13,6 @@ var searchData=
   ['gps_5fmax_5frotate',['GPS_MAX_ROTATE',['../_hypo_2inc_2params_8h.html#aec0d6c6fc0040656061b0996bb500c7d',1,'params.h']]],
   ['gps_5fmax_5fspeed',['GPS_MAX_SPEED',['../_hypo_2inc_2params_8h.html#a412e6f6562d2cdc5e2900b9a304a5af6',1,'params.h']]],
   ['gps_5fmin_5fradius',['GPS_MIN_RADIUS',['../_hypo_2inc_2params_8h.html#a410f484fdf617f0e223d1e2009d0bc21',1,'params.h']]],
-  ['gps_5fpanic',['GPS_PANIC',['../_hypo_2inc_2globals_8h.html#a9ac1e935ffaf582ee4594d2b455fffa3',1,'globals.h']]],
+  ['gps_5fpanic',['GPS_PANIC',['../_beacon_2inc_2globals_8h.html#a9ac1e935ffaf582ee4594d2b455fffa3',1,'GPS_PANIC():&#160;globals.h'],['../_hypo_2inc_2globals_8h.html#a9ac1e935ffaf582ee4594d2b455fffa3',1,'GPS_PANIC():&#160;globals.h']]],
   ['gps_5fsafe_5falt',['GPS_SAFE_ALT',['../_hypo_2inc_2params_8h.html#a7a42a38040e5b0a13d717aa3315e3a33',1,'params.h']]]
 ];

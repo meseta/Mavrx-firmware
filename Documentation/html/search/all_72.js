@@ -10,7 +10,7 @@ var searchData=
   ['read_5fmag_5fsensors',['read_mag_sensors',['../inputs_8h.html#ab4980606e2fc3dcfdf7a38bdb74ec0d4',1,'read_mag_sensors(void):&#160;inputs.c'],['../inputs_8c.html#ab4980606e2fc3dcfdf7a38bdb74ec0d4',1,'read_mag_sensors(void):&#160;inputs.c']]],
   ['read_5frx_5finput',['read_rx_input',['../inputs_8h.html#a1b83a366a672f3dc32fbed71e5ebe077',1,'read_rx_input(void):&#160;inputs.c'],['../inputs_8c.html#a1b83a366a672f3dc32fbed71e5ebe077',1,'read_rx_input(void):&#160;inputs.c']]],
   ['read_5fultrasound',['read_ultrasound',['../inputs_8h.html#aabf836b0ea199cde8e1082eeb6e1dff8',1,'read_ultrasound(void):&#160;inputs.c'],['../inputs_8c.html#aabf836b0ea199cde8e1082eeb6e1dff8',1,'read_ultrasound(void):&#160;inputs.c']]],
-  ['ritinterrupt',['RITInterrupt',['../_hypo_2main_8c.html#a85547937805d6281656f9b300156e86c',1,'RITInterrupt(void):&#160;main.c'],['../_thalamus_2main_8c.html#a85547937805d6281656f9b300156e86c',1,'RITInterrupt(void):&#160;main.c']]],
+  ['ritinterrupt',['RITInterrupt',['../_beacon_2main_8c.html#a85547937805d6281656f9b300156e86c',1,'RITInterrupt(void):&#160;main.c'],['../_hypo_2main_8c.html#a85547937805d6281656f9b300156e86c',1,'RITInterrupt(void):&#160;main.c'],['../_thalamus_2main_8c.html#a85547937805d6281656f9b300156e86c',1,'RITInterrupt(void):&#160;main.c']]],
   ['roll',['roll',['../structuser_struct.html#a26fd84d522945b6038221d9e38c7cc39',1,'userStruct::roll()'],['../structattitude__demand__body__struct.html#a26fd84d522945b6038221d9e38c7cc39',1,'attitude_demand_body_struct::roll()']]],
   ['roll_5fboost',['ROLL_Boost',['../_thalamus_2inc_2params_8h.html#a18f24445d4a4a7e6472c8a6066ccb9ef',1,'params.h']]],
   ['roll_5fde',['ROLL_De',['../_thalamus_2inc_2params_8h.html#a335245aa43c9998455704db1dc8f4391',1,'params.h']]],

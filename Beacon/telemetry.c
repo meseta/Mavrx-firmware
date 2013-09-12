@@ -17,40 +17,21 @@ mavlink_message_t mavlink_tx_msg;								/*!< Transmitted message  */
 mavlink_heartbeat_t mavlink_heartbeat;							/*!< Heartbeat  */
 mavlink_sys_status_t mavlink_sys_status;						/*!< System status  */
 mavlink_gps_raw_int_t mavlink_gps_raw_int;						/*!< Raw GPS  */
-mavlink_raw_imu_t mavlink_raw_imu;								/*!< Raw IMU  */
-mavlink_scaled_imu_t mavlink_scaled_imu;						/*!< Scaled IMU  */
-mavlink_attitude_t mavlink_attitude;							/*!< Attitude  */
 mavlink_command_ack_t mavlink_command_ack;						/*!< Command acknowledgement  */
 mavlink_param_value_t mavlink_param_value;						/*!< Parameters  */
-mavlink_rc_channels_raw_t mavlink_rc_channels_raw;				/*!< RC raw data  */
-mavlink_rc_channels_scaled_t mavlink_rc_channels_scaled;		/*!< RC scaled data  */
-mavlink_servo_output_raw_t mavlink_servo_output_raw;			/*!< Servo output data  */
-mavlink_gps_global_origin_t mavlink_gps_global_origin;			/*!< GPS home location  */
-mavlink_vfr_hud_t mavlink_vfr_hud;								/*!< VFR HUD  */
 
 mavlink_named_value_float_t mavlink_named_value_float;			/*!< Debug float  */
 mavlink_named_value_int_t mavlink_named_value_int;				/*!< Debug int  */
 mavlink_debug_vect_t mavlink_debug_vect;						/*!< Debug vector  */
 mavlink_statustext_t mavlink_statustext;						/*!< Status text  */
-mavlink_mission_request_t mavlink_mission_request;				/*!< Mission request  */
-mavlink_mission_item_t mavlink_mission_item;					/*!< Mission waypoint item  */
-mavlink_mission_ack_t mavlink_mission_ack;						/*!< Mission acknowledgement  */
-mavlink_mission_item_reached_t mavlink_mission_item_reached;	/*!< Mission waypoint reached notification  */
 
 // Received messages
 mavlink_message_t mavlink_rx_msg;								/*!< Receieved message  */
 mavlink_request_data_stream_t mavlink_request_data_stream;		/*!< Data stream rate request  */
 mavlink_command_long_t mavlink_command_long;					/*!< Commands  */
-//mavlink_param_request_list_t mavlink_param_request_list;		/*!< Parameter read all reuest  */
 mavlink_param_set_t mavlink_param_set;							/*!< Parameter set request  */
 mavlink_param_request_read_t mavlink_param_request_read;		/*!< Parameter read request  */
 mavlink_manual_control_t mavlink_manual_control;				/*!< Manual control  */
-mavlink_mission_count_t mavlink_mission_count;					/*!< Mission count  */
-mavlink_set_gps_global_origin_t mavlink_set_gps_global_origin;	/*!< Set Home  */
-mavlink_mission_request_list_t mavlink_mission_request_list;	/*!< Mission request  */
-mavlink_mission_clear_all_t mavlink_mission_clear_all;			/*!< Mission clear  */
-mavlink_mission_set_current_t mavlink_mission_set_current;		/*!< Mission set current  */
-mavlink_mission_current_t mavlink_mission_current;				/*!< Mission current  */
 mavlink_set_mode_t mavlink_set_mode;							/*!< Set craft mode  */
 
 unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];		/*!< Mavlink message buffer */

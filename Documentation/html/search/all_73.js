@@ -1,11 +1,13 @@
 var searchData=
 [
+  ['sendtolist',['SendToList',['../_hypx_2main_8c.html#a607c757b82740597d6f0d7afe91f9a0f',1,'main.c']]],
   ['sensorstructaccel',['sensorStructAccel',['../structsensor_struct_accel.html',1,'']]],
   ['sensorstructgyro',['sensorStructGyro',['../structsensor_struct_gyro.html',1,'']]],
   ['sensorstructmag',['sensorStructMag',['../structsensor_struct_mag.html',1,'']]],
-  ['setup',['setup',['../_hypo_2main_8c.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.c'],['../_thalamus_2main_8c.html#a7dfd9b79bc5a37d7df40207afbc5431f',1,'setup(void):&#160;main.c']]],
+  ['setup',['setup',['../_beacon_2main_8c.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.c'],['../_hypx_2main_8c.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.c'],['../_hypo_2main_8c.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.c'],['../_thalamus_2main_8c.html#a7dfd9b79bc5a37d7df40207afbc5431f',1,'setup(void):&#160;main.c']]],
   ['slow_5fdivider',['SLOW_DIVIDER',['../_thalamus_2inc_2globals_8h.html#a02ef4a714b72db178b1d773ce1e7081d',1,'globals.h']]],
   ['slow_5frate',['SLOW_RATE',['../_thalamus_2inc_2globals_8h.html#a61aa8a7a462e140974a545a5518b22f5',1,'globals.h']]],
+  ['sourceaddresslist',['sourceAddressList',['../_hypx_2main_8c.html#a53c61ef190ed30d7c930070f060277da',1,'main.c']]],
   ['state',['state',['../states_8h.html#ab12828525693568ae9c217805bea1ef9',1,'state():&#160;states.c'],['../states_8c.html#ab12828525693568ae9c217805bea1ef9',1,'state():&#160;states.c']]],
   ['state_5fauto',['STATE_AUTO',['../states_8h.html#a6a16b8b67cb1ce326bc70a4af90778f6',1,'states.h']]],
   ['state_5fdisarmed',['STATE_DISARMED',['../states_8h.html#a411cab1a736427a29f25cf9805f737c5',1,'states.h']]],
@@ -17,7 +19,10 @@ var searchData=
   ['states_2ec',['states.c',['../states_8c.html',1,'']]],
   ['states_2eh',['states.h',['../states_8h.html',1,'']]],
   ['still_5fthresh',['STILL_THRESH',['../calibrate_8h.html#a7ecaef9373ee2a3d2ce418831f51f782',1,'calibrate.h']]],
-  ['sysms',['sysMS',['../_hypo_2globals_8c.html#a08ca8ea07c114f5db0a3ff0d9b57dc6c',1,'sysMS():&#160;globals.c'],['../_hypo_2inc_2globals_8h.html#a08ca8ea07c114f5db0a3ff0d9b57dc6c',1,'sysMS():&#160;globals.c']]],
-  ['systickinterrupt',['SysTickInterrupt',['../_hypo_2main_8c.html#a00b1ff12603b34aaa42c7e91c7b59aa1',1,'SysTickInterrupt(void):&#160;main.c'],['../_thalamus_2main_8c.html#a00b1ff12603b34aaa42c7e91c7b59aa1',1,'SysTickInterrupt(void):&#160;main.c']]],
-  ['sysus',['sysUS',['../_hypo_2globals_8c.html#a387556b5609a0f2df71e00918a2ab13f',1,'sysUS():&#160;globals.c'],['../_hypo_2inc_2globals_8h.html#a387556b5609a0f2df71e00918a2ab13f',1,'sysUS():&#160;globals.c']]]
+  ['strike_5fcount_5fmax',['STRIKE_COUNT_MAX',['../_hypx_2main_8c.html#abd6b0af6307e37c5ca3cc87d7c58d274',1,'main.c']]],
+  ['strikeaddresslist',['strikeAddressList',['../_hypx_2main_8c.html#ac2b5ca69633c70a9cd718c8b2631e1da',1,'main.c']]],
+  ['strikenetworkaddress',['StrikeNetworkAddress',['../_hypx_2main_8c.html#a8bc3cbda1440319748495305ae22f6d4',1,'main.c']]],
+  ['sysms',['sysMS',['../_beacon_2globals_8c.html#a08ca8ea07c114f5db0a3ff0d9b57dc6c',1,'sysMS():&#160;globals.c'],['../_beacon_2inc_2globals_8h.html#a08ca8ea07c114f5db0a3ff0d9b57dc6c',1,'sysMS():&#160;globals.c'],['../_hypx_2main_8c.html#a08ca8ea07c114f5db0a3ff0d9b57dc6c',1,'sysMS():&#160;main.c'],['../_hypo_2globals_8c.html#a08ca8ea07c114f5db0a3ff0d9b57dc6c',1,'sysMS():&#160;globals.c'],['../_hypo_2inc_2globals_8h.html#a08ca8ea07c114f5db0a3ff0d9b57dc6c',1,'sysMS():&#160;globals.c']]],
+  ['systickinterrupt',['SysTickInterrupt',['../_beacon_2main_8c.html#a00b1ff12603b34aaa42c7e91c7b59aa1',1,'SysTickInterrupt(void):&#160;main.c'],['../_hypx_2main_8c.html#a13a0f81512ab39ed95698794b9ee82e9',1,'SysTickInterrupt():&#160;main.c'],['../_hypo_2main_8c.html#a00b1ff12603b34aaa42c7e91c7b59aa1',1,'SysTickInterrupt(void):&#160;main.c'],['../_thalamus_2main_8c.html#a00b1ff12603b34aaa42c7e91c7b59aa1',1,'SysTickInterrupt(void):&#160;main.c']]],
+  ['sysus',['sysUS',['../_beacon_2globals_8c.html#a387556b5609a0f2df71e00918a2ab13f',1,'sysUS():&#160;globals.c'],['../_beacon_2inc_2globals_8h.html#a387556b5609a0f2df71e00918a2ab13f',1,'sysUS():&#160;globals.c'],['../_hypo_2globals_8c.html#a387556b5609a0f2df71e00918a2ab13f',1,'sysUS():&#160;globals.c'],['../_hypo_2inc_2globals_8h.html#a387556b5609a0f2df71e00918a2ab13f',1,'sysUS():&#160;globals.c']]]
 ];

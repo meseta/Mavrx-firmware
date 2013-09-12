@@ -1,8 +1,10 @@
 var searchData=
 [
   ['targetz_5fult',['targetZ_ult',['../control_8c.html#a98b98f0abb4a1b28245c4ee26f6037bb',1,'control.c']]],
-  ['telemetry_2ec',['telemetry.c',['../telemetry_8c.html',1,'']]],
-  ['telemetry_2eh',['telemetry.h',['../telemetry_8h.html',1,'']]],
+  ['telemetry_2ec',['telemetry.c',['../_beacon_2telemetry_8c.html',1,'']]],
+  ['telemetry_2ec',['telemetry.c',['../_hypo_2telemetry_8c.html',1,'']]],
+  ['telemetry_2eh',['telemetry.h',['../_hypo_2inc_2telemetry_8h.html',1,'']]],
+  ['telemetry_2eh',['telemetry.h',['../_beacon_2inc_2telemetry_8h.html',1,'']]],
   ['thal_5fmotor_5foff',['thal_motor_off',['../control_8c.html#a5e329580731398980e5485075fed120c',1,'control.c']]],
   ['thal_5fpanic',['THAL_PANIC',['../_hypo_2inc_2globals_8h.html#a865b4851d056e0166e3ad08d26bf5a59',1,'globals.h']]],
   ['thal_5fthrot_5fcont',['thal_throt_cont',['../control_8c.html#a9439905b53aa68f25c3351e45b452f01',1,'control.c']]],

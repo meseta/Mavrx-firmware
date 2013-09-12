@@ -26,13 +26,13 @@ var searchData=
   ['ilinkmessagerequest',['ILinkMessageRequest',['../comms_8c.html#ad8b14158ff8b72e233271e2d0b93b4ea',1,'ILinkMessageRequest(unsigned short id):&#160;comms.c'],['../comms_8h.html#ad8b14158ff8b72e233271e2d0b93b4ea',1,'ILinkMessageRequest(unsigned short id):&#160;comms.c']]],
   ['inputs_2ec',['inputs.c',['../inputs_8c.html',1,'']]],
   ['inputs_2eh',['inputs.h',['../inputs_8h.html',1,'']]],
-  ['intmode_5f3d',['INTMODE_3D',['../gps_8h.html#a105cc6f9808341e8c22696df9aad206b',1,'gps.h']]],
-  ['intmode_5fdown',['INTMODE_DOWN',['../gps_8h.html#a0bb25bc3d06c2ce36f89aee5e8701dfd',1,'gps.h']]],
-  ['intmode_5fhorizontal',['INTMODE_HORIZONTAL',['../gps_8h.html#a2378b81085b564c6ae6b2f013a3338ca',1,'gps.h']]],
-  ['intmode_5foff',['INTMODE_OFF',['../gps_8h.html#acbd9245e99d894f8e648cc81af60c704',1,'gps.h']]],
-  ['intmode_5fsequence_5f3d',['INTMODE_SEQUENCE_3D',['../gps_8h.html#ae16b0d66054df27978904d5791ba9c74',1,'gps.h']]],
-  ['intmode_5fsequence_5fdown',['INTMODE_SEQUENCE_DOWN',['../gps_8h.html#a028229e46b7c321c708c6a304f7cb342',1,'gps.h']]],
-  ['intmode_5fsequence_5fup',['INTMODE_SEQUENCE_UP',['../gps_8h.html#a8157deae72099256cc882334eb43d4ce',1,'gps.h']]],
-  ['intmode_5fup_5fand_5fgo',['INTMODE_UP_AND_GO',['../gps_8h.html#a4a281757c428ed1cce5eb5f70350105e',1,'gps.h']]],
-  ['intmode_5fvertical',['INTMODE_VERTICAL',['../gps_8h.html#a72732bb41f457304d561253d1986f2f9',1,'gps.h']]]
+  ['intmode_5f3d',['INTMODE_3D',['../_hypo_2inc_2gps_8h.html#a105cc6f9808341e8c22696df9aad206b',1,'gps.h']]],
+  ['intmode_5fdown',['INTMODE_DOWN',['../_hypo_2inc_2gps_8h.html#a0bb25bc3d06c2ce36f89aee5e8701dfd',1,'gps.h']]],
+  ['intmode_5fhorizontal',['INTMODE_HORIZONTAL',['../_hypo_2inc_2gps_8h.html#a2378b81085b564c6ae6b2f013a3338ca',1,'gps.h']]],
+  ['intmode_5foff',['INTMODE_OFF',['../_hypo_2inc_2gps_8h.html#acbd9245e99d894f8e648cc81af60c704',1,'gps.h']]],
+  ['intmode_5fsequence_5f3d',['INTMODE_SEQUENCE_3D',['../_hypo_2inc_2gps_8h.html#ae16b0d66054df27978904d5791ba9c74',1,'gps.h']]],
+  ['intmode_5fsequence_5fdown',['INTMODE_SEQUENCE_DOWN',['../_hypo_2inc_2gps_8h.html#a028229e46b7c321c708c6a304f7cb342',1,'gps.h']]],
+  ['intmode_5fsequence_5fup',['INTMODE_SEQUENCE_UP',['../_hypo_2inc_2gps_8h.html#a8157deae72099256cc882334eb43d4ce',1,'gps.h']]],
+  ['intmode_5fup_5fand_5fgo',['INTMODE_UP_AND_GO',['../_hypo_2inc_2gps_8h.html#a4a281757c428ed1cce5eb5f70350105e',1,'gps.h']]],
+  ['intmode_5fvertical',['INTMODE_VERTICAL',['../_hypo_2inc_2gps_8h.html#a72732bb41f457304d561253d1986f2f9',1,'gps.h']]]
 ];

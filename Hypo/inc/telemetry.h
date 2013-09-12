@@ -41,7 +41,6 @@ extern mavlink_vfr_hud_t mavlink_vfr_hud;
 extern mavlink_message_t mavlink_rx_msg;
 extern mavlink_request_data_stream_t mavlink_request_data_stream;
 extern mavlink_command_long_t mavlink_command_long;
-extern mavlink_param_request_list_t mavlink_param_request_list;
 extern mavlink_param_set_t mavlink_param_set;
 extern mavlink_param_request_read_t mavlink_param_request_read;
 extern mavlink_manual_control_t mavlink_manual_control;

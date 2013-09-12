@@ -651,7 +651,9 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = Hypo \
+INPUT                  = Beacon \
+                         Hypx \
+                         Hypo \
 						 Thalamus \
 						 mainpage.dox
 

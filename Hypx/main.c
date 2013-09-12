@@ -1,26 +1,41 @@
+/*!
+\file Hypx/main.c
+\brief It all starts here
+
+Hypx main file, pretty much all user code is here.
+
+*/
+
 #include "thal.h"
 
 // Buttons and LED stuff
-volatile unsigned int PRGTimer;
-volatile unsigned int PRGLastState;
-volatile unsigned int PRGPushTime;
-volatile unsigned int PRGBlankTimer;
-unsigned int PRGMode;
+volatile unsigned int PRGTimer=0;       /*!< Timer for button pushes, continuously increments as the button is held */
+volatile unsigned char PRGLastState;    /*!< Last state that the button was in */
+volatile unsigned int PRGPushTime=0;    /*!< Contains the time that a button was pushed for, populated after button is released */
+volatile unsigned int PRGBlankTimer=100;/*!< Blanking time for button pushes */
+unsigned int PRGMode=0;                 /*!< Current mode invoked by PRG mode */
 
-unsigned int sysMS;
-unsigned int flashVLED;
+unsigned int sysMS=0;                   /*!< System timer */
+unsigned int flashVLED=0;               /*!< Boolean to enable VLED flashing */
 
-#define ADDRESSLIST_SIZE    20
-#define STRIKE_COUNT_MAX    1000
-unsigned short networkAddressList[ADDRESSLIST_SIZE];
-unsigned long long sourceAddressList[ADDRESSLIST_SIZE];
-unsigned short strikeAddressList[ADDRESSLIST_SIZE];
-unsigned int addressListCount;
+#define ADDRESSLIST_SIZE    20          /*!< Size of the address list */
+#define STRIKE_COUNT_MAX    1000        /*!< Number of failed transmission before address is struck  from the list */
+unsigned short networkAddressList[ADDRESSLIST_SIZE];    /*!< stored network addresses */
+unsigned long long sourceAddressList[ADDRESSLIST_SIZE]; /*!< stored source addresses */
+unsigned short strikeAddressList[ADDRESSLIST_SIZE];     /*!< stirke counts for stored addresses */
+unsigned int addressListCount=0;                        /*!< number of active addresses in list */
 
 void StrikeNetworkAddress(unsigned short networkAddress);
 void AddNetworkAddress(unsigned short networkAddress, unsigned long long sourceAddress);
 void SendToList(unsigned char * buffer, unsigned int length);
 
+/*!
+\brief Adds an address to the list
+
+Searches through the list for the address.  If the address is already in the 
+list, update its network address, and zero the strike counter.  If the address
+is not in the list, add it.
+*/
 void AddNetworkAddress(unsigned short networkAddress, unsigned long long sourceAddress) {
     unsigned int i, found;
     found = 0;
@@ -43,6 +58,12 @@ void AddNetworkAddress(unsigned short networkAddress, unsigned long long sourceA
     }
 }
 
+/*!
+\brief Strikes agains an address on the list
+
+Increments the strike counter on the address in the list.  If the strike 
+counter reaches STRIKE_COUNT_MAX, then the address is removed from the list
+*/
 void StrikeNetworkAddress(unsigned short networkAddress) {
     unsigned int i;
     for(i=0; i<addressListCount; i++) {
@@ -65,6 +86,12 @@ void StrikeNetworkAddress(unsigned short networkAddress) {
     }
 }
 
+/*!
+\brief Sends data to the list
+
+This function is here because it's much faster to unicast to several devices
+than it is to broadcast data.
+*/
 void SendToList(unsigned char * buffer, unsigned int length) {
     unsigned int i;
     for(i=0; i<length; i++) {
@@ -81,23 +108,26 @@ void SendToList(unsigned char * buffer, unsigned int length) {
 
 
 // CDC stuff
-#define CDCBUFSIZE 255
-unsigned char CDCBuf[CDCBUFSIZE];
-volatile unsigned int CDCCount;
-volatile unsigned int CDCFlag;
-volatile unsigned int CDCTimeout;
+#define CDCBUFSIZE 255               /*!< CDC buffer size */   
+unsigned char CDCBuf[CDCBUFSIZE];    /*!< CDC buffer */   
+volatile unsigned int CDCCount=0;    /*!< CDC buffer byte count */   
+volatile unsigned char CDCFlag=0;    /*!< CDC buffer in use flag */   
+volatile unsigned int CDCTimeout;    /*!< CDC transmit timeout */  
 
 // Mode/EEPROM stuff
-#define EEPROM_SETTING_ADDR 0x261
-#define EEPROM_XBEE_MODE    0xff
-#define EEPROM_BYPASS_MODE  0xfe
+#define EEPROM_SETTING_ADDR 0x261   /*!< location of the EEPROM setting (this is pretty much arbitrarily chosen since we only need to store one byte in the EEPROM */  
+#define EEPROM_XBEE_MODE    0xff    /*!< EEPROM value for normal XBee mode (EEPROM should be equal to this value on reset already */
+#define EEPROM_BYPASS_MODE  0xfe    /*!< EEPROM value for bypass mode */
 
-unsigned int XBeeBypassMode;
+unsigned char XBeeBypassMode=0;     /*!< Boolean for bypass mode */
 
+/*!
+\brief Setup function, sets stuff up...in function form...
+
+*/
 void setup () {
     LEDInit(PLED);
     LEDOn(PLED);
-    flashVLED = 0;
     
 	XBeeReset();
 	
@@ -105,33 +135,25 @@ void setup () {
 	
 	Delay(500);
     CDCInit(VIRTUAL);
-    CDCCount = 0;
 	
 	Delay(200);
     XBeeInit();
 	
-	
-    addressListCount = 0;
-    
     // Check to see if we should go into bypass mode
     if(EEPROMReadByte(EEPROM_SETTING_ADDR) == EEPROM_BYPASS_MODE) {
         XBeeStartBypass();
         XBeeBypassMode = 1;
     }
-    else {
-        XBeeBypassMode = 0;
-    }
-    
     
     LEDOff(PLED);
     LEDInit(VLED);
     LEDWrite(VLED, XBeeBypassMode);
-    PRGBlankTimer = 100;
-    PRGPushTime = 0;
-    PRGTimer = 0;
-    PRGMode = 0;
 }
 
+/*!
+\brief Idle loop, deals with button pushes and data transmission on timeout
+
+*/
 void loop() {
     if(PRGBlankTimer == 0) {
         // provide some visual feedback when using the buttons, this LED comes on after 3 seconds, and then off after 8 (or vice versa in bypass mode)
@@ -204,6 +226,10 @@ void loop() {
     }
 }
 
+/*!
+\brief System tick interrupt, deals with button push timing and LED flashing
+
+*/
 void SysTickInterrupt() {
     if(PRGBlankTimer) {
         PRGBlankTimer--;
@@ -236,6 +262,10 @@ void SysTickInterrupt() {
     }
 }
 
+/*!
+\brief Deals with XBee messages! Is triggered by UART ISR
+
+*/
 void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length) {
     if(XBeeBypassMode) {
         CDCWrite(buffer, length);
@@ -306,6 +336,10 @@ void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length
     }
 }
 
+/*!
+\brief CDC data input ISR
+
+*/
 void CDCReadByte(unsigned char byte) {
     if(XBeeBypassMode) {
         UARTWriteByte(byte);
