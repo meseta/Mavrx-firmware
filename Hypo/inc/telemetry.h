@@ -59,12 +59,6 @@ extern mavlink_mission_request_list_t mavlink_mission_request_list;
 extern unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];
 extern unsigned short mavlink_message_len;
 
-extern xbee_modem_status_t xbee_modem_status;
-extern xbee_at_command_t xbee_at_command;
-extern xbee_at_response_t xbee_at_response;
-extern xbee_receive_packet_t xbee_receive_packet;
-extern xbee_transmit_request_t xbee_transmit_request;
-
 void mavlink_telemetry(void);
 void mavlink_messages(void);
 

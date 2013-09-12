@@ -56,13 +56,6 @@ mavlink_set_mode_t mavlink_set_mode;							/*!< Set craft mode  */
 unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];		/*!< Mavlink message buffer */
 unsigned short mavlink_message_len;								/*!< Mavlink message buffer length */
 
-// Xbee stuff
-xbee_modem_status_t xbee_modem_status;							/*!< XBee modem status */
-xbee_at_command_t xbee_at_command;								/*!< XBee commands */
-xbee_at_response_t xbee_at_response;							/*!< XBee command response */
-xbee_receive_packet_t xbee_receive_packet;						/*!< XBee received packet */
-xbee_transmit_request_t xbee_transmit_request;					/*!< XBee transmit packet */
-
 /*!
 \brief Deals with sending all the Mavlink telemetry
 */

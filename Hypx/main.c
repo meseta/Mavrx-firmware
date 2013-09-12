@@ -10,20 +10,11 @@ unsigned int PRGMode;
 unsigned int sysMS;
 unsigned int flashVLED;
 
-// Xbee stuff
-xbee_modem_status_t xbee_modem_status;
-xbee_at_command_t xbee_at_command;
-xbee_at_response_t xbee_at_response;
-xbee_transmit_status_t xbee_transmit_status;
-xbee_receive_packet_t xbee_receive_packet;
-xbee_transmit_request_t xbee_transmit_request;
-xbee_node_identification_indicator_t xbee_node_identification_indicator;
-
 #define ADDRESSLIST_SIZE    20
-#define STRIKE_COUNT_MAX    100
+#define STRIKE_COUNT_MAX    1000
 unsigned short networkAddressList[ADDRESSLIST_SIZE];
 unsigned long long sourceAddressList[ADDRESSLIST_SIZE];
-unsigned char strikeAddressList[ADDRESSLIST_SIZE];
+unsigned short strikeAddressList[ADDRESSLIST_SIZE];
 unsigned int addressListCount;
 
 void StrikeNetworkAddress(unsigned short networkAddress);
@@ -296,20 +287,20 @@ void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length
         // take action
         switch(id) {
             case ID_XBEE_TRANSMITSTATUS:
-                if(xbee_transmit_status.deliveryStatus == 0x21) {
-                    StrikeNetworkAddress(xbee_transmit_status.networkAddress);
+                if(xbee_transmit_status.deliveryStatus == 0x21) { // fail delivery
+                    StrikeNetworkAddress(xbee_transmit_status.networkAddress); // strike network address
                 }
                 break;
-            case ID_XBEE_RECEIVEPACKET:
-                AddNetworkAddress(xbee_receive_packet.networkAddress, xbee_receive_packet.sourceAddress);
+            case ID_XBEE_RECEIVEPACKET: // received packet
+                AddNetworkAddress(xbee_receive_packet.networkAddress, xbee_receive_packet.sourceAddress); // add to network addresses
                 break;
-            case IX_XBEE_NODEIDENTIFICATIONINDICATOR:
+            case IX_XBEE_NODEIDENTIFICATIONINDICATOR: // new node connected
                 if(xbee_node_identification_indicator.sourceEvent == 0x02) { // if a join event
                     XBeeStopJoin(); // disallow joining
                     flashVLED = 3;
                     PRGMode = 0;
                 }
-                AddNetworkAddress(xbee_node_identification_indicator.remoteNetworkAddress, xbee_node_identification_indicator.remoteSourceAddress);
+                AddNetworkAddress(xbee_node_identification_indicator.remoteNetworkAddress, xbee_node_identification_indicator.remoteSourceAddress); // add to network address
                 break;
         }
     }

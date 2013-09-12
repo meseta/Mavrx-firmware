@@ -5044,6 +5044,15 @@ unsigned char PRGPoll(void) {
         volatile unsigned char FUNCXBeeChecksum;
         unsigned char FUNCXBeeBuffer[XBEE_BUFFER_SIZE];
         
+        // Xbee stuff
+        xbee_modem_status_t xbee_modem_status SRAM1;
+        xbee_at_command_t xbee_at_command SRAM1;
+        xbee_at_response_t xbee_at_response SRAM1;
+        xbee_transmit_status_t xbee_transmit_status SRAM1;
+        xbee_receive_packet_t xbee_receive_packet SRAM1;
+        xbee_transmit_request_t xbee_transmit_request SRAM1;
+        xbee_node_identification_indicator_t xbee_node_identification_indicator SRAM1;
+        
         unsigned char XBeeSendATCommand(void) {
             xbee_at_command.frameID = Random() | 0x1;
             XBeeSendFrame(ID_XBEE_ATCOMMAND, (unsigned char *)&xbee_at_command, sizeof(xbee_at_command)-2-16+xbee_at_command.varLen);
