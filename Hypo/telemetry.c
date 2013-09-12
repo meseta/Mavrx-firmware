@@ -11,6 +11,7 @@
 unsigned char mavlinkID;	/*!< This contains the craft's MAVID, by default it is generated from the chip ID, but is adjusted in parameters */
 
 // Sent messages
+mavlink_ping_t mavlink_ping;                                    /*!< Ping */
 mavlink_status_t mavlink_status;								/*!< Craft status */
 mavlink_message_t mavlink_tx_msg;								/*!< Transmitted message  */
 mavlink_heartbeat_t mavlink_heartbeat;							/*!< Heartbeat  */
@@ -592,12 +593,25 @@ void MAVLinkParse(unsigned char UARTData) {
     if(mavlink_parse_char(MAVLINK_COMM_0, UARTData, &mavlink_rx_msg, &mavlink_status)) {
         //MAVSendInt("ID", mavlink_rx_msg.msgid);
         switch(mavlink_rx_msg.msgid) {
-             case MAVLINK_MSG_ID_HEARTBEAT:
+            case MAVLINK_MSG_ID_HEARTBEAT:
                 // count heartbeat messages
                 heartbeatWatchdog = 0;
                 allowTransmit = 1;
                 break;
-             case MAVLINK_MSG_ID_MANUAL_CONTROL:
+            
+            case MAVLINK_MSG_ID_PING:
+                // PING is a special case, as only pings with target system set to zero is responded to,
+                // and results are breadcast on mesh instead of to coordinator.
+                if(mavlink_msg_ping_get_target_system(&mavlink_rx_msg) == 0) { // only respond to pings with target system set to zero
+                    mavlink_msg_ping_decode(&mavlink_rx_msg, &mavlink_ping);
+                    mavlink_ping.time_usec = sysUS;
+                    mavlink_ping.target_component = mavlinkID;
+                    mavlink_ping.target_component = MAV_COMP_ID_SYSTEM_CONTROL;
+                    XBeeWriteBroadcast(mavlink_message_buf, mavlink_message_len); // BROADCAST
+                }
+                break;
+            
+            case MAVLINK_MSG_ID_MANUAL_CONTROL:
 				// QGROUNDCONTROL BUG: gamepad control don't work
                 /*mavlink_msg_manual_control_decode(&mavlink_rx_msg, &mavlink_manual_control);
                 if(mavlink_manual_control.target == mavlinkID) {

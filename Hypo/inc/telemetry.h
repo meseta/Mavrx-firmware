@@ -10,6 +10,8 @@
 
 extern unsigned char mavlinkID;
 
+extern mavlink_ping_t mavlink_ping;
+
 extern mavlink_status_t mavlink_status;
 extern mavlink_message_t mavlink_tx_msg;
 extern mavlink_heartbeat_t mavlink_heartbeat;
