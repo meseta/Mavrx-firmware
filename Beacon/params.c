@@ -97,39 +97,3 @@ void eeprom_save_all(void) {
 	
 	EEPROMWrite(EEPROM_OFFSET + paramCount * 4, (unsigned char *)&tempStorage, 2);
 }
-
-/*!
-\brief deals with the transmission of parameters via MAVLink
-*/
-void paramater_transmit(void) {
-	unsigned int i;
-
-	if(paramSendCount < paramCount) {
-		unsigned short thisParam = paramSendCount; // store this to avoid race hazard since paramSendCount can change outside this interrupt
-		
-		for(i=0; i<PARAMNAMELEN; i++) {
-			mavlink_param_value.param_id[i] = paramStorage[thisParam].name[i];
-			if(paramStorage[thisParam].name[i] == '\0') break;
-		}
-		
-		mavlink_param_value.param_value = paramStorage[thisParam].value;
-		mavlink_param_value.param_count = paramCount; // this value shouldn't change
-		mavlink_param_value.param_index = thisParam;
-		mavlink_param_value.param_type = MAV_PARAM_TYPE_REAL32;
-		
-		mavlink_msg_param_value_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_param_value);
-		mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-		
-		XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-		XBeeWriteCoordinator(mavlink_message_buf, mavlink_message_len);
-		XBeeAllow();
-		
-		if(paramSendSingle) {
-			paramSendSingle = 0;
-			paramSendCount = paramCount;
-		}
-		else {
-			paramSendCount = thisParam+1;
-		}
-	}
-}

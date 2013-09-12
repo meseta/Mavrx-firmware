@@ -24,14 +24,10 @@ void setup() {
     // *** LED setup
     LEDInit(PLED);
     LEDOn(PLED);
-	
-	// *** EEPROM and params
-	MAV_ID = ReadUIDHash() & 0xff; // get last byte of hash and use as default ID
-	
+
     // *** XBee and MAVLink
     XBeeInit();
     MAVLinkInit();
-    MAVSendHeartbeat();
 
     // *** GPS
     GPSInit();
@@ -39,12 +35,15 @@ void setup() {
     GPSSetRate(ID_NAV_STATUS, 3); // every three nav solutions
     GPSSetRate(ID_NAV_VELNED, 1);
 	
-    // *** Things start happening as soon as RIT is enabled!
+    // *** Things start happening as soon as RIT is enabled!3
     RITInitms(1000/MESSAGE_LOOP_HZ);  // RIT at 25Hz
     LEDOff(PLED);
     LEDInit(VLED);
 	Port0Init(PIN13 | PIN14 | PIN15 | PIN16);
 	Port0SetOut(PIN13 | PIN14 | PIN15 | PIN16);
+    PRGBlankTimer = 100;
+    PRGPushTime = 0;
+    PRGTimer = 0;
 }
 
 /*!
@@ -61,15 +60,43 @@ void loop() {
             LEDOn(VLED);
         }
         
-        if(PRGPushTime > 3000) {
-            flashVLED = 0xffffffffUL;
-            XBeeJoin();
+        // begin working out button presses
+        if(PRGPushTime > 15000) {   // Factory reset the XBee
             flashVLED = 5;
+            craftValid = 0;
+            XBeeFactoryReset();
             
             PRGPushTime = 0;
             PRGTimer = 0;
             PRGBlankTimer = 100;
         }
+        else if(PRGPushTime > 3000) { // Create new network
+            flashVLED = XBEE_JOINPERIOD*10;
+            craftValid = 0;
+            XBeeCoordinatorJoin();
+            PRGMode = 1;
+            
+            PRGPushTime = 0;
+            PRGTimer = 0;
+            PRGBlankTimer = 100;
+        }
+        // Mesh not supported
+        /*else if(PRGPushTime > 50) {
+            if(PRGMode == 0) {
+                flashVLED = XBEE_JOINPERIOD*10;
+                XBeeAllowJoin();
+                PRGMode = 1;
+            }
+            else {
+                flashVLED = 1;
+                XBeeStopJoin();
+                PRGMode = 0;
+            }
+            
+            PRGPushTime = 0;
+            PRGTimer = 0;
+            PRGBlankTimer = 100;
+        }*/
     }
     
     if(xbee_modem_status.isNew) {
@@ -144,8 +171,6 @@ void RITInterrupt(void) {
     if(gpsWatchdog >= MESSAGE_LOOP_HZ*GPS_PANIC) {
         // GPS signal loss/no-fix
         gpsWatchdog = MESSAGE_LOOP_HZ*(GPS_PANIC+1); // prevent overflow
-        mavlink_gps_raw_int.fix_type = 0;
-        mavlink_gps_raw_int.satellites_visible = 0;
         gpsFixed = 0;
     }
     
@@ -158,8 +183,7 @@ void RITInterrupt(void) {
     
 	// Telemetry
     if(allowTransmit) {
-		paramater_transmit();
-        mavlink_telemetry();
+		
     }
 	
 	// GPS
@@ -182,11 +206,9 @@ void RITInterrupt(void) {
             gps_nav_status.isNew = 0;
 
             if((gps_nav_status.gpsFix == 0x03 || gps_nav_status.gpsFix == 0x04) && gps_nav_status.flags & 0x1) { // fix is 3D and valid
-                mavlink_gps_raw_int.fix_type = gps_nav_status.gpsFix;
                 gpsFixed = 1;
             }
             else {
-                mavlink_gps_raw_int.fix_type = 0;
                 gpsFixed = 0;
             }
             //mavlink_gps_raw_int.satellites_visible = gps_nav_sol.numSV;
@@ -197,12 +219,6 @@ void RITInterrupt(void) {
 
             if(gpsFixed == 1) {
                 gpsWatchdog = 0;
-                mavlink_gps_raw_int.lat = gps_nav_posllh.lat;
-                mavlink_gps_raw_int.lon = gps_nav_posllh.lon;
-                mavlink_gps_raw_int.alt = gps_nav_posllh.hMSL;
-                mavlink_gps_raw_int.eph = gps_nav_posllh.hAcc / 10;
-                mavlink_gps_raw_int.epv = gps_nav_posllh.vAcc / 10;
-
                 craft_X = gps_nav_posllh.lat / 10000000.0d;
                 craft_Y = gps_nav_posllh.lon / 10000000.0d;
                 craft_Z = (double)gps_nav_posllh.hMSL/ 1000.0d;
@@ -212,8 +228,6 @@ void RITInterrupt(void) {
         if(gps_nav_velned.isNew) {
             gps_nav_velned.isNew = 0;
 
-            mavlink_gps_raw_int.vel = gps_nav_velned.gSpeed;
-            mavlink_gps_raw_int.cog = gps_nav_velned.heading / 100; // because GPS assumes cog IS heading.
         }
 	}
 }

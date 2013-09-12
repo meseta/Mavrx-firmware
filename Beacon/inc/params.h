@@ -31,6 +31,4 @@ extern unsigned char paramSendSingle;
 void eeprom_load_all(void);
 void eeprom_save_all(void);
 
-void paramater_transmit(void);
-
 #endif

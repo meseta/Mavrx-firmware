@@ -10,9 +10,9 @@ Hypx main file, pretty much all user code is here.
 
 // Buttons and LED stuff
 volatile unsigned int PRGTimer=0;       /*!< Timer for button pushes, continuously increments as the button is held */
-volatile unsigned char PRGLastState;    /*!< Last state that the button was in */
+volatile unsigned char PRGLastState=0;    /*!< Last state that the button was in */
 volatile unsigned int PRGPushTime=0;    /*!< Contains the time that a button was pushed for, populated after button is released */
-volatile unsigned int PRGBlankTimer=100;/*!< Blanking time for button pushes */
+volatile unsigned int PRGBlankTimer=0;/*!< Blanking time for button pushes */
 unsigned int PRGMode=0;                 /*!< Current mode invoked by PRG mode */
 
 unsigned int sysMS=0;                   /*!< System timer */
@@ -148,6 +148,9 @@ void setup () {
     LEDOff(PLED);
     LEDInit(VLED);
     LEDWrite(VLED, XBeeBypassMode);
+    PRGBlankTimer = 100;
+    PRGPushTime = 0;
+    PRGTimer = 0;
 }
 
 /*!
@@ -308,7 +311,7 @@ void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length
         }
         
         if(ptr) {
-            if(length > structsize-3) length = structsize-3;
+            if(length > structsize-3) length = structsize-3; // I don't remember what this does any more, but it looks important
             for(j=0; j<length; j++) {
                 ptr[j] = buffer[j];
             }

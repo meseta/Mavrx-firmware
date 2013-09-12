@@ -11,10 +11,11 @@ volatile unsigned char allowTransmit=1; /*!< Boolean to allow telemetry transmis
 
 // *** LEDs and buttons stuff
 volatile unsigned int flashVLED=0;		/*!< Boolean for flashing LED */
-volatile unsigned int PRGTimer;			/*!< Timer for counting button push */
-volatile unsigned char PRGLastState;	/*!< Boolean for last button state */
-volatile unsigned int PRGPushTime;		/*!< Timer for counting button push */
-volatile unsigned int PRGBlankTimer;	/*!< Timer for blanking button push (i.e. debounce) */
+volatile unsigned int PRGTimer=0;			/*!< Timer for counting button push */
+volatile unsigned char PRGLastState=0;	/*!< Boolean for last button state */
+volatile unsigned int PRGPushTime=0;		/*!< Timer for counting button push */
+volatile unsigned int PRGBlankTimer=0;	/*!< Timer for blanking button push (i.e. debounce) */
+volatile unsigned char PRGMode=0;                 /*!< Current mode invoked by PRG mode */
 
 // *** Timers and counters
 unsigned int sysMS=0;					/*!< System milliseconds since boot */

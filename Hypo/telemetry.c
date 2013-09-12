@@ -12,7 +12,6 @@ unsigned char mavlinkID;	/*!< This contains the craft's MAVID, by default it is 
 
 // Sent messages
 mavlink_ping_t mavlink_ping;                                    /*!< Ping */
-mavlink_status_t mavlink_status;								/*!< Craft status */
 mavlink_message_t mavlink_tx_msg;								/*!< Transmitted message  */
 mavlink_heartbeat_t mavlink_heartbeat;							/*!< Heartbeat  */
 mavlink_sys_status_t mavlink_sys_status;						/*!< System status  */
@@ -38,6 +37,7 @@ mavlink_mission_ack_t mavlink_mission_ack;						/*!< Mission acknowledgement  */
 mavlink_mission_item_reached_t mavlink_mission_item_reached;	/*!< Mission waypoint reached notification  */
 
 // Received messages
+mavlink_status_t mavlink_status;								/*!< Receive message status */
 mavlink_message_t mavlink_rx_msg;								/*!< Receieved message  */
 mavlink_request_data_stream_t mavlink_request_data_stream;		/*!< Data stream rate request  */
 mavlink_command_long_t mavlink_command_long;					/*!< Commands  */

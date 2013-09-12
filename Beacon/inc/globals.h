@@ -20,6 +20,7 @@ extern volatile unsigned int PRGTimer;
 extern volatile unsigned char PRGLastState;
 extern volatile unsigned int PRGPushTime;
 extern volatile unsigned int PRGBlankTimer;
+extern volatile unsigned char PRGMode;
 
 extern unsigned int sysMS;
 extern unsigned long long sysUS;

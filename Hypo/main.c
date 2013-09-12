@@ -157,7 +157,7 @@ void RITInterrupt(void) {
     if(heartbeatWatchdog >= MESSAGE_LOOP_HZ*XBEE_PANIC) {
         // heartbeat from ground control lost
         heartbeatWatchdog = MESSAGE_LOOP_HZ*(XBEE_PANIC+1); // prevent overflow
-        //flashVLED = 5;
+        flashVLED = 5;
     }
 	
     // GPS watchdog
