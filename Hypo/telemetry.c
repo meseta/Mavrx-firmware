@@ -40,7 +40,7 @@ mavlink_mission_item_reached_t mavlink_mission_item_reached;	/*!< Mission waypoi
 mavlink_message_t mavlink_rx_msg;								/*!< Receieved message  */
 mavlink_request_data_stream_t mavlink_request_data_stream;		/*!< Data stream rate request  */
 mavlink_command_long_t mavlink_command_long;					/*!< Commands  */
-mavlink_param_request_list_t mavlink_param_request_list;		/*!< Parameter read all reuest  */
+//mavlink_param_request_list_t mavlink_param_request_list;		/*!< Parameter read all reuest  */
 mavlink_param_set_t mavlink_param_set;							/*!< Parameter set request  */
 mavlink_param_request_read_t mavlink_param_request_read;		/*!< Parameter read request  */
 mavlink_manual_control_t mavlink_manual_control;				/*!< Manual control  */
@@ -609,8 +609,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 }*/
                 break;
             case MAVLINK_MSG_ID_SET_MODE:
-                mavlink_msg_set_mode_decode(&mavlink_rx_msg, &mavlink_set_mode);
-                if(mavlink_set_mode.target_system == mavlinkID) {
+                if(mavlink_msg_set_mode_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_set_mode_decode(&mavlink_rx_msg, &mavlink_set_mode);
 					//MAVSendVector("MOD", mavlink_set_mode.custom_mode, mavlink_set_mode.base_mode, 0);
 					// QGROUNDCONTROL BUG: "Control" doesn't work, so only allowing ARM/Disarm into auto mode here.
 						//MAVSendVector("MOD", mavlink_set_mode.custom_mode, mavlink_set_mode.base_mode, 0);
@@ -626,8 +626,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 break;
             case MAVLINK_MSG_ID_COMMAND_LONG:
                 // actions!
-                mavlink_msg_command_long_decode(&mavlink_rx_msg, &mavlink_command_long);
-                if(mavlink_command_long.target_system == mavlinkID) {
+                if(mavlink_msg_command_long_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_command_long_decode(&mavlink_rx_msg, &mavlink_command_long);
                     switch(mavlink_command_long.command) {
                         case 0: // custom 0, reset
                             // reset remote
@@ -704,19 +704,22 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: // request send of all parameters
-				// remote params
-				ilink_thalctrl_tx.command = THALCTRL_EEPROM_READALL;
-				ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
-                // local params
-				paramSendCount = 0;
-				paramSendSingle = 0;
-				paramWaitForRemote = 1;
+                if(mavlink_msg_param_request_list_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    //mavlink_msg_param_request_list_decode(&mavlink_rx_msg, &mavlink_param_request_list);
+                    // no need to decode, doesn't conatian anything interesting
+                    // remote params
+                    ilink_thalctrl_tx.command = THALCTRL_EEPROM_READALL;
+                    ILinkSendMessage(ID_ILINK_THALCTRL, (unsigned short *) & ilink_thalctrl_tx, sizeof(ilink_thalctrl_tx)/2-1);
+                    // local params
+                    paramSendCount = 0;
+                    paramSendSingle = 0;
+                    paramWaitForRemote = 1;
+                }
 				break;
             case MAVLINK_MSG_ID_PARAM_REQUEST_READ:
                 // request send of one parameters
-                mavlink_msg_param_request_read_decode(&mavlink_rx_msg, &mavlink_param_request_read);
-			
-				if(mavlink_param_request_read.target_system == mavlinkID) {
+				if(mavlink_msg_param_request_read_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_param_request_read_decode(&mavlink_rx_msg, &mavlink_param_request_read);
 					if(mavlink_param_request_read.target_component == MAV_COMP_ID_IMU) {
 						// remote params
 						
@@ -752,8 +755,8 @@ void MAVLinkParse(unsigned char UARTData) {
 				break;
             case MAVLINK_MSG_ID_PARAM_SET:
                 // request set parameter
-                mavlink_msg_param_set_decode(&mavlink_rx_msg, &mavlink_param_set);
-                if(mavlink_param_set.target_system == mavlinkID) {
+                if(mavlink_msg_param_set_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_param_set_decode(&mavlink_rx_msg, &mavlink_param_set);
                     
 					if(mavlink_param_set.target_component == MAV_COMP_ID_IMU) {
 						// remote params
@@ -804,16 +807,16 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_SET_GPS_GLOBAL_ORIGIN:
+                if(mavlink_msg_set_gps_global_origin_get_target_system(&mavlink_rx_msg) == mavlinkID) {
                 mavlink_msg_set_gps_global_origin_decode(&mavlink_rx_msg, &mavlink_set_gps_global_origin);
-                if(mavlink_set_gps_global_origin.target_system == mavlinkID) {
                         home_X = (double)mavlink_set_gps_global_origin.latitude / 10000000.0d;
                         home_Y = (double)mavlink_set_gps_global_origin.longitude / 10000000.0d;
                         home_Z = (double)mavlink_set_gps_global_origin.altitude / 1000.0d;
                         home_valid = 1;
                 }
             case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:
-                mavlink_msg_mission_clear_all_decode(&mavlink_rx_msg, &mavlink_mission_clear_all);
-                if(mavlink_mission_clear_all.target_system == mavlinkID) {
+                if(mavlink_msg_mission_clear_all_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_mission_clear_all_decode(&mavlink_rx_msg, &mavlink_mission_clear_all);
                     waypointCurrent = 0;
                     waypointCount = 0;
                     waypointValid = 0;
@@ -825,8 +828,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_MISSION_SET_CURRENT:
-                mavlink_msg_mission_set_current_decode(&mavlink_rx_msg, &mavlink_mission_set_current);
-                if(mavlink_mission_set_current.target_system == mavlinkID) {
+                if(mavlink_msg_mission_set_current_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_mission_set_current_decode(&mavlink_rx_msg, &mavlink_mission_set_current);
                     waypointCurrent = mavlink_mission_set_current.seq;
                     mavlink_mission_current.seq = waypointCurrent;
                     mavlink_msg_mission_current_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_mission_current);
@@ -835,8 +838,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_MISSION_COUNT:
-                mavlink_msg_mission_count_decode(&mavlink_rx_msg, &mavlink_mission_count);
-                if(mavlink_mission_count.target_system == mavlinkID) {
+                if(mavlink_msg_mission_count_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_mission_count_decode(&mavlink_rx_msg, &mavlink_mission_count);
                     waypointCount = mavlink_mission_count.count;
                     waypointReceiveIndex = 0;
                     waypointTimer = WAYPOINT_TIMEOUT; // set waypoint timeout to timed out so that request is immediate
@@ -848,8 +851,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:
-                mavlink_msg_mission_request_list_decode(&mavlink_rx_msg, &mavlink_mission_request_list);
-                if(mavlink_mission_request_list.target_system == mavlinkID) {
+                if(mavlink_msg_mission_request_list_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_mission_request_list_decode(&mavlink_rx_msg, &mavlink_mission_request_list);
                     if(waypointValid == 0) {
                         mavlink_mission_count.count = 0;
                     }
@@ -865,8 +868,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_MISSION_REQUEST:
-                mavlink_msg_mission_request_decode(&mavlink_rx_msg, &mavlink_mission_request);
-                if(mavlink_mission_request.target_system == mavlinkID) {
+                if(mavlink_msg_mission_request_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_mission_request_decode(&mavlink_rx_msg, &mavlink_mission_request);
                     if(waypointValid != 0) {
                         mavlink_mission_item.target_system = mavlink_rx_msg.sysid;
                         mavlink_mission_item.target_component = mavlink_rx_msg.compid;    
@@ -897,8 +900,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 }
                 break;
             case MAVLINK_MSG_ID_MISSION_ITEM:
-                mavlink_msg_mission_item_decode(&mavlink_rx_msg, &mavlink_mission_item);
-                if(mavlink_mission_item.target_system == mavlinkID) {
+                if(mavlink_msg_mission_item_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_mission_item_decode(&mavlink_rx_msg, &mavlink_mission_item);
                     mavlink_mission_ack.type = MAV_MISSION_ERROR;
                     if(mavlink_mission_item.frame == MAV_FRAME_GLOBAL) {
                         if(mavlink_mission_item.seq < MAX_WAYPOINTS) {
@@ -956,8 +959,8 @@ void MAVLinkParse(unsigned char UARTData) {
                 
             case MAVLINK_MSG_ID_REQUEST_DATA_STREAM:
                 // Sets the output data rates
-                mavlink_msg_request_data_stream_decode(&mavlink_rx_msg, &mavlink_request_data_stream);
-                if(mavlink_request_data_stream.target_system == mavlinkID) {
+                if(mavlink_msg_request_data_stream_get_target_system(&mavlink_rx_msg) == mavlinkID) {
+                    mavlink_msg_request_data_stream_decode(&mavlink_rx_msg, &mavlink_request_data_stream);
                     if(mavlink_request_data_stream.req_message_rate > 255) mavlink_request_data_stream.req_message_rate = 255;
                     dataRate[mavlink_request_data_stream.req_stream_id] = mavlink_request_data_stream.req_message_rate;
                 }
@@ -966,6 +969,5 @@ void MAVLinkParse(unsigned char UARTData) {
                 //MAVSendInt("CMDIGNORE", mavlink_rx_msg.msgid);
                 break;
         }
-        //if(mavlink_rx_msg.msgid != 0) MAVSendInt("CMD", mavlink_rx_msg.msgid);
     }
 }
