@@ -32,10 +32,10 @@ var telemetry_8c =
     [ "mavlink_mission_set_current", "telemetry_8c.html#a703ddf329d7a81658990a8f6a1697f6e", null ],
     [ "mavlink_named_value_float", "telemetry_8c.html#a390b3a71091e67c0799933925143b7b3", null ],
     [ "mavlink_named_value_int", "telemetry_8c.html#aa4e120a36f36c42bbf344949c764f9a1", null ],
-    [ "mavlink_param_request_list", "telemetry_8c.html#affd412914c587bd2062f3c643750de5c", null ],
     [ "mavlink_param_request_read", "telemetry_8c.html#a5c6726453f3c0c43e5cac4677eafb97e", null ],
     [ "mavlink_param_set", "telemetry_8c.html#ab4c44174048911cf9fa5fcc46e2eb5e0", null ],
     [ "mavlink_param_value", "telemetry_8c.html#ae232e648597f848faf9cffac02e3155e", null ],
+    [ "mavlink_ping", "telemetry_8c.html#a4426ec9809059e5cdedadf60d35f778b", null ],
     [ "mavlink_raw_imu", "telemetry_8c.html#aa595e5a21773f19a8ce5fe40a263a5bb", null ],
     [ "mavlink_rc_channels_raw", "telemetry_8c.html#a1513cd38a6b46d02fc93715f73a1a3de", null ],
     [ "mavlink_rc_channels_scaled", "telemetry_8c.html#a7694cf77d11192a0960721635235e5f8", null ],
@@ -50,10 +50,5 @@ var telemetry_8c =
     [ "mavlink_sys_status", "telemetry_8c.html#ae76fcc6b42234f2acc4b1d9f94c068b6", null ],
     [ "mavlink_tx_msg", "telemetry_8c.html#a914e7de17fdb4c9a8726394206da3542", null ],
     [ "mavlink_vfr_hud", "telemetry_8c.html#a26e44de057537a52ee8a09f6f258280b", null ],
-    [ "mavlinkID", "telemetry_8c.html#aeae36bb6b8efe652c22e2a3249b6ae89", null ],
-    [ "xbee_at_command", "telemetry_8c.html#a3c2bc1f0c8e856a13aca13e64a3def39", null ],
-    [ "xbee_at_response", "telemetry_8c.html#ad27820ac8e66ed47a577e14615a32021", null ],
-    [ "xbee_modem_status", "telemetry_8c.html#a2d85ef4cc56e08c2333317910a924913", null ],
-    [ "xbee_receive_packet", "telemetry_8c.html#a9356327c1c752bb8a5d7cc02749ffbe4", null ],
-    [ "xbee_transmit_request", "telemetry_8c.html#a6f8893f0bb5c5f16cfa50f33d7ea8c04", null ]
+    [ "mavlinkID", "telemetry_8c.html#aeae36bb6b8efe652c22e2a3249b6ae89", null ]
 ];
