@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"inputs_8c.html#adca97acc6b0ff71f782f9c8a484a47b8":[2,0,1,6,33],
+"inputs_8c.html#aeb66f4553a423789fdb87299e40e6b09":[2,0,1,6,20],
 "inputs_8c.html#af4e07a37f029c8bf0bfd8d1e83da4a05":[2,0,1,6,21],
 "inputs_8h.html":[2,0,1,0,7],
 "inputs_8h.html#a01020628802e60dee9f2e968dcab2f46":[2,0,1,0,7,43],
@@ -141,15 +143,16 @@ var NAVTREEINDEX2 =
 "structuser_struct.html#a7efc219781df4a1e281cb5d348b7fbf9":[1,0,10,3],
 "structuser_struct.html#adca97acc6b0ff71f782f9c8a484a47b8":[1,0,10,2],
 "structwaypoint_struct.html":[1,0,11],
-"structwaypoint_struct.html#a15d92578c3350e0ad1c08815c02234ba":[1,0,11,3],
-"structwaypoint_struct.html#a4467003dd21793768c431a947b684045":[1,0,11,5],
-"structwaypoint_struct.html#a44a2cfc549fb9caf02d4c66a25b73efd":[1,0,11,4],
-"structwaypoint_struct.html#a4837f5e157f0da9478b8e927d45e6fdd":[1,0,11,2],
+"structwaypoint_struct.html#a02ed9af4f5fe1b48976cc80bf79a0cd8":[1,0,11,2],
+"structwaypoint_struct.html#a15d92578c3350e0ad1c08815c02234ba":[1,0,11,4],
+"structwaypoint_struct.html#a4467003dd21793768c431a947b684045":[1,0,11,6],
+"structwaypoint_struct.html#a44a2cfc549fb9caf02d4c66a25b73efd":[1,0,11,5],
+"structwaypoint_struct.html#a4837f5e157f0da9478b8e927d45e6fdd":[1,0,11,3],
 "structwaypoint_struct.html#a7f75709b48b5b8cb9226807ec309cc5b":[1,0,11,0],
-"structwaypoint_struct.html#ab3e6ed577a7c669c19de1f9c1b46c872":[1,0,11,8],
-"structwaypoint_struct.html#ab927965981178aa1fba979a37168db2a":[1,0,11,7],
+"structwaypoint_struct.html#ab3e6ed577a7c669c19de1f9c1b46c872":[1,0,11,9],
+"structwaypoint_struct.html#ab927965981178aa1fba979a37168db2a":[1,0,11,8],
 "structwaypoint_struct.html#af48e0311746bc01574a90f142220e748":[1,0,11,1],
-"structwaypoint_struct.html#af88b946fb90d5f08b5fb740c70e98c10":[1,0,11,6],
+"structwaypoint_struct.html#af88b946fb90d5f08b5fb740c70e98c10":[1,0,11,7],
 "telemetry_8c.html":[2,0,0,6],
 "telemetry_8c.html#a0c3ea131fec170e364b0646fcfa213ca":[2,0,0,6,11],
 "telemetry_8c.html#a1513cd38a6b46d02fc93715f73a1a3de":[2,0,0,6,37],
@@ -246,8 +249,5 @@ var NAVTREEINDEX2 =
 "telemetry_8h.html#aa595e5a21773f19a8ce5fe40a263a5bb":[2,0,0,0,6,35],
 "telemetry_8h.html#aab499c5865a8cd26585794556be3f83d":[2,0,0,0,6,40],
 "telemetry_8h.html#aad1fecfd46eaf868b803a0d723bab749":[2,0,0,0,6,18],
-"telemetry_8h.html#ab4c44174048911cf9fa5fcc46e2eb5e0":[2,0,0,0,6,33],
-"telemetry_8h.html#ab74abfe3b7af491cd90b5fd22d63f425":[2,0,0,0,6,16],
-"telemetry_8h.html#abc7cb5f80c33ef737cc6f5db152fd6c9":[2,0,0,0,6,45],
-"telemetry_8h.html#ac40975930eec756d6ae6f2f1f089fcc7":[2,0,0,0,6,12]
+"telemetry_8h.html#ab4c44174048911cf9fa5fcc46e2eb5e0":[2,0,0,0,6,33]
 };

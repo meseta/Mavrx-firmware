@@ -11,3 +11,4 @@
 #include "telemetry.h"
 #include "gps.h"
 #include "ilink.h"
+#include <math.h>

@@ -32,6 +32,7 @@ var searchData=
   ['gps_5fnavigate',['gps_navigate',['../gps_8c.html#a42d22891371e6c6438f07a6c11014898',1,'gps_navigate(void):&#160;gps.c'],['../gps_8h.html#a42d22891371e6c6438f07a6c11014898',1,'gps_navigate(void):&#160;gps.c']]],
   ['gps_5fpanic',['GPS_PANIC',['../_hypo_2inc_2globals_8h.html#a9ac1e935ffaf582ee4594d2b455fffa3',1,'globals.h']]],
   ['gps_5fsafe_5falt',['GPS_SAFE_ALT',['../_hypo_2inc_2params_8h.html#a7a42a38040e5b0a13d717aa3315e3a33',1,'params.h']]],
+  ['gps_5fset_5fhome',['gps_set_home',['../gps_8c.html#a759e5bdabda998c0036f189773ce5835',1,'gps_set_home(double X, double Y, double Z):&#160;gps.c'],['../gps_8h.html#a759e5bdabda998c0036f189773ce5835',1,'gps_set_home(double X, double Y, double Z):&#160;gps.c']]],
   ['gps_5fstatus',['gps_status',['../inputs_8h.html#a3935302654f0349bc61d4090915960e7',1,'gps_status(void):&#160;inputs.c'],['../inputs_8c.html#a3935302654f0349bc61d4090915960e7',1,'gps_status(void):&#160;inputs.c']]],
   ['gps_5fvalid',['gps_valid',['../inputs_8h.html#a9f1bd4cbcab28f474315dc545d8f58d6',1,'gps_valid():&#160;inputs.c'],['../inputs_8c.html#a9f1bd4cbcab28f474315dc545d8f58d6',1,'gps_valid():&#160;inputs.c']]],
   ['gpsfixed',['gpsFixed',['../gps_8c.html#a4f9e5c3f3cdcff628ea8b2097057c07b',1,'gpsFixed():&#160;gps.c'],['../gps_8h.html#a4f9e5c3f3cdcff628ea8b2097057c07b',1,'gpsFixed():&#160;gps.c']]],

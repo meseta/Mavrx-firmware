@@ -14,6 +14,7 @@ var gps_8h =
     [ "WAYPOINT_HOME", "gps_8h.html#af973cd5d9ced0d354703ec11e3e760c0", null ],
     [ "WAYPOINT_TIMEOUT", "gps_8h.html#ae4ea571787e1651e20662ae69a78708a", null ],
     [ "gps_navigate", "gps_8h.html#a42d22891371e6c6438f07a6c11014898", null ],
+    [ "gps_set_home", "gps_8h.html#a759e5bdabda998c0036f189773ce5835", null ],
     [ "gps_action", "gps_8h.html#a8ffdd804891f181b6469ea0dafb75ebf", null ],
     [ "gps_nav_posecef", "gps_8h.html#a5cd38dc3f6714be5be72a1f7aa3694ed", null ],
     [ "gps_nav_posllh", "gps_8h.html#a787e791bf2faaff360975ef44699037a", null ],

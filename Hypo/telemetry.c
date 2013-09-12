@@ -408,7 +408,7 @@ void mavlink_messages(void) {
 				MAVSendTextFrom(MAV_SEVERITY_INFO, "EEPROM Load OK", MAV_COMP_ID_SYSTEM_CONTROL);
 				break;
 			case THALCTRL_ORIOK:	MAVSendTextFrom(MAV_SEVERITY_INFO, "Craft orientation calibration ok", MAV_COMP_ID_IMU);	break;
-			case THALCTRL_ORIBAD:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Craft orientation does not match stored value!", MAV_COMP_ID_IMU);	break;
+			case THALCTRL_ORIBAD:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Craft orientation mismatch!", MAV_COMP_ID_IMU);	break;
 			case THALCTRL_RXLOST:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Radio transmitter signal lost!", MAV_COMP_ID_IMU);	break;
 			case THALCTRL_RXFOUND:	MAVSendTextFrom(MAV_SEVERITY_INFO, "Radio transmitter signal found", MAV_COMP_ID_IMU);	break;
 			case THALCTRL_BATTLOW:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Battery low!", MAV_COMP_ID_SYSTEM_CONTROL);	break;

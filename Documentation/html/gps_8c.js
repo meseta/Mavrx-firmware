@@ -1,6 +1,7 @@
 var gps_8c =
 [
     [ "gps_navigate", "gps_8c.html#a42d22891371e6c6438f07a6c11014898", null ],
+    [ "gps_set_home", "gps_8c.html#a759e5bdabda998c0036f189773ce5835", null ],
     [ "GPSMessage", "gps_8c.html#aa11b73f54ce0fb1bfbd97990d979b288", null ],
     [ "gps_action", "gps_8c.html#a8ffdd804891f181b6469ea0dafb75ebf", null ],
     [ "gps_nav_posecef", "gps_8c.html#a5cd38dc3f6714be5be72a1f7aa3694ed", null ],

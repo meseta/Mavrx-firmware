@@ -1,5 +1,8 @@
 var NAVTREEINDEX3 =
 {
+"telemetry_8h.html#ab74abfe3b7af491cd90b5fd22d63f425":[2,0,0,0,6,16],
+"telemetry_8h.html#abc7cb5f80c33ef737cc6f5db152fd6c9":[2,0,0,0,6,45],
+"telemetry_8h.html#ac40975930eec756d6ae6f2f1f089fcc7":[2,0,0,0,6,12],
 "telemetry_8h.html#ac6e06790a83700df05acb396499472dd":[2,0,0,0,6,23],
 "telemetry_8h.html#ac8266fba656cae316dead1a53361323f":[2,0,0,0,6,26],
 "telemetry_8h.html#acc321a94bf068d9813afe436aaa2e325":[2,0,0,0,6,44],

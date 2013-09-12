@@ -61,5 +61,5 @@ extern unsigned char gpsFixed;
 extern unsigned char gps_action;
 
 void gps_navigate(void);
-
+void gps_set_home(double X, double Y, double Z);
 #endif
