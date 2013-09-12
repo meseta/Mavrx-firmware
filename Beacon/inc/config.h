@@ -277,7 +277,7 @@
     #define GPS_EN              1           // Set to 1 to enable GPS code (set to 0 to save some RAM)
     
     #define GPS_5HZ_RATE        1           // Set to 1 to allow up to 5Hz position rate (set to 0 for the default 0Hz)
-    #define GPS_AIRBORNE        1           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
+    #define GPS_AIRBORNE        0           // Set to 1 to allow GPSInit() function to set the dynamic platform model to "Airborne < 1g", and GPSFix() will only return if there is a 3D fix
     
     #define GPS_METHOD          1           // Method, use 0 for the slow but simple polling method, or 1 for the faster but more complex periodic method    
     

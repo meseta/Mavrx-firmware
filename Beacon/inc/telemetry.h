@@ -1,5 +1,5 @@
 /*!
-\file Hypo/inc/telemetry.h
+\file Beacon/inc/telemetry.h
 \brief MAVLink stuff
 
 \author Yuan Gao
@@ -58,10 +58,10 @@ extern mavlink_mission_request_list_t mavlink_mission_request_list;
 
 extern unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];
 extern unsigned short mavlink_message_len;
+
 extern unsigned char dataRate[MAV_DATA_STREAM_ENUM_END];
 
 void mavlink_telemetry(void);
-void mavlink_messages(void);
 
 void MAVLinkInit(void);
 void MAVSendHeartbeat(void);

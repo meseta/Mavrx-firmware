@@ -24,6 +24,3 @@ unsigned short heartbeatWatchdog=0;		/*!< Watchdog counter to indicate when base
 unsigned short gpsWatchdog=0;			/*!< Watchdog counter to indicate when GPS is lost */
 unsigned short thalWatchdog=0;			/*!< Watchdog counter to indicate when thalamus is lost */
 unsigned char thalAvailable=0;			/*!< Boolean to indicate if Thalamus is available */
-
-// Timers
-unsigned char dataRate[MAV_DATA_STREAM_ENUM_END];	/*!< Data stream rates */

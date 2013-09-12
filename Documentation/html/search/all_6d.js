@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['mavrx_20multirotor_20firmware',['Mavrx Multirotor Firmware',['../index.html',1,'']]],
   ['m1',['M1',['../filter_8c.html#a26c4dd8d91d1824e91cd6a7968d54aac',1,'M1():&#160;filter.c'],['../filter_8h.html#a26c4dd8d91d1824e91cd6a7968d54aac',1,'M1():&#160;filter.c']]],
   ['m2',['M2',['../filter_8c.html#a8f9dcdb4a7483eccdadc8242ae9fc7f1',1,'M2():&#160;filter.c'],['../filter_8h.html#a8f9dcdb4a7483eccdadc8242ae9fc7f1',1,'M2():&#160;filter.c']]],
   ['m3',['M3',['../filter_8c.html#aedaa83799d108ff1d50553189ff7c48d',1,'M3():&#160;filter.c'],['../filter_8h.html#aedaa83799d108ff1d50553189ff7c48d',1,'M3():&#160;filter.c']]],

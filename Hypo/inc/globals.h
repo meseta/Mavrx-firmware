@@ -32,6 +32,4 @@ extern unsigned short gpsWatchdog;
 extern unsigned short thalWatchdog;
 extern unsigned char thalAvailable;
 
-extern unsigned char dataRate[MAV_DATA_STREAM_ENUM_END];
-
 #endif

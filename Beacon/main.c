@@ -26,12 +26,12 @@ void setup() {
     LEDOn(PLED);
 	
 	// *** EEPROM and params
-	//MAV_ID = ReadUIDHash() & 0xff; // get last byte of hash and use as default ID
+	MAV_ID = ReadUIDHash() & 0xff; // get last byte of hash and use as default ID
 	
     // *** XBee and MAVLink
     XBeeInit();
-    /*MAVLinkInit();
-    MAVSendHeartbeat();*/
+    MAVLinkInit();
+    MAVSendHeartbeat();
 
     // *** GPS
     GPSInit();
@@ -144,34 +144,77 @@ void RITInterrupt(void) {
     if(gpsWatchdog >= MESSAGE_LOOP_HZ*GPS_PANIC) {
         // GPS signal loss/no-fix
         gpsWatchdog = MESSAGE_LOOP_HZ*(GPS_PANIC+1); // prevent overflow
-        //mavlink_gps_raw_int.fix_type = 0;
-        //mavlink_gps_raw_int.satellites_visible = 0;
-        //gpsFixed = 0;
+        mavlink_gps_raw_int.fix_type = 0;
+        mavlink_gps_raw_int.satellites_visible = 0;
+        gpsFixed = 0;
     }
     
 	// *** Outgoing heartbeat
     heartbeatCounter++;
     if(heartbeatCounter >= MESSAGE_LOOP_HZ) { // 1Hz loop
         heartbeatCounter = 0;
-        //MAVSendHeartbeat();
+        MAVSendHeartbeat();
     }
     
 	// Telemetry
     if(allowTransmit) {
-		//paramater_transmit();
-        //mavlink_telemetry();
-		//mavlink_messages();
+		paramater_transmit();
+        mavlink_telemetry();
     }
 	
 	// GPS
+    static double craft_X = 0;
+    static double craft_Y = 0;
+    static double craft_Z = 0;
+
 	static unsigned short gpsFetchCounter = 0;
 	gpsFetchCounter++;
 	if(gpsFetchCounter > MESSAGE_LOOP_HZ/10) {
 		gpsFetchCounter = 0; // fetch GPS at 10Hz
+        
 		// *** Process GPS
 		XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
 		GPSFetchData();
 		XBeeAllow();
+
+        // *** Get GPS data
+        if(gps_nav_status.isNew) {
+            gps_nav_status.isNew = 0;
+
+            if((gps_nav_status.gpsFix == 0x03 || gps_nav_status.gpsFix == 0x04) && gps_nav_status.flags & 0x1) { // fix is 3D and valid
+                mavlink_gps_raw_int.fix_type = gps_nav_status.gpsFix;
+                gpsFixed = 1;
+            }
+            else {
+                mavlink_gps_raw_int.fix_type = 0;
+                gpsFixed = 0;
+            }
+            //mavlink_gps_raw_int.satellites_visible = gps_nav_sol.numSV;
+        }
+
+        if(gps_nav_posllh.isNew) {
+            gps_nav_posllh.isNew = 0;
+
+            if(gpsFixed == 1) {
+                gpsWatchdog = 0;
+                mavlink_gps_raw_int.lat = gps_nav_posllh.lat;
+                mavlink_gps_raw_int.lon = gps_nav_posllh.lon;
+                mavlink_gps_raw_int.alt = gps_nav_posllh.hMSL;
+                mavlink_gps_raw_int.eph = gps_nav_posllh.hAcc / 10;
+                mavlink_gps_raw_int.epv = gps_nav_posllh.vAcc / 10;
+
+                craft_X = gps_nav_posllh.lat / 10000000.0d;
+                craft_Y = gps_nav_posllh.lon / 10000000.0d;
+                craft_Z = (double)gps_nav_posllh.hMSL/ 1000.0d;
+            }
+        }
+
+        if(gps_nav_velned.isNew) {
+            gps_nav_velned.isNew = 0;
+
+            mavlink_gps_raw_int.vel = gps_nav_velned.gSpeed;
+            mavlink_gps_raw_int.cog = gps_nav_velned.heading / 100; // because GPS assumes cog IS heading.
+        }
 	}
 }
 

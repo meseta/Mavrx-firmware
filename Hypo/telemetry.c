@@ -56,6 +56,9 @@ mavlink_set_mode_t mavlink_set_mode;							/*!< Set craft mode  */
 unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];		/*!< Mavlink message buffer */
 unsigned short mavlink_message_len;								/*!< Mavlink message buffer length */
 
+// Timers
+unsigned char dataRate[MAV_DATA_STREAM_ENUM_END];	/*!< Data stream rates */
+
 /*!
 \brief Deals with sending all the Mavlink telemetry
 */
