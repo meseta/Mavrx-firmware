@@ -18,4 +18,6 @@ extern gps_nav_timeutc_t gps_nav_timeutc;
 extern unsigned int gpsSendCounter;
 extern unsigned char gpsFixed;
 
+void gps_process(void);
+
 #endif

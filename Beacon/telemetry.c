@@ -27,13 +27,9 @@ mavlink_set_mode_t mavlink_set_mode;							/*!< Set craft mode  */
 unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];		/*!< Mavlink message buffer */
 unsigned short mavlink_message_len;								/*!< Mavlink message buffer length */
 
-unsigned char craftValid=1;
-unsigned long long craftSourceAddress=0;
-unsigned char craftNetworkAddress=0;
-
-// /*!
-// \brief Deals with sending all the Mavlink telemetry
-// */
+unsigned char craftValid=0;
+unsigned long long craftSourceAddress;
+unsigned char craftNetworkAddress;
 
 /*!
 \brief Initialise mavlink stuff
@@ -54,13 +50,12 @@ This function is triggered by the Mavlink parser, which is triggered by the
 Xbee parser, which is ultimately triggered by the UART RX ISR
 */
 void MAVSendHeartbeat(void) {
-    if(craftValid == 1) {
-        mavlink_msg_heartbeat_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_heartbeat);
-        mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
-        XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
-        XBeeWriteBroadcast(mavlink_message_buf, mavlink_message_len); // REPLACE WITH DIRECT ADDRESS
-        XBeeAllow();
-    }
+    mavlink_msg_heartbeat_encode(mavlinkID, MAV_COMP_ID_SYSTEM_CONTROL, &mavlink_tx_msg, &mavlink_heartbeat);
+    mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
+    XBeeInhibit(); // XBee input needs to be inhibited before transmitting as some incomming messages cause UART responses which could disrupt XBeeWriteCoordinator if it is interrupted.
+    if(craftValid == 1) XBeeWrite(craftSourceAddress, craftNetworkAddress, mavlink_message_buf, mavlink_message_len);
+    else XBeeWriteBroadcast(mavlink_message_buf, mavlink_message_len);
+    XBeeAllow();
 }
 
 /*!
@@ -120,7 +115,6 @@ void XBeeMessage(unsigned char id, unsigned char * buffer, unsigned short length
 \brief Parses MAVLink data
 */
 void MAVLinkParse(unsigned char UARTData) {
-	unsigned int i, j, match;
     if(mavlink_parse_char(MAVLINK_COMM_0, UARTData, &mavlink_rx_msg, &mavlink_status)) {
         //MAVSendInt("ID", mavlink_rx_msg.msgid);
         switch(mavlink_rx_msg.msgid) {
@@ -139,9 +133,6 @@ void MAVLinkParse(unsigned char UARTData) {
                     mavlink_ping.target_component = mavlinkID;
                     mavlink_ping.target_component = MAV_COMP_ID_SYSTEM_CONTROL;
                     XBeeWriteBroadcast(mavlink_message_buf, mavlink_message_len); // BROADCAST
-                }
-                else {
-                
                 }
                 break;
             default:

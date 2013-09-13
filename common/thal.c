@@ -5083,38 +5083,33 @@ unsigned char PRGPoll(void) {
             return 0;
         }
         
-        unsigned char XBeeWriteBroadcast(unsigned char * buffer, unsigned short length) {
+        unsigned char XBeeWrite(unsigned long long destinationAddress, unsigned short networkAddress, unsigned char * buffer, unsigned short length) {
             unsigned int i;
             for(i=0; i<length; i++) {
                 xbee_transmit_request.RFData[i] = buffer[i];
             }
             xbee_transmit_request.varLen = length;
-            xbee_transmit_request.destinationAddress = 0xffff000000000000ULL; //broadcast (big-endian)
-            xbee_transmit_request.networkAddress = 0xfeff;
+            xbee_transmit_request.destinationAddress = destinationAddress; //broadcast (big-endian)
+            xbee_transmit_request.networkAddress = networkAddress;
+            
             XBeeSendPacket();
             return 1;
         }
         
-        unsigned char XBeeWriteCoordinator(unsigned char * buffer, unsigned short length) {
-            unsigned int i;
-            for(i=0; i<length; i++) {
-                xbee_transmit_request.RFData[i] = buffer[i];
-            }
-            xbee_transmit_request.varLen = length;
-            xbee_transmit_request.destinationAddress = 0x0000000000000000ULL; //to coordinator (big-endian)
-            xbee_transmit_request.networkAddress = 0xfeff;
-            XBeeSendPacket();
-            return 1;
-        }
-        
-        unsigned char XBeeSendPacket(void) {
+        void XBeeSendPacket(void) {
             xbee_transmit_request.frameID = Random() | 0x01;
             xbee_transmit_request.broadcastRadius = 0;
             xbee_transmit_request.options = 0x01; // disable ACK;
 
             XBeeSendFrame(ID_XBEE_TRANSMITREQUEST, (unsigned char *)&xbee_transmit_request, sizeof(xbee_transmit_request)-2-255+xbee_transmit_request.varLen);
-
-            return 1;
+        }
+        
+        unsigned char XBeeWriteBroadcast(unsigned char * buffer, unsigned short length) {
+            return XBeeWrite(0xffff000000000000ULL, 0xfeff, buffer, length); // broadcast address
+        }
+        
+        unsigned char XBeeWriteCoordinator(unsigned char * buffer, unsigned short length) {
+            return XBeeWrite(0x0000000000000000ULL, 0xfeff, buffer, length); // coordinator address
         }
 
         void XBeeAllowJoin() {

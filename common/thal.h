@@ -1591,7 +1591,8 @@ static inline void RSTReset(void) { ResetInit(); }
         void XBeeJoin(void);
         void XBeeSendFrame(unsigned char id, unsigned char * buffer, unsigned short length);
         unsigned char XBeeSendATCommand(void);
-        unsigned char XBeeSendPacket(void);
+        unsigned char XBeeWrite(unsigned long long destinationAddress, unsigned short neworkAddress, unsigned char * buffer, unsigned short length);
+        void XBeeSendPacket(void);
         unsigned char XBeeWriteBroadcast(unsigned char * buffer, unsigned short length);
         unsigned char XBeeWriteCoordinator(unsigned char * buffer, unsigned short length);
         

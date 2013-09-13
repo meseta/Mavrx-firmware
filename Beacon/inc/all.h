@@ -10,4 +10,6 @@
 #include "params.h"
 #include "telemetry.h"
 #include "gps.h"
+#include "io.h"
+#include "screen.h"
 #include <math.h>

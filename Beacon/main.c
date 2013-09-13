@@ -98,16 +98,6 @@ void loop() {
             PRGBlankTimer = 100;
         }*/
     }
-    
-    if(xbee_modem_status.isNew) {
-        xbee_modem_status.isNew = 0;
-        if(xbee_modem_status.status == 2) {
-            allowTransmit = 1;
-        }
-        else if(xbee_modem_status.status == 3) {
-            allowTransmit = 0;
-        }
-    }
 }
 
 /*!
@@ -155,8 +145,6 @@ This function is triggered by interrupt every few tens of ms (actual speed, is
 defined by MESSAGE_LOOP_HZ).
 */
 void RITInterrupt(void) {
-	static unsigned char heartbeatCounter=0;
-
     // *** Watchdogs
     // Incoming heartbeat watchdog
     heartbeatWatchdog++;
@@ -175,60 +163,25 @@ void RITInterrupt(void) {
     }
     
 	// *** Outgoing heartbeat
+	static unsigned char heartbeatCounter=0;
     heartbeatCounter++;
     if(heartbeatCounter >= MESSAGE_LOOP_HZ) { // 1Hz loop
         heartbeatCounter = 0;
         MAVSendHeartbeat();
     }
     
-	// Telemetry
-    if(allowTransmit) {
-		
-    }
-	
-	// GPS
-    static double craft_X = 0;
-    static double craft_Y = 0;
-    static double craft_Z = 0;
-
+	// *** INPUTS
+    // deal with button presses, USB inputs
+    
+    // *** OUTPUTS
+    // deal with screen, LEDs
+    
+	// *** GPS
 	static unsigned short gpsFetchCounter = 0;
 	gpsFetchCounter++;
 	if(gpsFetchCounter > MESSAGE_LOOP_HZ/10) {
 		gpsFetchCounter = 0; // fetch GPS at 10Hz
-        
-		// *** Process GPS
-		XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
-		GPSFetchData();
-		XBeeAllow();
-
-        // *** Get GPS data
-        if(gps_nav_status.isNew) {
-            gps_nav_status.isNew = 0;
-
-            if((gps_nav_status.gpsFix == 0x03 || gps_nav_status.gpsFix == 0x04) && gps_nav_status.flags & 0x1) { // fix is 3D and valid
-                gpsFixed = 1;
-            }
-            else {
-                gpsFixed = 0;
-            }
-            //mavlink_gps_raw_int.satellites_visible = gps_nav_sol.numSV;
-        }
-
-        if(gps_nav_posllh.isNew) {
-            gps_nav_posllh.isNew = 0;
-
-            if(gpsFixed == 1) {
-                gpsWatchdog = 0;
-                craft_X = gps_nav_posllh.lat / 10000000.0d;
-                craft_Y = gps_nav_posllh.lon / 10000000.0d;
-                craft_Z = (double)gps_nav_posllh.hMSL/ 1000.0d;
-            }
-        }
-
-        if(gps_nav_velned.isNew) {
-            gps_nav_velned.isNew = 0;
-
-        }
+        gps_process();
 	}
 }
 

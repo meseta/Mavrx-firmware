@@ -7,8 +7,6 @@
 
 #include "all.h"
 
-volatile unsigned char allowTransmit=1; /*!< Boolean to allow telemetry transmission, used to avoid transmittig stuff when nothing is connected */
-
 // *** LEDs and buttons stuff
 volatile unsigned int flashVLED=0;		/*!< Boolean for flashing LED */
 volatile unsigned int PRGTimer=0;			/*!< Timer for counting button push */
