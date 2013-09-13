@@ -4,7 +4,7 @@
 // *** See readme_forebrain.txt files for the text of the license
 // ****************************************************************************
 
-#include "LPC1347.h"
+#include "lpc1347.h"
 #include "thal.h"
 
 #ifndef WEAK

@@ -22,6 +22,22 @@ extern "C" {
 
 // *** In-application programmingfunctions
 static const FUNCIAP FUNCIAPEntry = (FUNCIAP)0x1fff1ff1;
+void IAPSafe(unsigned int * command, unsigned int * result) { // safe IAP function, disables interrupts before executing IAP and restores afterwards
+    unsigned int interrupts[8];
+    unsigned char i;
+    // store and disable interrupts
+    for(i=0; i<8; i++) {
+        interrupts[i] = NVIC->ISER[i];
+        NVIC->ICER[i] = interrupts[i];
+    }
+    
+    FUNCIAPEntry(command, result);
+    
+    // restore interrputs
+    for(i=0; i<8; i++) {
+        NVIC->ISER[i] = interrupts[i];
+    }
+}
 
 // *** Reprogram function
 /*void Reprogram(void) {
@@ -33,14 +49,14 @@ static const FUNCIAP FUNCIAPEntry = (FUNCIAP)0x1fff1ff1;
     __set_MSP(*((unsigned int *)0x1FFF0000));	// set pointer to bootloader ROM location
 
     //__set_Stack(0x10002000);
-    FUNCIAPEntry(command, result);
+    IAPSafe(command, result);
 }*/
 
 // *** Read chip's part identifier
 unsigned int ReadPID(void) {
     unsigned int command[5], result[4];
     command[0] = 54;					        // 54 is code to read PID
-    FUNCIAPEntry(command, result);
+    IAPSafe(command, result);
     return result[0];
 }
 
@@ -48,7 +64,7 @@ unsigned int ReadPID(void) {
 void ReadUID(unsigned int * uid) {
     unsigned int command[5];
     command[0] = 58;					        // 58 is code to read UID
-    FUNCIAPEntry(command, uid);
+    IAPSafe(command, uid);
 }
 
 // *** Provide a simple hash of the unique identifier to avoid user having to deal with 128 bits
@@ -57,7 +73,7 @@ void ReadUID(unsigned int * uid) {
 unsigned int ReadUIDHash(void) {
     unsigned int command[5], result[4], hash;
     command[0] = 58;					        // 58 is code to read UID
-    FUNCIAPEntry(command, result);
+    IAPSafe(command, result);
     
     hash = result[0];
     hash *= 33;
@@ -95,7 +111,7 @@ void EEPROMWrite(unsigned int address, unsigned char * data, unsigned int length
         command[4] = 12000;					// clock speed in kHz
     }
     
-    FUNCIAPEntry(command, result);
+    IAPSafe(command, result);
 }
 
 void EEPROMRead(unsigned int address, unsigned char * data, unsigned int length) {
@@ -111,7 +127,7 @@ void EEPROMRead(unsigned int address, unsigned char * data, unsigned int length)
     else {
         command[4] = 12000;					// clock speed in kHz
     }
-    FUNCIAPEntry(command, result);
+    IAPSafe(command, result);
 }
 
 // *** Reset function
