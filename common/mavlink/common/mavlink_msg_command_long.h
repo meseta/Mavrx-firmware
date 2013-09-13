@@ -20,8 +20,6 @@ typedef struct __mavlink_command_long_t
 #define MAVLINK_MSG_ID_COMMAND_LONG_LEN 33
 #define MAVLINK_MSG_ID_76_LEN 33
 
-
-
 #define MAVLINK_MESSAGE_INFO_COMMAND_LONG { \
 	"COMMAND_LONG", \
 	11, \

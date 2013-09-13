@@ -15,6 +15,7 @@ var _hypo_2inc_2telemetry_8h =
     [ "mavlink_command_ack", "_hypo_2inc_2telemetry_8h.html#a5b88506ca2aff751e47adff814cabcae", null ],
     [ "mavlink_command_long", "_hypo_2inc_2telemetry_8h.html#ac40975930eec756d6ae6f2f1f089fcc7", null ],
     [ "mavlink_debug_vect", "_hypo_2inc_2telemetry_8h.html#a41762ed7758ab861c755f1c1ace0456f", null ],
+    [ "mavlink_global_position_int_beacon", "_hypo_2inc_2telemetry_8h.html#a379c07c7703818b244272ecde0d9729c", null ],
     [ "mavlink_gps_global_origin", "_hypo_2inc_2telemetry_8h.html#a6d23f70736240bfdefe46b18cf996098", null ],
     [ "mavlink_gps_raw_int", "_hypo_2inc_2telemetry_8h.html#af603d6492f9cef1180ac7ef52a413012", null ],
     [ "mavlink_heartbeat", "_hypo_2inc_2telemetry_8h.html#ab74abfe3b7af491cd90b5fd22d63f425", null ],

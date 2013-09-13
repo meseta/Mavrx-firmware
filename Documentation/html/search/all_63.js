@@ -15,9 +15,13 @@ var searchData=
   ['command',['command',['../structwaypoint_struct.html#af48e0311746bc01574a90f142220e748',1,'waypointStruct']]],
   ['comms_2ec',['comms.c',['../comms_8c.html',1,'']]],
   ['comms_2eh',['comms.h',['../comms_8h.html',1,'']]],
+  ['connected',['connected',['../structcraft__data__struct.html#af11a56f076dc011d02e2319d3d128959',1,'craft_data_struct']]],
   ['control_2ec',['control.c',['../control_8c.html',1,'']]],
   ['control_5fmotors',['control_motors',['../control_8c.html#abb9bac63b73330ebe25df944a9e9fedf',1,'control.c']]],
   ['control_5fthrottle',['control_throttle',['../control_8c.html#afaf768d6c85a3e7a8e2fc5ec17bc3d8b',1,'control.c']]],
   ['convert_5fori',['convert_ori',['../inputs_8h.html#a9e97ee9276ed405c66f9d3f39f83ff99',1,'convert_ori(volatile signed short *X, volatile signed short *Y, volatile signed short *Z, signed short *data):&#160;inputs.c'],['../inputs_8c.html#a9e97ee9276ed405c66f9d3f39f83ff99',1,'convert_ori(volatile signed short *X, volatile signed short *Y, volatile signed short *Z, signed short *data):&#160;inputs.c']]],
-  ['count',['count',['../structalt_struct.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'altStruct::count()'],['../structthree_axis_sensor_struct_gyro.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'threeAxisSensorStructGyro::count()'],['../structthree_axis_sensor_struct_accel.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'threeAxisSensorStructAccel::count()'],['../structthree_axis_sensor_struct_mag.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'threeAxisSensorStructMag::count()']]]
+  ['count',['count',['../structalt_struct.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'altStruct::count()'],['../structthree_axis_sensor_struct_gyro.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'threeAxisSensorStructGyro::count()'],['../structthree_axis_sensor_struct_accel.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'threeAxisSensorStructAccel::count()'],['../structthree_axis_sensor_struct_mag.html#a16ff2d8e15ade4948398b0aeb80124a8',1,'threeAxisSensorStructMag::count()']]],
+  ['craft',['craft',['../_beacon_2inc_2telemetry_8h.html#a4d5bed2e3e23a67bc0d071c86cd23cda',1,'craft():&#160;telemetry.c'],['../_beacon_2telemetry_8c.html#a4d5bed2e3e23a67bc0d071c86cd23cda',1,'craft():&#160;telemetry.c']]],
+  ['craft_5fdata_5fstruct',['craft_data_struct',['../structcraft__data__struct.html',1,'']]],
+  ['craft_5fdata_5ft',['craft_data_t',['../_beacon_2inc_2telemetry_8h.html#a2e0dd4da9fa2a4267a6b607f65e7409f',1,'telemetry.h']]]
 ];

@@ -2,6 +2,8 @@ var annotated =
 [
     [ "altStruct", "structalt_struct.html", "structalt_struct" ],
     [ "attitude_demand_body_struct", "structattitude__demand__body__struct.html", "structattitude__demand__body__struct" ],
+    [ "craft_data_struct", "structcraft__data__struct.html", "structcraft__data__struct" ],
+    [ "gps_data_struct", "structgps__data__struct.html", "structgps__data__struct" ],
     [ "paramBuffer_struct", "structparam_buffer__struct.html", "structparam_buffer__struct" ],
     [ "paramStorage_struct", "structparam_storage__struct.html", "structparam_storage__struct" ],
     [ "sensorStructAccel", "structsensor_struct_accel.html", "structsensor_struct_accel" ],

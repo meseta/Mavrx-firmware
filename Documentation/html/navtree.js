@@ -26,9 +26,9 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_beacon_2globals_8c.html",
-"_hypo_2inc_2gps_8h.html#ae4ea571787e1651e20662ae69a78708a",
-"_thalamus_2inc_2params_8h.html#a88c9ee16af0b82d809a04ca71d9400a1",
-"index.html"
+"_hypo_2inc_2params_8h.html#ab2c2deb88b7e0a5d7f7c3b80a26f2a75",
+"_thalamus_2inc_2params_8h.html#aea2138897de874fd157be99a743170a8",
+"inputs_8c.html#a6cc9550b3ab20742147edf2ee0a29621"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

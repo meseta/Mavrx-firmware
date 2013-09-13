@@ -1,5 +1,9 @@
 var _beacon_2inc_2gps_8h =
 [
+    [ "gps_data_struct", "structgps__data__struct.html", "structgps__data__struct" ],
+    [ "gps_data", "_beacon_2inc_2gps_8h.html#a43bf384d83cb41c70e7b4414a3355f14", null ],
+    [ "gps_process", "_beacon_2inc_2gps_8h.html#a5e2c2113b229b85830e1cdd2207b812d", null ],
+    [ "gps", "_beacon_2inc_2gps_8h.html#a27a58741a0d79be59df7a154725d3a98", null ],
     [ "gps_nav_posecef", "_beacon_2inc_2gps_8h.html#a5cd38dc3f6714be5be72a1f7aa3694ed", null ],
     [ "gps_nav_posllh", "_beacon_2inc_2gps_8h.html#a787e791bf2faaff360975ef44699037a", null ],
     [ "gps_nav_sol", "_beacon_2inc_2gps_8h.html#aabedbd0f818dd0beda7b0772826a680b", null ],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['coredebug_5ftype',['CoreDebug_Type',['../struct_core_debug___type.html',1,'']]]
+  ['craft_5fdata_5fstruct',['craft_data_struct',['../structcraft__data__struct.html',1,'']]]
 ];

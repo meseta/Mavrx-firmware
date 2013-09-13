@@ -63,7 +63,8 @@ void loop() {
         // begin working out button presses
         if(PRGPushTime > 15000) {   // Factory reset the XBee
             flashVLED = 5;
-            craftValid = 0;
+            craft.valid = 0;
+            craft.IDValid = 0;
             XBeeFactoryReset();
             
             PRGPushTime = 0;
@@ -72,7 +73,8 @@ void loop() {
         }
         else if(PRGPushTime > 3000) { // Create new network
             flashVLED = XBEE_JOINPERIOD*10;
-            craftValid = 0;
+            craft.valid = 0;
+            craft.IDValid = 0;
             XBeeCoordinatorJoin();
             PRGMode = 1;
             
@@ -149,9 +151,9 @@ void RITInterrupt(void) {
     // Incoming heartbeat watchdog
     heartbeatWatchdog++;
     if(heartbeatWatchdog >= MESSAGE_LOOP_HZ*XBEE_PANIC) {
-        // heartbeat from ground control lost
+        // heartbeat from remote lost
         heartbeatWatchdog = MESSAGE_LOOP_HZ*(XBEE_PANIC+1); // prevent overflow
-        //flashVLED = 5;
+        craft.connected = 0;
     }
 	
     // GPS watchdog
@@ -159,7 +161,7 @@ void RITInterrupt(void) {
     if(gpsWatchdog >= MESSAGE_LOOP_HZ*GPS_PANIC) {
         // GPS signal loss/no-fix
         gpsWatchdog = MESSAGE_LOOP_HZ*(GPS_PANIC+1); // prevent overflow
-        gpsFixed = 0;
+        gps.valid = 0;
     }
     
 	// *** Outgoing heartbeat

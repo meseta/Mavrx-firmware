@@ -8,7 +8,6 @@ var _beacon_2inc_2params_8h =
     [ "paramStorage_t", "_beacon_2inc_2params_8h.html#ac943ca441725ee0067e224568f520998", null ],
     [ "eeprom_load_all", "_beacon_2inc_2params_8h.html#a0cfbad15b0b2e66b5507d31a0f2df54c", null ],
     [ "eeprom_save_all", "_beacon_2inc_2params_8h.html#a41f75d92e96bf087c969f5695a0f5864", null ],
-    [ "paramater_transmit", "_beacon_2inc_2params_8h.html#a6e2d3342dac46b6634180fe5f3cd84cd", null ],
     [ "paramCount", "_beacon_2inc_2params_8h.html#a35c624d95cd4e23c6ca894f5cd3543b9", null ],
     [ "paramSendCount", "_beacon_2inc_2params_8h.html#a8c4421c26660a40c0a98d7e0a8297692", null ],
     [ "paramSendSingle", "_beacon_2inc_2params_8h.html#ae5015c864be2dbabdb49f2667aee708c", null ],

@@ -18,6 +18,20 @@ extern gps_nav_timeutc_t gps_nav_timeutc;
 extern unsigned int gpsSendCounter;
 extern unsigned char gpsFixed;
 
+/*! \brief GPS data storage structure */
+typedef struct gps_data_struct {
+	unsigned char valid;    /*!< Whether GPS data is valid */
+	signed int lat;	        /*!< Latitude */
+	signed int lon;	        /*!< Longitude */
+	signed int alt;	        /*!< Altitude (hMSL) */
+	signed int velN;	    /*!< North velocity */
+	signed int velE;	    /*!< East velocity */
+	signed int velD;	    /*!< Down velocity */
+	signed int heading;	    /*!< Heading */
+} gps_data;
+
+extern gps_data gps;
+
 void gps_process(void);
 
 #endif

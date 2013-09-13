@@ -1,6 +1,7 @@
 var searchData=
 [
   ['filtered',['filtered',['../structalt_struct.html#af2eed96d0424911b730d85f8304c47a2',1,'altStruct']]],
+  ['fix',['fix',['../structcraft__data__struct.html#a6b668ead1c59612faa92541b80fa2517',1,'craft_data_struct']]],
   ['flapstate',['flapState',['../inputs_8h.html#a214247ebd842db7f18635ef404ae477b',1,'flapState():&#160;inputs.c'],['../inputs_8c.html#a214247ebd842db7f18635ef404ae477b',1,'flapState():&#160;inputs.c']]],
   ['flapswitch',['flapswitch',['../inputs_8h.html#a7b1a189ab628486ec9b4057f31404b11',1,'flapswitch():&#160;inputs.c'],['../inputs_8c.html#a7b1a189ab628486ec9b4057f31404b11',1,'flapswitch():&#160;inputs.c']]],
   ['flashpled',['flashPLED',['../_thalamus_2globals_8c.html#ac64b3f3682b384b735d5a12e24b0cf3a',1,'flashPLED():&#160;globals.c'],['../_thalamus_2inc_2globals_8h.html#ac64b3f3682b384b735d5a12e24b0cf3a',1,'flashPLED():&#160;globals.c']]],

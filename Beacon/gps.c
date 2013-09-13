@@ -16,8 +16,10 @@ gps_nav_velned_t gps_nav_velned;		/*!< GPS velocity in NED */
 gps_nav_timeutc_t gps_nav_timeutc;		/*!< GPS time in UTC */
 
 unsigned int gpsSendCounter;			/*!< GPS loop counter */
-unsigned char gpsFixed=0;				/*!< Boolean: whether GPS is fixed */
+gps_data gps={0};							/*!< GPS storage structure */
 
+
+/*! \brief Process GPS */
 void gps_process(void) {
     // *** Process GPS
     XBeeInhibit(); // XBee input needs to be inhibited while processing GPS to avoid disrupting the I2C
@@ -27,30 +29,30 @@ void gps_process(void) {
     // *** Get GPS data
     if(gps_nav_status.isNew) {
         gps_nav_status.isNew = 0;
-
+		gpsWatchdog = 0;
+		
         if((gps_nav_status.gpsFix == 0x03 || gps_nav_status.gpsFix == 0x04) && gps_nav_status.flags & 0x1) { // fix is 3D and valid
-            gpsFixed = 1;
+            gps.valid = 1;
         }
         else {
-            gpsFixed = 0;
+            gps.valid = 0;
         }
-        //mavlink_gps_raw_int.satellites_visible = gps_nav_sol.numSV;
     }
 
     if(gps_nav_posllh.isNew) {
         gps_nav_posllh.isNew = 0;
 
-        if(gpsFixed == 1) {
-            gpsWatchdog = 0;
-            /*craft_X = gps_nav_posllh.lat / 10000000.0d;
-            craft_Y = gps_nav_posllh.lon / 10000000.0d;
-            craft_Z = (double)gps_nav_posllh.hMSL/ 1000.0d;*/
-        }
+		gps.lat = gps_nav_posllh.lat;
+		gps.lon = gps_nav_posllh.lon;
+		gps.alt = gps_nav_posllh.hMSL;
     }
 
     if(gps_nav_velned.isNew) {
         gps_nav_velned.isNew = 0;
-
+		gps.velN = gps_nav_velned.velN;
+		gps.velE = gps_nav_velned.velE;
+		gps.velD = gps_nav_velned.velD;
+		gps.heading = gps_nav_velned.heading;
     }
 }
 

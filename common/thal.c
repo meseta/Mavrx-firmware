@@ -22,21 +22,17 @@ extern "C" {
 
 // *** In-application programmingfunctions
 static const FUNCIAP FUNCIAPEntry = (FUNCIAP)0x1fff1ff1;
+
 void IAPSafe(unsigned int * command, unsigned int * result) { // safe IAP function, disables interrupts before executing IAP and restores afterwards
-    unsigned int interrupts[8];
-    unsigned char i;
+    unsigned int interrupts;
     // store and disable interrupts
-    for(i=0; i<8; i++) {
-        interrupts[i] = NVIC->ISER[i];
-        NVIC->ICER[i] = interrupts[i];
-    }
+    interrupts = NVIC->ISER[0];
+    NVIC->ICER[0] = interrupts;
     
     FUNCIAPEntry(command, result);
     
     // restore interrputs
-    for(i=0; i<8; i++) {
-        NVIC->ISER[i] = interrupts[i];
-    }
+    NVIC->ISER[0] = interrupts;
 }
 
 // *** Reprogram function

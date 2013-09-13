@@ -61,6 +61,7 @@ extern "C" {
 // *** In-application programming functions
 
 typedef void (*FUNCIAP)(unsigned int *, unsigned int *);
+void IAPSafe(unsigned int * command, unsigned int * result);
 
 void Reprogram(void);
 unsigned int ReadPID(void);
@@ -906,8 +907,8 @@ static inline void LEDToggle(unsigned int pins) { Port0Toggle(pins); FUNCLEDStat
 
 static inline void RSTInit(void) { Port0Init(PIN0); Port0SetIn(PIN0); }
 static inline void PRGInit(void) { Port0Init(PIN1); Port0SetIn(PIN1); }
-static inline unsigned char RSTRead(void) { Port0SetIn(PIN0); __NOP(); __NOP(); __NOP(); return Port0Read(PIN0); }
-static inline unsigned char PRGRead(void) { Port0SetIn(PIN1); __NOP(); __NOP(); __NOP(); return Port0Read(PIN1); }
+static inline unsigned char RSTRead(void) { Port0SetIn(PIN0); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); return Port0Read(PIN0); }
+static inline unsigned char PRGRead(void) { Port0SetIn(PIN1); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); __NOP(); return Port0Read(PIN1); } // delay is needed for rise time
 
 unsigned char RSTPoll(void);
 unsigned char PRGPoll(void);

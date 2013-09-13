@@ -47,6 +47,7 @@ mavlink_param_request_read_t mavlink_param_request_read;		/*!< Parameter read re
 mavlink_manual_control_t mavlink_manual_control;				/*!< Manual control  */
 mavlink_mission_count_t mavlink_mission_count;					/*!< Mission count  */
 mavlink_set_gps_global_origin_t mavlink_set_gps_global_origin;	/*!< Set Home  */
+mavlink_global_position_int_t mavlink_global_position_int_beacon; /*!< for beacon setpoint */
 mavlink_mission_request_list_t mavlink_mission_request_list;	/*!< Mission request  */
 mavlink_mission_clear_all_t mavlink_mission_clear_all;			/*!< Mission clear  */
 mavlink_mission_set_current_t mavlink_mission_set_current;		/*!< Mission set current  */
@@ -88,7 +89,7 @@ void mavlink_telemetry(void) {
 	if(waypointReceiveIndex < waypointCount) {
 		if(waypointTimer > WAYPOINT_TIMEOUT) {
 			mavlink_mission_request.seq = waypointReceiveIndex;
-			mavlink_mission_request.target_system = waypointProviderID;
+            mavlink_mission_request.target_system = waypointProviderID;
 			mavlink_mission_request.target_component = waypointProviderComp;
 			mavlink_msg_mission_request_encode(mavlinkID, MAV_COMP_ID_MISSIONPLANNER, &mavlink_tx_msg, &mavlink_mission_request);
 			mavlink_message_len = mavlink_msg_to_send_buffer(mavlink_message_buf, &mavlink_tx_msg);
@@ -419,7 +420,8 @@ void mavlink_messages(void) {
 */
 void MAVLinkInit() {
     mavlinkID = (unsigned char) MAV_ID;
-	if(mavlinkID == 255) mavlinkID = 0; // 255 reserved for ground control
+	if(mavlinkID == 255) mavlinkID = 254; // 255 reserved for ground control
+	if(mavlinkID == 0) mavlinkID = 1; // 0 reserved for broadcast
 	
     mavlink_heartbeat.type = MAV_TYPE_QUADROTOR;
     mavlink_heartbeat.autopilot = MAV_AUTOPILOT_GENERIC;

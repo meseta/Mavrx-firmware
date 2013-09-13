@@ -116,6 +116,10 @@ $(document).ready(function(){initNavTree('_beacon_2gps_8c.html','');});
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a5e2c2113b229b85830e1cdd2207b812d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5e2c2113b229b85830e1cdd2207b812d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_beacon_2gps_8c.html#a5e2c2113b229b85830e1cdd2207b812d">gps_process</a> (void)</td></tr>
+<tr class="memdesc:a5e2c2113b229b85830e1cdd2207b812d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process GPS. <br/></td></tr>
+<tr class="separator:a5e2c2113b229b85830e1cdd2207b812d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa11b73f54ce0fb1bfbd97990d979b288"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_beacon_2gps_8c.html#aa11b73f54ce0fb1bfbd97990d979b288">GPSMessage</a> (unsigned short id, unsigned char *buffer, unsigned short length)</td></tr>
 <tr class="memdesc:aa11b73f54ce0fb1bfbd97990d979b288"><td class="mdescLeft">&#160;</td><td class="mdescRight">Communications with the uBlox GPS.  <a href="#aa11b73f54ce0fb1bfbd97990d979b288">More...</a><br/></td></tr>
 <tr class="separator:aa11b73f54ce0fb1bfbd97990d979b288"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,8 +140,8 @@ Variables</h2></td></tr>
 <tr class="separator:aee3543644a5985bceee1a5482f60f6a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c01df7605b5302aba85f93f2f6a36e0"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_beacon_2gps_8c.html#a4c01df7605b5302aba85f93f2f6a36e0">gpsSendCounter</a></td></tr>
 <tr class="separator:a4c01df7605b5302aba85f93f2f6a36e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f9e5c3f3cdcff628ea8b2097057c07b"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_beacon_2gps_8c.html#a4f9e5c3f3cdcff628ea8b2097057c07b">gpsFixed</a> =0</td></tr>
-<tr class="separator:a4f9e5c3f3cdcff628ea8b2097057c07b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27a58741a0d79be59df7a154725d3a98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_beacon_2inc_2gps_8h.html#a43bf384d83cb41c70e7b4414a3355f14">gps_data</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_beacon_2gps_8c.html#a27a58741a0d79be59df7a154725d3a98">gps</a> ={0}</td></tr>
+<tr class="separator:a27a58741a0d79be59df7a154725d3a98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>GPS waypoint flying. </p>
@@ -179,6 +183,19 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a class="anchor" id="a27a58741a0d79be59df7a154725d3a98"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_beacon_2inc_2gps_8h.html#a43bf384d83cb41c70e7b4414a3355f14">gps_data</a> gps ={0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>GPS storage structure </p>
+
+</div>
+</div>
 <a class="anchor" id="a5cd38dc3f6714be5be72a1f7aa3694ed"></a>
 <div class="memitem">
 <div class="memproto">
@@ -257,19 +274,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a4f9e5c3f3cdcff628ea8b2097057c07b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char gpsFixed =0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Boolean: whether GPS is fixed </p>
-
-</div>
-</div>
 <a class="anchor" id="a4c01df7605b5302aba85f93f2f6a36e0"></a>
 <div class="memitem">
 <div class="memproto">
@@ -289,7 +293,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_dcaef47a8c03272bea12397f98c4fccb.html">Beacon</a></li><li class="navelem"><a class="el" href="_beacon_2gps_8c.html">gps.c</a></li>
-    <li class="footer">Generated on Thu Sep 12 2013 17:44:10 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Fri Sep 13 2013 17:44:15 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>
