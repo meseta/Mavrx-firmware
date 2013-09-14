@@ -41,7 +41,6 @@ mavlink_status_t mavlink_status;								/*!< Receive message status */
 mavlink_message_t mavlink_rx_msg;								/*!< Receieved message  */
 mavlink_request_data_stream_t mavlink_request_data_stream;		/*!< Data stream rate request  */
 mavlink_command_long_t mavlink_command_long;					/*!< Commands  */
-//mavlink_param_request_list_t mavlink_param_request_list;		/*!< Parameter read all reuest  */
 mavlink_param_set_t mavlink_param_set;							/*!< Parameter set request  */
 mavlink_param_request_read_t mavlink_param_request_read;		/*!< Parameter read request  */
 mavlink_manual_control_t mavlink_manual_control;				/*!< Manual control  */
@@ -608,18 +607,6 @@ void MAVLinkParse(unsigned char UARTData) {
                     XBeeWriteBroadcast(mavlink_message_buf, mavlink_message_len); // BROADCAST
                 }
                 break;
-            
-            case MAVLINK_MSG_ID_MANUAL_CONTROL:
-				// QGROUNDCONTROL BUG: gamepad control don't work
-                /*mavlink_msg_manual_control_decode(&mavlink_rx_msg, &mavlink_manual_control);
-                if(mavlink_manual_control.target == mavlinkID) {
-                    ilink_mancon.roll = mavlink_manual_control.roll;
-                    ilink_mancon.pitch = mavlink_manual_control.pitch;
-                    ilink_mancon.yaw = mavlink_manual_control.yaw;
-                    ilink_mancon.thrust = mavlink_manual_control.thrust;
-                    //ILinkSendMessage(ID_ILINK_MANCON, (unsigned short *) & ilink_mancon, sizeof(ilink_mancon)/2-1);
-                }*/
-                break;
             case MAVLINK_MSG_ID_SET_MODE:
                 if(mavlink_msg_set_mode_get_target_system(&mavlink_rx_msg) == mavlinkID) {
                     mavlink_msg_set_mode_decode(&mavlink_rx_msg, &mavlink_set_mode);
@@ -821,9 +808,9 @@ void MAVLinkParse(unsigned char UARTData) {
             case MAVLINK_MSG_ID_SET_GPS_GLOBAL_ORIGIN:
                 if(mavlink_msg_set_gps_global_origin_get_target_system(&mavlink_rx_msg) == mavlinkID) {
                 mavlink_msg_set_gps_global_origin_decode(&mavlink_rx_msg, &mavlink_set_gps_global_origin);
-                        home_X = (double)mavlink_set_gps_global_origin.latitude / 10000000.0d;
-                        home_Y = (double)mavlink_set_gps_global_origin.longitude / 10000000.0d;
-                        home_Z = (double)mavlink_set_gps_global_origin.altitude / 1000.0d;
+                        home_lat = (double)mavlink_set_gps_global_origin.latitude / 10000000.0d;
+                        home_lon = (double)mavlink_set_gps_global_origin.longitude / 10000000.0d;
+                        home_alt = (double)mavlink_set_gps_global_origin.altitude / 1000.0d;
                         home_valid = 1;
                 }
             case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:
@@ -968,7 +955,6 @@ void MAVLinkParse(unsigned char UARTData) {
             case MAVLINK_MSG_ID_MISSION_ACK:
                 //ignored
                 break;
-                
             case MAVLINK_MSG_ID_REQUEST_DATA_STREAM:
                 // Sets the output data rates
                 if(mavlink_msg_request_data_stream_get_target_system(&mavlink_rx_msg) == mavlinkID) {
@@ -976,6 +962,18 @@ void MAVLinkParse(unsigned char UARTData) {
                     if(mavlink_request_data_stream.req_message_rate > 255) mavlink_request_data_stream.req_message_rate = 255;
                     dataRate[mavlink_request_data_stream.req_stream_id] = mavlink_request_data_stream.req_message_rate;
                 }
+                break;
+            case MAVLINK_MSG_ID_MANUAL_CONTROL: // beacon input
+                mavlink_msg_manual_control_decode(&mavlink_rx_msg, &mavlink_manual_control);
+                if(mavlink_manual_control.target == mavlinkID) {
+                    /*ilink_mancon.roll = mavlink_manual_control.roll;
+                    ilink_mancon.pitch = mavlink_manual_control.pitch;
+                    ilink_mancon.yaw = mavlink_manual_control.yaw;
+                    ilink_mancon.thrust = mavlink_manual_control.thrust;*/
+                    //ILinkSendMessage(ID_ILINK_MANCON, (unsigned short *) & ilink_mancon, sizeof(ilink_mancon)/2-1);
+                }
+                break;
+            case MAVLINK_MSG_ID_GLOBAL_POSITION_INT: // beacon input
                 break;
             default:
                 //MAVSendInt("CMDIGNORE", mavlink_rx_msg.msgid);

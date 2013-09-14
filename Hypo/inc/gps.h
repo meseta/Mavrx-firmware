@@ -46,9 +46,9 @@ extern gps_nav_timeutc_t gps_nav_timeutc;
 extern unsigned int gpsSendCounter;
 
 extern waypointStruct waypoint[MAX_WAYPOINTS];
-extern double home_X;
-extern double home_Y;
-extern double home_Z;
+extern double home_lat;
+extern double home_lon;
+extern double home_alt;
 extern unsigned char home_valid;
 
 extern unsigned short waypointCurrent, waypointCount, waypointReceiveIndex;
@@ -61,5 +61,5 @@ extern unsigned char gpsFixed;
 extern unsigned char gps_action;
 
 void gps_navigate(void);
-void gps_set_home(double X, double Y, double Z);
+void gps_set_home(double lat, double lon, double alt);
 #endif
