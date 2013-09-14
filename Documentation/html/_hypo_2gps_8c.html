@@ -119,10 +119,22 @@ Functions</h2></td></tr>
 <tr class="memitem:a42d22891371e6c6438f07a6c11014898"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a42d22891371e6c6438f07a6c11014898">gps_navigate</a> (void)</td></tr>
 <tr class="memdesc:a42d22891371e6c6438f07a6c11014898"><td class="mdescLeft">&#160;</td><td class="mdescRight">Does the GPS navigation thing.  <a href="#a42d22891371e6c6438f07a6c11014898">More...</a><br/></td></tr>
 <tr class="separator:a42d22891371e6c6438f07a6c11014898"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a759e5bdabda998c0036f189773ce5835"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a759e5bdabda998c0036f189773ce5835"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a759e5bdabda998c0036f189773ce5835">gps_set_home</a> (double X, double Y, double Z)</td></tr>
-<tr class="memdesc:a759e5bdabda998c0036f189773ce5835"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the home waypoint. <br/></td></tr>
-<tr class="separator:a759e5bdabda998c0036f189773ce5835"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaec3cad62990e561f91ce3e42f4b9a65"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaec3cad62990e561f91ce3e42f4b9a65"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#aaec3cad62990e561f91ce3e42f4b9a65">gps_set_home</a> (double lat, double lon, double <a class="el" href="inputs_8c.html#abffc5ca516aa3689a057ad62c0017996">alt</a>)</td></tr>
+<tr class="memdesc:aaec3cad62990e561f91ce3e42f4b9a65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the home waypoint. <br/></td></tr>
+<tr class="separator:aaec3cad62990e561f91ce3e42f4b9a65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbdbd60450c468885c87d62372278298"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#acbdbd60450c468885c87d62372278298">latDiff2Meters</a> (double latdiff)</td></tr>
+<tr class="memdesc:acbdbd60450c468885c87d62372278298"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a lattitide difference to meters.  <a href="#acbdbd60450c468885c87d62372278298">More...</a><br/></td></tr>
+<tr class="separator:acbdbd60450c468885c87d62372278298"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a048d89ab4aa25a0ace2c3d403cb7ea"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a2a048d89ab4aa25a0ace2c3d403cb7ea">lonDiff2Meters</a> (double londiff, double ref_lat)</td></tr>
+<tr class="memdesc:a2a048d89ab4aa25a0ace2c3d403cb7ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a longitude difference to meters (requires a reference latitude)  <a href="#a2a048d89ab4aa25a0ace2c3d403cb7ea">More...</a><br/></td></tr>
+<tr class="separator:a2a048d89ab4aa25a0ace2c3d403cb7ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17bacedc2b6f3c94cbeba0b89dba21bc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a17bacedc2b6f3c94cbeba0b89dba21bc">meters2LatDiff</a> (float meters)</td></tr>
+<tr class="memdesc:a17bacedc2b6f3c94cbeba0b89dba21bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts meters to a lattitude difference.  <a href="#a17bacedc2b6f3c94cbeba0b89dba21bc">More...</a><br/></td></tr>
+<tr class="separator:a17bacedc2b6f3c94cbeba0b89dba21bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3520cc830e94aa01c19df2c40d95d883"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a3520cc830e94aa01c19df2c40d95d883">meters2LonDiff</a> (float meters, double ref_lat)</td></tr>
+<tr class="memdesc:a3520cc830e94aa01c19df2c40d95d883"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts meters to a longitude difference (requires a reference latitude)  <a href="#a3520cc830e94aa01c19df2c40d95d883">More...</a><br/></td></tr>
+<tr class="separator:a3520cc830e94aa01c19df2c40d95d883"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa11b73f54ce0fb1bfbd97990d979b288"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#aa11b73f54ce0fb1bfbd97990d979b288">GPSMessage</a> (unsigned short id, unsigned char *buffer, unsigned short length)</td></tr>
 <tr class="memdesc:aa11b73f54ce0fb1bfbd97990d979b288"><td class="mdescLeft">&#160;</td><td class="mdescRight">Communications with the uBlox GPS.  <a href="#aa11b73f54ce0fb1bfbd97990d979b288">More...</a><br/></td></tr>
 <tr class="separator:aa11b73f54ce0fb1bfbd97990d979b288"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,12 +157,12 @@ Variables</h2></td></tr>
 <tr class="separator:a4c01df7605b5302aba85f93f2f6a36e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ef9cbadef05b95c3548730b50be57c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structwaypoint_struct.html">waypointStruct</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a4ef9cbadef05b95c3548730b50be57c2">waypoint</a> [<a class="el" href="_hypo_2inc_2gps_8h.html#a0351e86a69da7f513f59240246a49d09">MAX_WAYPOINTS</a>]</td></tr>
 <tr class="separator:a4ef9cbadef05b95c3548730b50be57c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8aa63c3cbc7b1a20541524c7dcad6081"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a8aa63c3cbc7b1a20541524c7dcad6081">home_X</a></td></tr>
-<tr class="separator:a8aa63c3cbc7b1a20541524c7dcad6081"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accb457d6199648bb02f0ab88c7c09a51"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#accb457d6199648bb02f0ab88c7c09a51">home_Y</a></td></tr>
-<tr class="separator:accb457d6199648bb02f0ab88c7c09a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a463d73a3ddb44706f8f7b22d841cb679"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a463d73a3ddb44706f8f7b22d841cb679">home_Z</a></td></tr>
-<tr class="separator:a463d73a3ddb44706f8f7b22d841cb679"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4498aee536ce877107138934d32da714"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a4498aee536ce877107138934d32da714">home_lat</a></td></tr>
+<tr class="separator:a4498aee536ce877107138934d32da714"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5ba66367bf3c403e5f2a3af9f2932f0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#aa5ba66367bf3c403e5f2a3af9f2932f0">home_lon</a></td></tr>
+<tr class="separator:aa5ba66367bf3c403e5f2a3af9f2932f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a518d82c1b754c84e6e1ffcffcacfa81d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a518d82c1b754c84e6e1ffcffcacfa81d">home_alt</a></td></tr>
+<tr class="separator:a518d82c1b754c84e6e1ffcffcacfa81d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a5673e8a164f12c81ead918ec512b96"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a8a5673e8a164f12c81ead918ec512b96">home_valid</a> =0</td></tr>
 <tr class="separator:a8a5673e8a164f12c81ead918ec512b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54c1c57a7797ca0e871d4da065211787"><td class="memItemLeft" align="right" valign="top">unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a54c1c57a7797ca0e871d4da065211787">waypointCurrent</a> =0</td></tr>
@@ -159,8 +171,6 @@ Variables</h2></td></tr>
 <tr class="separator:a2aed5643420b27b490bade79d58e476a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a890b7c74013d4eabfbcb1bf314319d08"><td class="memItemLeft" align="right" valign="top">unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a890b7c74013d4eabfbcb1bf314319d08">waypointReceiveIndex</a> =0</td></tr>
 <tr class="separator:a890b7c74013d4eabfbcb1bf314319d08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a4fd06199d67ea93b0f8d22ca5ed2f9"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a0a4fd06199d67ea93b0f8d22ca5ed2f9">waypointTries</a></td></tr>
-<tr class="separator:a0a4fd06199d67ea93b0f8d22ca5ed2f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dda9f252e0f8230dc1e1a240bf4b5c5"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a2dda9f252e0f8230dc1e1a240bf4b5c5">waypointValid</a> =0</td></tr>
 <tr class="separator:a2dda9f252e0f8230dc1e1a240bf4b5c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65e4ff1b090381b931309b28a2a839b7"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a65e4ff1b090381b931309b28a2a839b7">waypointGo</a> =0</td></tr>
@@ -169,12 +179,18 @@ Variables</h2></td></tr>
 <tr class="separator:a94d889fb729c69821ec9d0a42f7994e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25c53335ad27e057c7774def2d9887af"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a25c53335ad27e057c7774def2d9887af">waypointLoiterTimer</a></td></tr>
 <tr class="separator:a25c53335ad27e057c7774def2d9887af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4db78219d6d362a4402cfbc7026ec2a"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#ac4db78219d6d362a4402cfbc7026ec2a">waypointProviderID</a></td></tr>
-<tr class="separator:ac4db78219d6d362a4402cfbc7026ec2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa3103165ab9d5cc8c0f9b0a9d9b7254"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#aaa3103165ab9d5cc8c0f9b0a9d9b7254">waypointProviderComp</a></td></tr>
-<tr class="separator:aaa3103165ab9d5cc8c0f9b0a9d9b7254"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1345896f451359458f4b8629ec4808ce"><td class="memItemLeft" align="right" valign="top">unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a1345896f451359458f4b8629ec4808ce">waypointTimer</a> =0</td></tr>
-<tr class="separator:a1345896f451359458f4b8629ec4808ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac165d3be7787254952d383eaf92c6acc"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#ac165d3be7787254952d383eaf92c6acc">waypointTurnCounter</a></td></tr>
+<tr class="separator:ac165d3be7787254952d383eaf92c6acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acecd113c73c9e07e27d611e69ea2bc3e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#acecd113c73c9e07e27d611e69ea2bc3e">orbitRadius</a></td></tr>
+<tr class="separator:acecd113c73c9e07e27d611e69ea2bc3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d4014d685f3dab6c726cf327ccc9c1a"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a3d4014d685f3dab6c726cf327ccc9c1a">orbitPhase</a></td></tr>
+<tr class="separator:a3d4014d685f3dab6c726cf327ccc9c1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a617906430238249136e3eb8401784f34"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a617906430238249136e3eb8401784f34">orbitSpeed</a></td></tr>
+<tr class="separator:a617906430238249136e3eb8401784f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6cc54866eb85be3c73d86ad1275771c"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#ad6cc54866eb85be3c73d86ad1275771c">orbitCount</a></td></tr>
+<tr class="separator:ad6cc54866eb85be3c73d86ad1275771c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab086d2ce586dc4a2d2465db18836ea9b"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#ab086d2ce586dc4a2d2465db18836ea9b">orbitDirection</a> =0</td></tr>
+<tr class="separator:ab086d2ce586dc4a2d2465db18836ea9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f9e5c3f3cdcff628ea8b2097057c07b"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a4f9e5c3f3cdcff628ea8b2097057c07b">gpsFixed</a> =0</td></tr>
 <tr class="separator:a4f9e5c3f3cdcff628ea8b2097057c07b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ffdd804891f181b6469ea0dafb75ebf"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_hypo_2gps_8c.html#a8ffdd804891f181b6469ea0dafb75ebf">gps_action</a> = 0</td></tr>
@@ -235,6 +251,148 @@ Variables</h2></td></tr>
 
 <p>Communications with the uBlox GPS. </p>
 <p>This function is called by the GPS processing function that needs to be called at regular intervals to poll the GPS for data over I2C </p>
+
+</div>
+</div>
+<a class="anchor" id="acbdbd60450c468885c87d62372278298"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float latDiff2Meters </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>latdiff</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts a lattitide difference to meters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">latdiff</td><td>a difference in latitude </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">a</td><td>distance in meters that corresponds to the input latitude difference </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a2a048d89ab4aa25a0ace2c3d403cb7ea"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float lonDiff2Meters </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>londiff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>ref_lat</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts a longitude difference to meters (requires a reference latitude) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">londiff</td><td>a difference in longitude </td></tr>
+    <tr><td class="paramname">ref_lat</td><td>a the reference latitude at which the conversion takes place </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">a</td><td>distance in meters that corresponds to the input longitude difference </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a17bacedc2b6f3c94cbeba0b89dba21bc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double meters2LatDiff </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>meters</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts meters to a lattitude difference. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">meters</td><td>a distance in meters </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">a</td><td>latitude difference that corresponds to the input distance in meters </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a3520cc830e94aa01c19df2c40d95d883"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double meters2LonDiff </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>meters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>ref_lat</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts meters to a longitude difference (requires a reference latitude) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">meters</td><td>a distance in meters </td></tr>
+    <tr><td class="paramname">ref_lat</td><td>a the reference latitude at which the conversion takes place </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">a</td><td>longitude difference that corresponds to the input distance in meters </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -356,6 +514,45 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a518d82c1b754c84e6e1ffcffcacfa81d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double home_alt</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Home Z waypoint </p>
+
+</div>
+</div>
+<a class="anchor" id="a4498aee536ce877107138934d32da714"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double home_lat</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Home X waypoint </p>
+
+</div>
+</div>
+<a class="anchor" id="aa5ba66367bf3c403e5f2a3af9f2932f0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double home_lon</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Home Y waypoint </p>
+
+</div>
+</div>
 <a class="anchor" id="a8a5673e8a164f12c81ead918ec512b96"></a>
 <div class="memitem">
 <div class="memproto">
@@ -369,42 +566,68 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8aa63c3cbc7b1a20541524c7dcad6081"></a>
+<a class="anchor" id="ad6cc54866eb85be3c73d86ad1275771c"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">double home_X</td>
+          <td class="memname">float orbitCount</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Home X waypoint </p>
+<p>Orbit counter </p>
 
 </div>
 </div>
-<a class="anchor" id="accb457d6199648bb02f0ab88c7c09a51"></a>
+<a class="anchor" id="ab086d2ce586dc4a2d2465db18836ea9b"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">double home_Y</td>
+          <td class="memname">unsigned char orbitDirection =0</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Home Y waypoint </p>
+<p>Robit direction (CW or CCW) </p>
 
 </div>
 </div>
-<a class="anchor" id="a463d73a3ddb44706f8f7b22d841cb679"></a>
+<a class="anchor" id="a3d4014d685f3dab6c726cf327ccc9c1a"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">double home_Z</td>
+          <td class="memname">float orbitPhase</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Home Z waypoint </p>
+<p>Orbit phase </p>
+
+</div>
+</div>
+<a class="anchor" id="acecd113c73c9e07e27d611e69ea2bc3e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float orbitRadius</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Radius at which to orbit </p>
+
+</div>
+</div>
+<a class="anchor" id="a617906430238249136e3eb8401784f34"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float orbitSpeed</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Linear speed of orbit </p>
 
 </div>
 </div>
@@ -473,32 +696,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aaa3103165ab9d5cc8c0f9b0a9d9b7254"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char waypointProviderComp</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>The provider component of the waypoints </p>
-
-</div>
-</div>
-<a class="anchor" id="ac4db78219d6d362a4402cfbc7026ec2a"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char waypointProviderID</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>The provider device of the waypoints </p>
-
-</div>
-</div>
 <a class="anchor" id="a94d889fb729c69821ec9d0a42f7994e1"></a>
 <div class="memitem">
 <div class="memproto">
@@ -525,29 +722,16 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1345896f451359458f4b8629ec4808ce"></a>
+<a class="anchor" id="ac165d3be7787254952d383eaf92c6acc"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned short waypointTimer =0</td>
+          <td class="memname">float waypointTurnCounter</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Waypoint loop timer </p>
-
-</div>
-</div>
-<a class="anchor" id="a0a4fd06199d67ea93b0f8d22ca5ed2f9"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char waypointTries</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Number of attemts to get waypoint </p>
+<p>Waypoint turn counter </p>
 
 </div>
 </div>
@@ -570,7 +754,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_7aebccb76396db28a8b12c48580fa168.html">Hypo</a></li><li class="navelem"><a class="el" href="_hypo_2gps_8c.html">gps.c</a></li>
-    <li class="footer">Generated on Fri Sep 13 2013 17:44:15 for Mavrx Multirotor Firmware by
+    <li class="footer">Generated on Sat Sep 14 2013 22:57:16 for Mavrx Multirotor Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

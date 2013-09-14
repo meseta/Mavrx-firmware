@@ -60,6 +60,9 @@ extern unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];
 extern unsigned short mavlink_message_len;
 extern unsigned char dataRate[MAV_DATA_STREAM_ENUM_END];
 
+extern unsigned char waypointProviderID, waypointProviderComp;
+extern unsigned short waypointTimer;
+
 void mavlink_telemetry(void);
 void mavlink_messages(void);
 

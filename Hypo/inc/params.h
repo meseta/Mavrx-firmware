@@ -29,6 +29,7 @@ extern struct paramStorage_struct paramStorage[];
 #define GPS_Kp			paramStorage[7].value	/*!< GPS navigation P gain */
 #define GPS_Ki			paramStorage[8].value	/*!< GPS navigation I gain */
 #define GPS_Kd			paramStorage[9].value	/*!< GPS navigation D gain */
+#define GPS_ORBRADIUS   paramStorage[10].value	/*!< GPS navigation D gain */
 
 extern unsigned int paramCount;
 extern unsigned int paramSendCount;

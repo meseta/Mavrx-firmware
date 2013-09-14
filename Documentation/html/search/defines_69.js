@@ -6,6 +6,7 @@ var searchData=
   ['intmode_5fdown',['INTMODE_DOWN',['../_hypo_2inc_2gps_8h.html#a0bb25bc3d06c2ce36f89aee5e8701dfd',1,'gps.h']]],
   ['intmode_5fhorizontal',['INTMODE_HORIZONTAL',['../_hypo_2inc_2gps_8h.html#a2378b81085b564c6ae6b2f013a3338ca',1,'gps.h']]],
   ['intmode_5foff',['INTMODE_OFF',['../_hypo_2inc_2gps_8h.html#acbd9245e99d894f8e648cc81af60c704',1,'gps.h']]],
+  ['intmode_5forbit',['INTMODE_ORBIT',['../_hypo_2inc_2gps_8h.html#a44ffdaffe1083e893d21a16bfa042409',1,'gps.h']]],
   ['intmode_5fsequence_5f3d',['INTMODE_SEQUENCE_3D',['../_hypo_2inc_2gps_8h.html#ae16b0d66054df27978904d5791ba9c74',1,'gps.h']]],
   ['intmode_5fsequence_5fdown',['INTMODE_SEQUENCE_DOWN',['../_hypo_2inc_2gps_8h.html#a028229e46b7c321c708c6a304f7cb342',1,'gps.h']]],
   ['intmode_5fsequence_5fup',['INTMODE_SEQUENCE_UP',['../_hypo_2inc_2gps_8h.html#a8157deae72099256cc882334eb43d4ce',1,'gps.h']]],

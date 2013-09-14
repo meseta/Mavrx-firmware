@@ -56,6 +56,13 @@ mavlink_set_mode_t mavlink_set_mode;							/*!< Set craft mode  */
 unsigned char mavlink_message_buf[MAVLINK_MAX_PACKET_LEN];		/*!< Mavlink message buffer */
 unsigned short mavlink_message_len;								/*!< Mavlink message buffer length */
 
+
+unsigned char waypointTries;			/*!< Number of attemts to get waypoint*/
+unsigned char waypointProviderID;		/*!< The provider device of the waypoints */
+unsigned char waypointProviderComp;		/*!< The provider component of the waypoints */
+
+unsigned short waypointTimer=0;         /*!< Timer for waypoint transmission loop */
+
 // Timers
 unsigned char dataRate[MAV_DATA_STREAM_ENUM_END];	/*!< Data stream rates */
 
@@ -63,7 +70,6 @@ unsigned char dataRate[MAV_DATA_STREAM_ENUM_END];	/*!< Data stream rates */
 \brief Deals with sending all the Mavlink telemetry
 */
 void mavlink_telemetry(void) {
-	static unsigned short waypointTimer=0;
 	static unsigned short rawSensorStreamCounter=0;
 	static unsigned short extStatusStreamCounter=0;
 	static unsigned short rcChannelCounter=0;

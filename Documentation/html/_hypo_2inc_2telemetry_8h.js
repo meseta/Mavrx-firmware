@@ -51,5 +51,8 @@ var _hypo_2inc_2telemetry_8h =
     [ "mavlink_sys_status", "_hypo_2inc_2telemetry_8h.html#ae76fcc6b42234f2acc4b1d9f94c068b6", null ],
     [ "mavlink_tx_msg", "_hypo_2inc_2telemetry_8h.html#a914e7de17fdb4c9a8726394206da3542", null ],
     [ "mavlink_vfr_hud", "_hypo_2inc_2telemetry_8h.html#a26e44de057537a52ee8a09f6f258280b", null ],
-    [ "mavlinkID", "_hypo_2inc_2telemetry_8h.html#aeae36bb6b8efe652c22e2a3249b6ae89", null ]
+    [ "mavlinkID", "_hypo_2inc_2telemetry_8h.html#aeae36bb6b8efe652c22e2a3249b6ae89", null ],
+    [ "waypointProviderComp", "_hypo_2inc_2telemetry_8h.html#aaa3103165ab9d5cc8c0f9b0a9d9b7254", null ],
+    [ "waypointProviderID", "_hypo_2inc_2telemetry_8h.html#ac4db78219d6d362a4402cfbc7026ec2a", null ],
+    [ "waypointTimer", "_hypo_2inc_2telemetry_8h.html#a1345896f451359458f4b8629ec4808ce", null ]
 ];

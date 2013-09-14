@@ -22,10 +22,11 @@ struct paramStorage_struct paramStorage[] = {
     [ 3] = {"GPS_MAXSPD",     1.0f}, 
     [ 4] = {"GPS_MAXROT",     1.5f}, 
     [ 5] = {"GPS_MAXADF",     3.0f}, 
-    [ 6] = {"GPS_MINRAD",     2.0f}, 
+    [ 6] = {"GPS_MINRAD",     2.0f},  
     [ 7] = {"GPS_Kp",        0.03f}, 
     [ 8] = {"GPS_Ki",        0.00f}, 
     [ 9] = {"GPS_Kd",         0.1f}, 
+    [ 10] = {"GPS_ORBRAD",     3.0f},
 };
 
 unsigned char paramSendSingle = 0; /*!< boolean to control whether to send a single param or not */

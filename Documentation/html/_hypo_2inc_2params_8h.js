@@ -12,6 +12,7 @@ var _hypo_2inc_2params_8h =
     [ "GPS_MAX_ROTATE", "_hypo_2inc_2params_8h.html#aec0d6c6fc0040656061b0996bb500c7d", null ],
     [ "GPS_MAX_SPEED", "_hypo_2inc_2params_8h.html#a412e6f6562d2cdc5e2900b9a304a5af6", null ],
     [ "GPS_MIN_RADIUS", "_hypo_2inc_2params_8h.html#a410f484fdf617f0e223d1e2009d0bc21", null ],
+    [ "GPS_ORBRADIUS", "_hypo_2inc_2params_8h.html#a886ea259c896f904e5dd366263558a0f", null ],
     [ "GPS_SAFE_ALT", "_hypo_2inc_2params_8h.html#a7a42a38040e5b0a13d717aa3315e3a33", null ],
     [ "MAV_ID", "_hypo_2inc_2params_8h.html#a7aa2cbbbbc9d06f25ac4e9d46404d96e", null ],
     [ "PARAMBUFFER_SIZE", "_hypo_2inc_2params_8h.html#a506cb9af21a494af94885bb7342b31af", null ],

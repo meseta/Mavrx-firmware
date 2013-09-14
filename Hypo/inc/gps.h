@@ -21,6 +21,7 @@
 #define INTMODE_SEQUENCE_UP 6 		/*!< same as UP, but auto-switches to SEQUENCE_NORMAL on completion */
 #define INTMODE_SEQUENCE_3D 7 		/*!< same as 3D, but auto-switches to SEQUENCE_DOWN on completion */
 #define INTMODE_SEQUENCE_DOWN   8 	/*!< same as DOWN, but with allow_land explicitely set */
+#define INTMODE_ORBIT       9 	    /*!< horizontal orbit at a constant radius above target */
 
 /*! \brief Waypoint storage structure */
 typedef struct {
@@ -53,9 +54,7 @@ extern unsigned char home_valid;
 
 extern unsigned short waypointCurrent, waypointCount, waypointReceiveIndex;
 extern unsigned char waypointTries, waypointValid, waypointGo, waypointReached;
-extern unsigned short waypointTimer;
 extern unsigned int waypointLoiterTimer;
-extern unsigned char waypointProviderID, waypointProviderComp;
 
 extern unsigned char gpsFixed;
 extern unsigned char gps_action;

@@ -26,15 +26,18 @@ unsigned char home_valid=0;				/*!< Boolean: whether home waypoint is valid */
 unsigned short waypointCurrent=0;		/*!< Current waypoint */
 unsigned short waypointCount=0;			/*!< Number of waypoints */
 unsigned short waypointReceiveIndex=0;	/*!< Index for receiving waypoints */
-unsigned char waypointTries;			/*!< Number of attemts to get waypoint*/
 unsigned char waypointValid=0;			/*!< Boolean: Whether waypoints are vaild */
 unsigned char waypointGo=0;				/*!< Boolean: Waypoints execution */
 unsigned char waypointReached;			/*!< Boolean: Waypoint is reached */
-unsigned int waypointLoiterTimer;		/*!< Waypoint loiter time */
-unsigned char waypointProviderID;		/*!< The provider device of the waypoints */
-unsigned char waypointProviderComp;		/*!< The provider component of the waypoints */
 
-unsigned short waypointTimer=0;			/*!< Waypoint loop timer */
+unsigned int waypointLoiterTimer;		/*!< Waypoint loiter time */
+float waypointTurnCounter;              /*!< Waypoint turn counter */
+
+float orbitRadius;                      /*!< Radius at which to orbit */
+float orbitPhase;                       /*!< Orbit phase */
+float orbitSpeed;                       /*!< Linear speed of orbit */
+float orbitCount;                       /*!< Orbit counter */
+unsigned char orbitDirection=0;         /*!< Robit direction (CW or CCW) */
 
 unsigned char gpsFixed=0;				/*!< Boolean: whether GPS is fixed */
 unsigned char gps_action = 0;			/*!< GPS Actions */
@@ -162,7 +165,7 @@ void gps_navigate(void) {
                     if(waypointValid == 1 && waypointCurrent < waypointCount) {
 						MAVSendTextFrom(MAV_SEVERITY_INFO, "Waypoint execution resumed", MAV_COMP_ID_MISSIONPLANNER);
 
-                        // if we're already going, check if we're stuck at a LOITER_UNLIM position, and break out of it
+                        // if we're already going, check if we're stuck at a LOITER_UNLIM position, and break out of it.  In other cases, waypoints are advanced before setting gps_action
                         if(waypointGo == 1 && waypointReached == 1 && waypoint[waypointCurrent].command == MAV_CMD_NAV_LOITER_UNLIM) {
                             waypointCurrent++;
                         }
@@ -256,6 +259,28 @@ void gps_navigate(void) {
                     gps_action = 0;
 					MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Craft going IDLE!", MAV_COMP_ID_MISSIONPLANNER);
                     target_set = 0;
+                    break;
+                case 8: // drop into orbit
+                    gps_action = 0;
+                    if(target_set == 0) { // if no target set, craft is orbit target
+                        target_lat = craft_lat;
+                        target_lon = craft_lon;
+                        target_alt = craft_alt;
+                        target_set = 1;
+                        orbitPhase = 0;
+                        orbitDirection = 0;
+                        orbitRadius = GPS_ORBRADIUS;
+                        orbitSpeed = GPS_MAX_SPEED;
+                    }
+                    else {
+                        // calculate starting orbit phase
+                        float vector_X = latDiff2Meters(target_lat - interpolator_lat);
+                        float vector_Y = lonDiff2Meters(target_lon - interpolator_lon, interpolator_lat);
+
+                        orbitPhase = fatan2(vector_X, vector_Y);
+                    }
+                    orbitCount = 0;
+                    interpolator_mode = INTMODE_ORBIT;
                     break;
             }
 
@@ -439,6 +464,39 @@ void gps_navigate(void) {
 
                     // no yaw control in landing mode
                     break;
+                    
+                case INTMODE_ORBIT:
+                    target_speed_north = 0;
+                    target_speed_east = 0;
+                    // check that we're not maxed out on the angles
+                    if(ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE &&
+                    ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE) {
+                        
+                        if(orbitRadius < GPS_ORBRADIUS) orbitRadius = GPS_ORBRADIUS;
+                        if(orbitSpeed > M_PI * orbitRadius) orbitSpeed = M_PI * orbitRadius; // speed can't be bigger than one orbit every 2 seconds
+                        float old_vector_X = orbitRadius * fsin(orbitPhase);
+                        float old_vector_Y = orbitRadius * fcos(orbitPhase);
+                        float phaseChange = orbitSpeed/(orbitRadius * 5);
+                        
+                        if(orbitDirection) orbitPhase += phaseChange;
+                        else orbitPhase -= phaseChange;
+                        orbitCount += phaseChange/(2*M_PI);
+                        
+                        float vector_X = orbitRadius * fsin(orbitPhase);
+                        float vector_Y = orbitRadius * fcos(orbitPhase);
+                        
+                        interpolator_lat = meters2LatDiff(vector_X);
+                        interpolator_lon = meters2LonDiff(vector_Y, interpolator_lat);
+                        
+                        target_speed_north = (vector_X - old_vector_X) * 5;
+                        target_speed_east = (vector_Y - old_vector_Y) * 5;
+
+                        interpolator_yaw = orbitPhase;
+                    }
+                    interpolator_alt = target_alt;
+                    target_speed_up = 0;
+                    allow_land = 0;
+                    break;
             }
 
             // *** PID & Output
@@ -468,7 +526,7 @@ void gps_navigate(void) {
             XBeeAllow();
 
             // *** Check targeting rules for waypoints
-            if(waypointGo == 1 && waypointValid == 1 && waypointCurrent < waypointCount && waypoint[waypointCurrent].command != MAV_CMD_NAV_RETURN_TO_LAUNCH) {
+            if(waypointGo == 1 && waypointValid == 1 && waypointReached == 0 && waypointCurrent < waypointCount && waypoint[waypointCurrent].command != MAV_CMD_NAV_RETURN_TO_LAUNCH) {
                 float radius = waypoint[waypointCurrent].param2; // param2 is radius in QGroumdcontrol 1.0.1
                 if(radius < GPS_MIN_RADIUS) radius = GPS_MIN_RADIUS; // minimum radis
 
@@ -494,36 +552,53 @@ void gps_navigate(void) {
 
                     // waypointPhase = fatan2(-diff_Y2, -diff_X2);
                 }
-
-                if(waypointReached == 1) {
-                    switch(waypoint[waypointCurrent].command) {
-                        case MAV_CMD_NAV_LOITER_UNLIM:
-                        default:
-                            // do nothing (i.e. get stuck here until user requests to resume)
-                            break;
-                        case MAV_CMD_NAV_LOITER_TURNS:
-                            // TODO: deal with loiter radius/turns
-                            break;
-                        case MAV_CMD_NAV_LOITER_TIME:
-                        case MAV_CMD_NAV_WAYPOINT:
-                            if(waypointLoiterTimer >= waypoint[waypointCurrent].param1) { // Param1 in this case is wait time (in milliseconds, waypointLoiterTimer incremented by SysTick)
-                                if(waypointCurrent < waypointCount) {
-                                    waypointCurrent ++;
-                                    gps_action = 4; // loads up new waypoint
-                                    waypointReached = 0;
-                                    waypointLoiterTimer = 0;
-                                }
+            }
+            
+            // *** Deal with being at waypoint
+            if(waypointReached == 1) {
+                switch(waypoint[waypointCurrent].command) {
+                    case MAV_CMD_NAV_LOITER_UNLIM:
+                    default:
+                        // do nothing (i.e. get stuck here until user requests to resume)
+                        break;
+                    case MAV_CMD_NAV_LOITER_TURNS:
+                        if(interpolator_mode != INTMODE_ORBIT) {
+                            if(waypoint[waypointCurrent].param3 > 0) {
+                                orbitDirection = 0;
+                                orbitRadius = waypoint[waypointCurrent].param3;
                             }
-                            break;
-                        case MAV_CMD_NAV_LAND:
-                            gps_action = 5;
-                            break;
-                    }
+                            else {
+                                orbitDirection = 1;
+                                orbitRadius = -waypoint[waypointCurrent].param3;
+                            }
+                            orbitSpeed = GPS_MAX_SPEED;
+                            orbitCount = 0;
+                            gps_action = 8;
+                        }
+                        else {
+                            if(orbitCount > waypoint[waypointCurrent].param1) {
+                                waypointCurrent++;
+                                gps_action = 4; // loads up a new waypoint
+                            }
+                        }
+                        break;
+                    case MAV_CMD_NAV_LOITER_TIME:
+                    case MAV_CMD_NAV_WAYPOINT:
+                        waypointLoiterTimer += 200; // TODO: replace 200 with actual loop speed
+                        if(waypointLoiterTimer >= waypoint[waypointCurrent].param1) { // Param1 in this case is wait time (in milliseconds, waypointLoiterTimer incremented by SysTick)
+                            if(waypointCurrent < waypointCount) {
+                                waypointCurrent++;
+                                gps_action = 4; // loads up new waypoint
+                            }
+                        }
+                        break;
+                    case MAV_CMD_NAV_LAND:
+                        gps_action = 5;
+                        waypointReached = 0;
+                        break;
                 }
             }
-            else {
-                free_yaw = 1;
-            }
+        
         }
         else {
             ilink_gpsfly.flags = 0; // GPS not valid

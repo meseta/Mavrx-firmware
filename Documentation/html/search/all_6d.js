@@ -84,6 +84,8 @@ var searchData=
   ['maxstick',['MAXSTICK',['../inputs_8h.html#ab4965945ac77771da22ff6a4f53e9d75',1,'inputs.h']]],
   ['maxthresh',['MAXTHRESH',['../inputs_8h.html#ac8f1d00ed8418477888503cbe5a8a6df',1,'inputs.h']]],
   ['message_5floop_5fhz',['MESSAGE_LOOP_HZ',['../_beacon_2inc_2globals_8h.html#a70e1fb5efb3119d39ae7374dcc996a43',1,'MESSAGE_LOOP_HZ():&#160;globals.h'],['../_hypo_2inc_2globals_8h.html#a70e1fb5efb3119d39ae7374dcc996a43',1,'MESSAGE_LOOP_HZ():&#160;globals.h'],['../_thalamus_2inc_2globals_8h.html#a70e1fb5efb3119d39ae7374dcc996a43',1,'MESSAGE_LOOP_HZ():&#160;globals.h']]],
+  ['meters2latdiff',['meters2LatDiff',['../_hypo_2gps_8c.html#a17bacedc2b6f3c94cbeba0b89dba21bc',1,'meters2LatDiff(float meters):&#160;gps.c'],['../_hypo_2inc_2gps_8h.html#a17bacedc2b6f3c94cbeba0b89dba21bc',1,'meters2LatDiff(float meters):&#160;gps.c']]],
+  ['meters2londiff',['meters2LonDiff',['../_hypo_2gps_8c.html#a3520cc830e94aa01c19df2c40d95d883',1,'meters2LonDiff(float meters, double ref_lat):&#160;gps.c'],['../_hypo_2inc_2gps_8h.html#a3520cc830e94aa01c19df2c40d95d883',1,'meters2LonDiff(float meters, double ref_lat):&#160;gps.c']]],
   ['midstick',['MIDSTICK',['../inputs_8h.html#aff9c3083cbf2ae4c581d51af4f8f1427',1,'inputs.h']]],
   ['minthresh',['MINTHRESH',['../inputs_8h.html#ae370b782d5d2e9535d5f99fe741cf2b2',1,'inputs.h']]]
 ];
