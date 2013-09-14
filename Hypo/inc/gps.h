@@ -62,4 +62,9 @@ extern unsigned char gps_action;
 
 void gps_navigate(void);
 void gps_set_home(double lat, double lon, double alt);
+float latDiff2Meters(double latdiff);
+float lonDiff2Meters(double londiff, double ref_lat);
+double meters2LatDiff(float meters);
+double meters2LonDiff(float meters, double ref_lat);
+
 #endif

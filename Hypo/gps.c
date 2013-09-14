@@ -296,7 +296,7 @@ void gps_navigate(void) {
                 case INTMODE_SEQUENCE_UP:
                 case INTMODE_UP_AND_GO:
                 case INTMODE_VERTICAL:
-                    zdiff = craft_alt - interpolator_alt;
+                    zdiff = interpolator_alt - craft_alt;
                     target_speed_north = 0;
                     target_speed_east = 0;
                     target_speed_up = 0;
@@ -347,8 +347,8 @@ void gps_navigate(void) {
                     if(ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE &&
                     ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE) {
 
-                        float vector_X = target_lat - interpolator_lat; // yes, convert a double to a float to make use of faster float functions. After subtraction, a float has enough accuracy for this
-                        float vector_Y = target_lon - interpolator_lon;
+                        float vector_X = latDiff2Meters(target_lat - interpolator_lat);
+                        float vector_Y = lonDiff2Meters(target_lon - interpolator_lon, interpolator_lat);
 
                         // normalise vector
                         float sumsqu = finvSqrt(vector_X*vector_X + vector_Y*vector_Y);
@@ -360,8 +360,8 @@ void gps_navigate(void) {
                             vector_Y *= sumsqu;
                         }
 
-                        interpolator_lat += vector_X;
-                        interpolator_lon += vector_Y;
+                        interpolator_lat += meters2LatDiff(vector_X);
+                        interpolator_lon += meters2LonDiff(vector_Y, interpolator_lat);
                         target_speed_north = vector_X * 5;
                         target_speed_east = vector_Y * 5;
 
@@ -385,9 +385,9 @@ void gps_navigate(void) {
                     if(ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE &&
                     ilink_gpsfly.northDemand < GPS_MAX_ANGLE && ilink_gpsfly.northDemand > -GPS_MAX_ANGLE &&
                     zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
-
-                        float vector_X = target_lat - interpolator_lat; // yes, convert a double to a float to make use of faster float functions. After subtraction, a float has enough accuracy for this
-                        float vector_Y = target_lon - interpolator_lon;
+                    
+                        float vector_X = latDiff2Meters(target_lat - interpolator_lat);
+                        float vector_Y = lonDiff2Meters(target_lon - interpolator_lon, interpolator_lat);
                         float vector_Z = target_alt - interpolator_alt;
 
                         // normalise vector
@@ -406,8 +406,9 @@ void gps_navigate(void) {
                             interpolator_mode = INTMODE_SEQUENCE_DOWN;
                         }
 
-                        interpolator_lat += vector_X;
-                        interpolator_lon += vector_Y;
+                        
+                        interpolator_lat += meters2LatDiff(vector_X);
+                        interpolator_lon += meters2LonDiff(vector_Y, interpolator_lat);
                         interpolator_alt += vector_Z;
                         target_speed_north = vector_X * 5;
                         target_speed_east = vector_Y * 5;
@@ -441,8 +442,8 @@ void gps_navigate(void) {
             }
 
             // *** PID & Output
-            float diff_X = (double)(interpolator_lat - craft_lat) * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
-            float diff_Y = (double)(interpolator_lon - craft_lon) * (double)111194.92664455873734580834 * fcos((float)((double)craft_lat*(double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
+            float diff_X = latDiff2Meters(interpolator_lat - craft_lat);
+            float diff_Y = lonDiff2Meters(interpolator_lon - craft_lon, craft_lat);
             float diff_Z = (float)(interpolator_alt - craft_alt);
 
 			static float diff_X_i = 0;
@@ -555,6 +556,48 @@ void gps_set_home(double lat, double lon, double alt) {
     XBeeAllow();
 
     MAVSendTextFrom(MAV_SEVERITY_INFO, "Home position set", MAV_COMP_ID_MISSIONPLANNER);
+}
+
+/*!
+\brief Converts a lattitide difference to meters
+
+\param latdiff a difference in latitude
+\retval a distance in meters that corresponds to the input latitude difference
+*/
+float latDiff2Meters(double latdiff) {
+    return (double)latdiff * (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
+}
+
+/*!
+\brief Converts a longitude difference to meters (requires a reference latitude)
+
+\param londiff a difference in longitude
+\param ref_lat a the reference latitude at which the conversion takes place
+\retval a distance in meters that corresponds to the input longitude difference
+*/
+float lonDiff2Meters(double londiff, double ref_lat) {
+    return (double)londiff * (double)111194.92664455873734580834 * fcos((float)((double)ref_lat*(double)0.01745329251994329577)); // 0.01745329251994329577f is deg-rad conversion PI()/180
+}
+
+/*!
+\brief Converts meters to a lattitude difference
+
+\param meters a distance in meters
+\retval a latitude difference that corresponds to the input distance in meters
+*/
+double meters2LatDiff(float meters) {
+    return (double)meters / (double)111194.92664455873734580834; // 111194.92664455873734580834f is radius of earth and deg-rad conversion: 6371000*PI()/180
+}
+
+/*!
+\brief Converts meters to a longitude difference (requires a reference latitude)
+
+\param meters a distance in meters
+\param ref_lat a the reference latitude at which the conversion takes place
+\retval a longitude difference that corresponds to the input distance in meters
+*/
+double meters2LonDiff(float meters, double ref_lat) {
+    return (double)meters / ((double)111194.92664455873734580834 * fcos((float)((double)ref_lat*(double)0.01745329251994329577))); // 0.01745329251994329577f is deg-rad conversion PI()/180
 }
 
 /*!
