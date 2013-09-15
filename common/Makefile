@@ -31,6 +31,7 @@ SRCS1=$(wildcard *.c)
 SRCS2=$(wildcard $(PRJPATH)/../common/*.c)
 DIRS=$(PRJPATH)/obj
 DIRS+=$(PRJPATH)/lib
+DIRS+=$(PRJPATH)/bin
 OBJS=$(SRCS1:%.c=obj/%.o)
 OBJS+=$(SRCS2:$(PRJPATH)/../common/%.c=lib/%.o)
 
@@ -63,18 +64,18 @@ $(PRJPATH)/lib/%.o : $(PRJPATH)/../common/%.s
 
 firmware: $(DIRS) | $(OBJS)
 	-@echo "*** Compiling... ***"
-	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) -o $(PRJPATH)/firmware.elf $(OBJS) -lm
+	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) -o $(PRJPATH)/bin/firmware.elf $(OBJS) -lm
 	-@echo ""
 	-@echo "*** Converting... ***"
-	$(OBJCOPY) $(OCFLAGS) -O binary $(PRJPATH)/firmware.elf firmware.bin
-	$(OBJCOPY) $(OCFLAGS) -O ihex $(PRJPATH)/firmware.elf firmware.hex
+	$(OBJCOPY) $(OCFLAGS) -O binary $(PRJPATH)/bin/firmware.elf $(PRJPATH)/bin/firmware.bin
+	$(OBJCOPY) $(OCFLAGS) -O ihex $(PRJPATH)/bin/firmware.elf $(PRJPATH)/bin/firmware.hex
 	-@echo ""
 	-@echo "*** Adding Checksum... ***"
-	-$(CHKSM) firmware.bin
+	-$(CHKSM) $(PRJPATH)/bin/firmware.bin
 	-@echo ""
 	-@echo "*** Getting Size information... ***"
-	$(SIZE) $(PRJPATH)/firmware.elf
+	$(SIZE) $(PRJPATH)/bin/firmware.elf
 	-@echo ""
 	-@echo "*** Compile complete! ***"
 clean:
-	rm -f $(PRJPATH)/obj/*.o $(PRJPATH)/lib/*.o $(PRJPATH)/firmware.elf $(PRJPATH)/firmware.bin $(PRJPATH)/firmware.hex
+	rm -f $(PRJPATH)/obj/*.o $(PRJPATH)/lib/*.o $(PRJPATH)/bin/firmware.elf $(PRJPATH)/bin/firmware.bin $(PRJPATH)/bin/firmware.hex
