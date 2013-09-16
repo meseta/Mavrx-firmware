@@ -52,6 +52,8 @@ void setup(void) {
 unsigned char connectedStatus=0;
 unsigned char waitFrames = 0;
 
+unsigned char maxPacketSize; /*!< Maximum packet size, as per descriptor */
+
 void loop(void) {
 	if(waitFrames > 0) {
 		if(rreg(rHIRQ) & bmFRAMEIRQ) { // R25: HRQ, check for the FRAMEIRQ, decrement the waitFrame counter if it is set
@@ -77,14 +79,25 @@ void loop(void) {
 					connectedStatus = 1;
 				}
 				break;
-			case 1:	// Device connecting, collect descriptors
-				// ...
-				LEDOn(PLED);
-				
-				
-				wreg(rHIRQ, bmCONDETIRQ);	// clear disconnect status
+			case 1:	// Device connecting, perform initial reset
+				Hwreg(rHCTL, bmBUSRST);			// R29: perform bus reset
 				connectedStatus = 2;
 				break;
+			case 2: // Wait for bus to reset
+				/*! \todo: bus reset timeout */
+				if(Hrreg(rHCTL) & bmBUSRST == 0) {  // wait for bus reset
+					waitFrames = 200;			// set to wait for 200 frames after bus reset
+					connectedStatus = 3;
+				}
+				break;
+			case 3: // Get device descriptor
+				wreg(rPERADDR, 0x00); // first packet to address 0
+				Get_Descriptor_Device[6]=8;		// wLengthL
+				Get_Descriptor_Device[7]=0;		// wLengthH
+
+				break;
+			
+				wreg(rHIRQ, bmCONDETIRQ);	// clear disconnect status
 			case 2: // Device active
 				// ...
 			
@@ -96,7 +109,6 @@ void loop(void) {
 			case 3: // Device disconnected, clean up
 				wreg(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST);	// turn off bmSOFKAENAB, go to FS
 				connectedStatus = 0;
-				LEDOff(PLED);
 				break;
 		}
 	}
