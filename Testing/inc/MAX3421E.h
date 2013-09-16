@@ -3,14 +3,16 @@
 
 
 
+extern void DebugPin(unsigned char value);
+
 extern unsigned char connectedStatus;
 extern unsigned char waitFrames;
 
 extern unsigned char maxPacketSize;
-extern unsigned char deviceDescriptor[8];
-extern unsigned char configDescriptor[8];
 
 extern unsigned int last_transfer_size;
+
+extern unsigned char MAXUSBData[2000];
 
 void MAXUSBInit(void);
 void MAXUSBWriteRegister(unsigned char reg, unsigned char val);
@@ -19,6 +21,7 @@ unsigned char MAXUSBReadRegister(unsigned char reg);
 
 unsigned char MAXUSBSendPacket(unsigned char token, unsigned char endpoint);
 unsigned char MAXUSBReadCTL(unsigned char * pSUD);
+unsigned char MAXUSBWriteCTL(unsigned char * pSUD);
 unsigned char MAXUSBINTransfer(unsigned char endpoint, unsigned int length);
 
 void MAXUSBProcess(void);
