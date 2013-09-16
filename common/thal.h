@@ -559,11 +559,19 @@ extern WEAK void Port3Pin3Interrupt(void);
     void SSP0SetSpeed(unsigned short speed);
     
     // *** Read and write functions
-    void SSP0WriteByte(unsigned short data);
-    unsigned short SSP0ReadByte(void);
-    void SSP0Write(unsigned short * data, unsigned int i);
-    unsigned short SSP0Byte(unsigned short data);
-    void SSP0NextByte(unsigned short data);
+	#if SSP0_SIZE > 8
+		void SSP0WriteByte(unsigned short data);
+		unsigned short SSP0ReadByte(void);
+		void SSP0Write(unsigned short * data, unsigned int i);
+		unsigned short SSP0Byte(unsigned short data);
+		void SSP0NextByte(unsigned short data);
+	#else
+		void SSP0WriteByte(unsigned char data);
+		unsigned char SSP0ReadByte(void);
+		void SSP0Write(unsigned char * data, unsigned int i);
+		unsigned char SSP0Byte(unsigned char data);
+		void SSP0NextByte(unsigned char data);
+	#endif
     
     // *** SSP SSEL functions
     static inline void SSP0Wait(void) { while (LPC_SSP0->SR & 0x10); }
@@ -586,11 +594,19 @@ extern WEAK void Port3Pin3Interrupt(void);
     void SSP1SetSpeed(unsigned short speed);
     
     // *** Read and write functions
-    void SSP1WriteByte(unsigned short data);
-    unsigned short SSP1ReadByte(void);
-    void SSP1Write(unsigned short * data, unsigned int i);
-    unsigned short SSP1Byte(unsigned short data);
-    void SSP1NextByte(unsigned short data);
+	#if SSP1_SIZE > 8
+		void SSP1WriteByte(unsigned short data);
+		unsigned short SSP1ReadByte(void);
+		void SSP1Write(unsigned short * data, unsigned int i);
+		unsigned short SSP1Byte(unsigned short data);
+		void SSP1NextByte(unsigned short data);
+	#else
+		void SSP1WriteByte(unsigned char data);
+		unsigned char SSP1ReadByte(void);
+		void SSP1Write(unsigned char * data, unsigned int i);
+		unsigned char SSP1Byte(unsigned char data);
+		void SSP1NextByte(unsigned char data);
+	#endif
     
     // *** SSP SSEL functions
     static inline void SSP1Wait(void) { while (LPC_SSP1->SR & 0x10); }
