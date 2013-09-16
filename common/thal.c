@@ -1796,39 +1796,75 @@ void PIOINT3_IRQHandler(void) {
         LPC_SSP0->CPSR = scale & 0xfe;
     }
     
-    void SSP0WriteByte(unsigned short data) {
-        unsigned short dummy=dummy;
-        while ((LPC_SSP0->SR & 0x02) == 0);
-        LPC_SSP0->DR = data;
-        while ((LPC_SSP0->SR & 0x14) != 0x04);
-        dummy = LPC_SSP0->DR;
-    }
-    
-    void SSP0Write(unsigned short * data, unsigned int length) {
-        unsigned int i;
-        for(i=0; i<length; i++) {
-            SSP0WriteByte(data[i]);
-        }
-    }
-    
-    unsigned short SSP0ReadByte(void) {
-        while ((LPC_SSP0->SR & 0x02) == 0);
-        LPC_SSP0->DR = 0xffff;
-        while ((LPC_SSP0->SR & 0x14) != 0x04);
-        return (LPC_SSP0->DR);
-    }
-    
-    unsigned short SSP0Byte(unsigned short data) {
-        while((LPC_SSP0->SR & 0x02) == 0);
-        LPC_SSP0->DR = data;
-        while ((LPC_SSP0->SR & 0x14) != 0x04);
-        return (LPC_SSP0->DR);
-    }
-    
-    void SSP0NextByte(unsigned short data) {
-        while((LPC_SSP0->SR & 0x02) == 0);
-        LPC_SSP0->DR = data;
-    }
+	#if SSP0_SIZE > 8
+		void SSP0WriteByte(unsigned short data) {
+			unsigned short dummy=dummy;
+			while ((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = data;
+			while ((LPC_SSP0->SR & 0x14) != 0x04);
+			dummy = LPC_SSP0->DR;
+		}
+		
+		void SSP0Write(unsigned short * data, unsigned int length) {
+			unsigned int i;
+			for(i=0; i<length; i++) {
+				SSP0WriteByte(data[i]);
+			}
+		}
+		
+		unsigned short SSP0ReadByte(void) {
+			while ((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = 0xffff;
+			while ((LPC_SSP0->SR & 0x14) != 0x04);
+			return (LPC_SSP0->DR);
+		}
+		
+		unsigned short SSP0Byte(unsigned short data) {
+			while((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = data;
+			while ((LPC_SSP0->SR & 0x14) != 0x04);
+			return (LPC_SSP0->DR);
+		}
+		
+		void SSP0NextByte(unsigned short data) {
+			while((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = data;
+		}
+	#else
+		void SSP0WriteByte(unsigned char data) {
+			unsigned char dummy=dummy;
+			while ((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = data;
+			while ((LPC_SSP0->SR & 0x14) != 0x04);
+			dummy = LPC_SSP0->DR;
+		}
+		
+		void SSP0Write(unsigned char * data, unsigned int length) {
+			unsigned int i;
+			for(i=0; i<length; i++) {
+				SSP0WriteByte(data[i]);
+			}
+		}
+		
+		unsigned char SSP0ReadByte(void) {
+			while ((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = 0xffff;
+			while ((LPC_SSP0->SR & 0x14) != 0x04);
+			return (LPC_SSP0->DR);
+		}
+		
+		unsigned char SSP0Byte(unsigned char data) {
+			while((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = data;
+			while ((LPC_SSP0->SR & 0x14) != 0x04);
+			return (LPC_SSP0->DR);
+		}
+		
+		void SSP0NextByte(unsigned char data) {
+			while((LPC_SSP0->SR & 0x02) == 0);
+			LPC_SSP0->DR = data;
+		}
+	#endif
     
     void SSP0_IRQHandler(void) {
         while(LPC_SSP0->SR & 0x4) {// Receive FIFO Not Empty
@@ -1919,40 +1955,77 @@ void PIOINT3_IRQHandler(void) {
         LPC_SSP1->CPSR = scale & 0xfe;
     }
     
-    void SSP1WriteByte(unsigned short data) {
-        unsigned short dummy=dummy;
-        while ((LPC_SSP1->SR & 0x02) == 0);
-        LPC_SSP1->DR = data;
-        //while ((LPC_SSP1->SR & 0x14) != 0x04);
-        while ((LPC_SSP1->SR & 0x10));
-        dummy = LPC_SSP1->DR;
-    }
-    
-    void SSP1Write(unsigned short * data, unsigned int length) {
-        unsigned int i;
-        for(i=0; i<length; i++) {
-            SSP1WriteByte(data[i]);
-        }
-    }
-    
-    unsigned short SSP1ReadByte(void) {
-        while ((LPC_SSP1->SR & 0x02) == 0);
-        LPC_SSP1->DR = 0xffff;
-        while ((LPC_SSP1->SR & 0x14) != 0x04);
-        return (LPC_SSP1->DR);
-    }
-    
-    unsigned short SSP1Byte(unsigned short data) {
-        while ((LPC_SSP1->SR & 0x02) == 0);
-        LPC_SSP1->DR = data;
-        while ((LPC_SSP1->SR & 0x14) != 0x04);
-        return (LPC_SSP1->DR);
-    }
+	#if SSP1_SIZE > 8
+		void SSP1WriteByte(unsigned short data) {
+			unsigned short dummy=dummy;
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = data;
+			//while ((LPC_SSP1->SR & 0x14) != 0x04);
+			while ((LPC_SSP1->SR & 0x10));
+			dummy = LPC_SSP1->DR;
+		}
+		
+		void SSP1Write(unsigned short * data, unsigned int length) {
+			unsigned int i;
+			for(i=0; i<length; i++) {
+				SSP1WriteByte(data[i]);
+			}
+		}
+		
+		unsigned short SSP1ReadByte(void) {
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = 0xffff;
+			while ((LPC_SSP1->SR & 0x14) != 0x04);
+			return (LPC_SSP1->DR);
+		}
+		
+		unsigned short SSP1Byte(unsigned short data) {
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = data;
+			while ((LPC_SSP1->SR & 0x14) != 0x04);
+			return (LPC_SSP1->DR);
+		}
 
-    void SSP1NextByte(unsigned short data) {
-        while ((LPC_SSP1->SR & 0x02) == 0);
-        LPC_SSP1->DR = data;
-    }
+		void SSP1NextByte(unsigned short data) {
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = data;
+		}
+	#else
+		void SSP1WriteByte(unsigned char data) {
+			unsigned char dummy=dummy;
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = data;
+			//while ((LPC_SSP1->SR & 0x14) != 0x04);
+			while ((LPC_SSP1->SR & 0x10));
+			dummy = LPC_SSP1->DR;
+		}
+		
+		void SSP1Write(unsigned char * data, unsigned int length) {
+			unsigned int i;
+			for(i=0; i<length; i++) {
+				SSP1WriteByte(data[i]);
+			}
+		}
+		
+		unsigned char SSP1ReadByte(void) {
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = 0xffff;
+			while ((LPC_SSP1->SR & 0x14) != 0x04);
+			return (LPC_SSP1->DR);
+		}
+		
+		unsigned char SSP1Byte(unsigned char data) {
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = data;
+			while ((LPC_SSP1->SR & 0x14) != 0x04);
+			return (LPC_SSP1->DR);
+		}
+
+		void SSP1NextByte(unsigned char data) {
+			while ((LPC_SSP1->SR & 0x02) == 0);
+			LPC_SSP1->DR = data;
+		}
+	#endif
     
     void SSP1_IRQHandler(void) {
         while(LPC_SSP1->SR & 0x4) {// Receive FIFO Not Empty
