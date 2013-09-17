@@ -12,6 +12,7 @@ unsigned char configDescriptor[8] = {0x80,0x06,0x00,0x02,0x00,0x00,0x00,0x00};
 unsigned char maxPacketSize; /*!< Maximum packet size, as per descriptor */
 
 unsigned int last_transfer_size = 0;
+unsigned short maxNak = 300;
 
 unsigned char MAXUSBData[2000]; /*!< Data buffer \todo move to USBRAM */
 unsigned short MAXUSB_VID;
@@ -89,10 +90,10 @@ unsigned char MAXUSBSendPacket(unsigned char token, unsigned char endpoint) {
 		MAXUSBWriteRegister(rHIRQ,bmHXFRDNIRQ);              	// R25: HIRQ, clear interrupt flag
 		retval = MAXUSBReadRegister(rHRSL) & 0x0F;    					// R31: HRSL, get result
 		if(retval == hrNAK) {
-			if(++nak_count==300) break;		// maximum 200 NAKs
+			if(++nak_count>=maxNak) break;		// maximum 200 NAKs
 		}
 		else if(retval == hrTIMEOUT) {
-			if (++retry_count==3) break;	// maximum 3 retries
+			if (++retry_count>=3) break;	// maximum 3 retries
 		}
 		else break;
 	}
@@ -155,13 +156,14 @@ unsigned char MAXUSBINTransfer(unsigned char endpoint, unsigned int length) {
 }
 
 void MAXUSBProcess(void) {
-	static unsigned char SetAddressto7[8] = {0x00,0x05,0x07,0x00,0x00,0x00,0x00,0x00};
+	static unsigned char setAddressto7[8]    = {0x00,0x05,0x07,0x00,0x00,0x00,0x00,0x00};
+    static unsigned char setConfigto1[8]     = {0x00,0x09,0x01,0x00,0x00,0x00,0x00,0x00}; 
 	static unsigned char deviceDescriptor[8] = {0x80,0x06,0x00,0x01,0x00,0x00,0x00,0x00}; // code fills in length field
 	static unsigned char configDescriptor[8] = {0x80,0x06,0x00,0x02,0x00,0x00,0x00,0x00};
 	static unsigned char descriptorString[8] = {0x80,0x06,0x00,0x03,0x00,0x00,0x40,0x00};
 	unsigned int i, j;
-	static unsigned char pollCounter;
-	
+	static unsigned char pollCounter, dcCheckCounter;
+    
 	if(waitFrames > 0) {
 		if(MAXUSBReadRegister(rHIRQ) & bmFRAMEIRQ) { // R25: HRQ, check for the FRAMEIRQ, decrement the waitFrame counter if it is set
 			MAXUSBWriteRegister(rHIRQ, bmFRAMEIRQ); // clear the IRQ
@@ -172,19 +174,25 @@ void MAXUSBProcess(void) {
 		switch(connectedStatus) {
 			default:
 			case 0:	// Nothing connected, poll for things plugged in
-				MAXUSBWriteRegister(rHCTL, bmSAMPLEBUS); // R29: HCTL, sample state of bus
-				unsigned char hrsl = MAXUSBReadRegister(rHRSL); // R31: HRSL
-				if(hrsl & (bmJSTATUS | bmKSTATUS)) {	// something connected
-					if(hrsl & bmJSTATUS) {	// check JSTATUS, JStatus means D+ high, therefore FS device
-						MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST | bmSOFKAENAB);	// R27: MODE, enable DP and DM pulldowns, host mode, and auto generation of SOF packets/keep alive
-					}
-					else if(hrsl & bmKSTATUS) { // KSTATUS, in FS, KStatus means D- high, therefore LS device
-						MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST | bmLOWSPEED | bmSOFKAENAB);	// R27: MODE, enable DP and DM pulldowns, host mode, low-speed, and auto generation of SOF packets/keep alive
-					}
-					
-					waitFrames = 200;			// set to wait for 200 frames
-					connectedStatus = 1;
-				}
+                maxNak = 300;
+                
+                if(++dcCheckCounter >= 100) {
+                    dcCheckCounter = 0;
+                
+                    MAXUSBWriteRegister(rHCTL, bmSAMPLEBUS); // R29: HCTL, sample state of bus
+                    unsigned char hrsl = MAXUSBReadRegister(rHRSL); // R31: HRSL
+                    if(hrsl & (bmJSTATUS | bmKSTATUS)) {	// something connected
+                        if(hrsl & bmJSTATUS) {	// check JSTATUS, JStatus means D+ high, therefore FS device
+                            MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST | bmSOFKAENAB);	// R27: MODE, enable DP and DM pulldowns, host mode, and auto generation of SOF packets/keep alive
+                        }
+                        else if(hrsl & bmKSTATUS) { // KSTATUS, in FS, KStatus means D- high, therefore LS device
+                            MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST | bmLOWSPEED | bmSOFKAENAB);	// R27: MODE, enable DP and DM pulldowns, host mode, low-speed, and auto generation of SOF packets/keep alive
+                        }
+                        
+                        waitFrames = 200;			// set to wait for 200 frames
+                        connectedStatus = 1;
+                    }
+                }
 				break;
 			case 1:	// Device connecting, perform initial reset
 				MAXUSBWriteRegister(rHCTL, bmBUSRST);			// R29: perform bus reset
@@ -218,7 +226,7 @@ void MAXUSBProcess(void) {
 				}
 				break;
 			case 5: // Set address to 7
-				if(MAXUSBWriteCTL(SetAddressto7)) connectedStatus = 8; // if error, wait for disconnect
+				if(MAXUSBWriteCTL(setAddressto7)) connectedStatus = 8; // if error, wait for disconnect
 				else {
 					waitFrames = 30;
 					connectedStatus = 6;
@@ -352,7 +360,7 @@ void MAXUSBProcess(void) {
 										if(MAXUSBData[i+5] == 0x03 && MAXUSBData[i+6] == 0x01 && MAXUSBData[i+7] == 0x02) { // HID device && HID boot protocol && ID mouse
 											processFunction = device_genericMouse;
 											connectedStatus = 7;
-											inEndpoint[0] = 0x81;	// safe values to use in case endpoints not detected
+											inEndpoint[0] = 0x01;	// safe values to use in case endpoints not detected
 											inEndpointSize[0] = 0x3;
 										}
 										break;
@@ -362,18 +370,18 @@ void MAXUSBProcess(void) {
 										// 4 wMaxPacketSize
 										// 5 wMaxPacketSize
 										// 6 bInterval
-										/*if((MAXUSBData[i+3] & 0x03) == 0x03) { // Interrupt type endpoint
+										if((MAXUSBData[i+3] & 0x03) == 0x03) { // Interrupt type endpoint
 											if((MAXUSBData[i+2] & 0x80) == 0x80) { // input
-												inEndpoint[inCount] = MAXUSBData[i+2] & 0x7F;
+												inEndpoint[inCount] = MAXUSBData[i+2] & 0xF;
 												inEndpointSize[inCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
 												inCount++;
 											}
 											else {	// output
-												outEndpoint[outCount] = MAXUSBData[i+2] & 0x7F;
+												outEndpoint[outCount] = MAXUSBData[i+2] & 0xF;
 												outEndpointSize[outCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
 												outCount++;
 											}
-										}*/
+										}
 									case 0x21: // HID Class Descriptor
 										// 2 bcdHID
 										// 3 bcdHID
@@ -397,16 +405,21 @@ void MAXUSBProcess(void) {
 								}
 							}*/
 						
-							MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
-							pollCounter = 0;
 						}
 					}
+                    
+                    if(processFunction) {
+                        MAXUSBWriteCTL(setConfigto1); // set config to 1
+                        MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
+                        maxNak = 0;
+                    }
+                    
 				}
 				break;
 			case 7: // Connected, device active
 				if(processFunction) { // supported device
 					// poll device
-					if(++pollCounter >= 10) {
+					if(++pollCounter >= 11) {
 						pollCounter = 0;
 						(*processFunction)();
 						LEDToggle(PLED);
@@ -419,12 +432,16 @@ void MAXUSBProcess(void) {
 				
 				// fallthrough! to check for disconnect
 			case 8: // Check/Wait for disconnect
-				if(MAXUSBReadRegister(rHIRQ) & bmCONDETIRQ) {
-					connectedStatus = 9;
-				}
+                if(++dcCheckCounter >= 100) {
+                    dcCheckCounter = 0;
+                    if(MAXUSBReadRegister(rHIRQ) & bmCONDETIRQ) {
+                        connectedStatus = 9;
+                    }
+                }
 				break;
 			case 9: // Device disconnected, clean up
 				LEDOff(PLED);
+                maxNak = 300;
 				MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST);	// turn off bmSOFKAENAB, go to FS
 				MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
 				connectedStatus = 0;
