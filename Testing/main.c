@@ -1,7 +1,7 @@
 #include "thal.h"
 #include "MAX3421E.h"
 
-void DebugPin(unsigned char value) {	Port0Write(PIN15, value); }
+//void DebugPin(unsigned char value) {	Port0Write(PIN15, value); }
 void ResetPin(unsigned char value) {	Port0Write(PIN13, value); }
 
 unsigned char INTPin(void) { return Port0Read(PIN14); }
@@ -19,7 +19,7 @@ void setup(void) {
 	Port0SetOut(PIN13 | PIN15);
 	
 	ResetPin(1);
-	
+	DebugPin(1);
 	
 	SSP0Init(1000); // debug
 	

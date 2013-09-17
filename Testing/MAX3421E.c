@@ -2,16 +2,46 @@
 #include "MAX3421E.h"
 #include "MAX3421EReg.h"
 
+void DebugPin(unsigned char value) {	Port0Write(PIN15, value); }
+
 unsigned char connectedStatus=0; /*!< Connection state machine */
 unsigned char waitFrames = 0; /*!< Number of frames to delay */
 
-unsigned char maxPacketSize; /*!< Maximum packet size, as per descriptor */
 unsigned char deviceDescriptor[8] = {0x80,0x06,0x00,0x01,0x00,0x00,0x00,0x00};
 unsigned char configDescriptor[8] = {0x80,0x06,0x00,0x02,0x00,0x00,0x00,0x00};
+unsigned char maxPacketSize; /*!< Maximum packet size, as per descriptor */
 
 unsigned int last_transfer_size = 0;
 
-unsigned char MAXUSBData[2000];
+unsigned char MAXUSBData[2000]; /*!< Data buffer \todo move to USBRAM */
+unsigned short MAXUSB_VID;
+unsigned short MAXUSB_PID;
+unsigned char MAXUSB_MFG;
+unsigned char MAXUSB_PRO;
+unsigned char MAXUSB_SER;
+unsigned char MAXUSB_CFG;
+unsigned char MAXUSB_MFGStr[128];
+unsigned char MAXUSB_PROStr[128];
+unsigned char MAXUSB_SERStr[128];
+
+unsigned char inCount, outCount;
+unsigned char inEndpoint[4], outEndpoint[4];
+unsigned short inEndpointSize[4], outEndpointSize[4];
+
+void device_genericMouse(void) { // Generic mouse with the HID Boot protocol - no HID descriptors to mess with, X-Y axis and scroll only, no buttons
+	if(MAXUSBINTransfer(inEndpoint[0], inEndpointSize[0]) == 0) {
+		DebugPin(0);
+		unsigned int i;
+		for(i=0; i<last_transfer_size; i++) {
+			SSP1WriteByte(MAXUSBData[i]);
+		}
+		SSP1Wait();
+		DebugPin(1);
+	
+	}
+}
+
+void (*processFunction)(void);
 
 void MAXUSBInit(void) {
 	SSP1Init(1000);
@@ -73,17 +103,32 @@ unsigned char MAXUSBReadCTL(unsigned char * pSUD) {
 	unsigned char retval;
 
 	// SETUP packet
-	MAXUSBWriteBytes(rSUDFIFO, pSUD, 8);   // send SETUP packet to FIFO
-	retval=MAXUSBSendPacket(tokSETUP,0);   	// send FIFO to EP0
-	if(retval) return retval;	// return if error
+	MAXUSBWriteBytes(rSUDFIFO, pSUD, 8);   	// send SETUP packet to FIFO
+	retval = MAXUSBSendPacket(tokSETUP,0);	// send FIFO to EP0
+	if(retval) return retval;				// return if error
 	
 	// One or more IN packets (may be a multi-packet transfer)
 	MAXUSBWriteRegister(rHCTL, bmRCVTOG1);	// R29: HCTL, set receive toggle 1
 	retval = MAXUSBINTransfer(0, (pSUD[6] | (pSUD[7] << 8)));
-	if(retval) return retval;	// return if error
+	if(retval) return retval;				// return if error
 
-	retval = MAXUSBSendPacket(tokOUTHS,0);	// OUT status stage
-	if (retval) return retval; // return if error
+	retval = MAXUSBSendPacket(tokOUTHS, 0);	// OUT status stage
+	if (retval) return retval; 				// return if error
+	
+	return 0;
+}
+
+unsigned char MAXUSBWriteCTL(unsigned char *pSUD) {
+	unsigned char retval;
+	
+	// SETUP packet
+	MAXUSBWriteBytes(rSUDFIFO, pSUD, 8);   	// send SETUP packet to FIFO
+	retval = MAXUSBSendPacket(tokSETUP,0);  // send FIFO to EP0
+	if(retval) return retval;				// return if error
+
+	retval = MAXUSBSendPacket(tokINHS, 0);  // This function takes care of NAK retries.
+	if(retval) return retval;  				// return if error
+  
 	return 0;
 }
 
@@ -97,7 +142,7 @@ unsigned char MAXUSBINTransfer(unsigned char endpoint, unsigned int length) {
 		if(retval) return retval;  							// return if error
 		
 		packetSize = MAXUSBReadRegister(rRCVBC);            // R6: receive byte count
-		for(i=0; i<packetSize; i++) {                      	// add this packet's data to XfrData array
+		for(i=0; i<packetSize; i++) {                      	// add this packet's data to MAXUSBData array
 			MAXUSBData[i+count] = MAXUSBReadRegister(rRCVFIFO);	// R1: Read FIFO
 		}
 		
@@ -110,6 +155,13 @@ unsigned char MAXUSBINTransfer(unsigned char endpoint, unsigned int length) {
 }
 
 void MAXUSBProcess(void) {
+	static unsigned char SetAddressto7[8] = {0x00,0x05,0x07,0x00,0x00,0x00,0x00,0x00};
+	static unsigned char deviceDescriptor[8] = {0x80,0x06,0x00,0x01,0x00,0x00,0x00,0x00}; // code fills in length field
+	static unsigned char configDescriptor[8] = {0x80,0x06,0x00,0x02,0x00,0x00,0x00,0x00};
+	static unsigned char descriptorString[8] = {0x80,0x06,0x00,0x03,0x00,0x00,0x40,0x00};
+	unsigned int i, j;
+	static unsigned char pollCounter;
+	
 	if(waitFrames > 0) {
 		if(MAXUSBReadRegister(rHIRQ) & bmFRAMEIRQ) { // R25: HRQ, check for the FRAMEIRQ, decrement the waitFrame counter if it is set
 			MAXUSBWriteRegister(rHIRQ, bmFRAMEIRQ); // clear the IRQ
@@ -151,25 +203,230 @@ void MAXUSBProcess(void) {
 				break;
 			case 3: // Get device descriptor
 				MAXUSBWriteRegister(rPERADDR, 0x00); // first packet to address 0
-				MAXUSBReadCTL(deviceDescriptor);
-				connectedStatus = 10;
-				break;
-			
-			
-			case 10:
-				MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
-				connectedStatus = 11;
-				break;
-			case 11: // Device active
-				// ...
-			
-				// check for disconnect
-				if(MAXUSBReadRegister(rHIRQ) & bmCONDETIRQ) {
-					connectedStatus = 12;
+				if(MAXUSBReadCTL(deviceDescriptor)) connectedStatus = 8; // if error, go to wait for disconnect
+				else {
+					maxPacketSize = MAXUSBData[7];
+					MAXUSBWriteRegister(rHCTL, bmBUSRST);			// R29: perform anothrbus reset
+					connectedStatus = 4;
 				}
 				break;
-			case 12: // Device disconnected, clean up
+			case 4: // Wait for bus to reset another time
+				/*! \todo: bus reset timeout */
+				if((MAXUSBReadRegister(rHCTL) & bmBUSRST) == 0) {  // wait for bus reset
+					waitFrames = 200;			// set to wait for 200 frames after bus reset
+					connectedStatus = 5;
+				}
+				break;
+			case 5: // Set address to 7
+				if(MAXUSBWriteCTL(SetAddressto7)) connectedStatus = 8; // if error, wait for disconnect
+				else {
+					waitFrames = 30;
+					connectedStatus = 6;
+				}
+				break;
+			case 6: // Read device descriptors
+				MAXUSBWriteRegister(rPERADDR, 7); // all transfers to addres 7
+				deviceDescriptor[6] = 0x12; // device descriptor length
+				if(MAXUSBReadCTL(deviceDescriptor)) connectedStatus = 8; // if error, wait for disconnect
+				else {
+					// IDs
+					MAXUSB_VID = MAXUSBData[8] | (MAXUSBData[9] << 8);
+					MAXUSB_PID = MAXUSBData[10] | (MAXUSBData[11] << 8);
+					MAXUSB_MFG = MAXUSBData[14];
+					MAXUSB_PRO = MAXUSBData[15];
+					MAXUSB_SER = MAXUSBData[16];
+					MAXUSB_CFG = MAXUSBData[17];
+					
+					// Detect supported devices
+					processFunction = 0;
+					/*switch(MAXUSB_VID) {
+						case VID_MICROSOFT:
+							if(MAXUSB_PID == PID_XBOX360) {
+								processFunction = device_xbox360;
+								connetedStatus = 7;
+							}
+					
+					}*/
+					
+					// Lang
+					descriptorString[2]=0;	// index 0 is language ID string
+					descriptorString[4]=0;	// lang ID is 0
+					descriptorString[5]=0;
+					descriptorString[6]=4;	// wLengthL
+					descriptorString[7]=0;	// wLengthH
+					if(MAXUSBReadCTL(descriptorString) == 0) { // update language if success
+						descriptorString[4] = MAXUSBData[2];
+						descriptorString[5] = MAXUSBData[3];
+						descriptorString[6] = 255;
+					}
+					
+					// Manufacturer string
+					if(MAXUSB_MFG > 0) { //
+						descriptorString[2] = MAXUSB_MFG;
+						MAXUSBReadCTL(descriptorString);
+						j=0;
+						for(i=2; i<last_transfer_size; i+=2) {
+							MAXUSB_MFGStr[j++] = MAXUSBData[i];
+						}
+					}
+					else MAXUSB_MFGStr[0] = 0;
+					
+					// Product string
+					if(MAXUSB_PRO > 0) {
+						descriptorString[2] = MAXUSB_PRO;
+						MAXUSBReadCTL(descriptorString);
+						j=0;
+						for(i=2; i<last_transfer_size; i+=2) {
+							MAXUSB_PROStr[j++] = MAXUSBData[i];
+						}
+					}
+					else MAXUSB_PROStr[0] = 0;
+					
+					// Serial
+					/*if(MAXUSB_SER > 0) {
+						descriptorString[2] = MAXUSB_SER;
+						MAXUSBReadCTL(descriptorString);
+						j=0;
+						for(i=2; i<last_transfer_size; i+=2) {
+							MAXUSB_SERStr[j++] = MAXUSBData[i];
+						}
+					}
+					else MAXUSB_SERStr[0] = 0;*/
+					
+					
+					// If no supported devices found, try to find generic
+					if(processFunction == 0) {
+						// 9-byte Config descriptor
+						configDescriptor[6] = 9;
+						configDescriptor[7] = 0;
+						if(MAXUSBReadCTL(configDescriptor)) connectedStatus = 8; // if error, wait for disconnect
+						else {
+							
+							// Full config descriptor
+							// 0 bLength
+							// 1 bDescriptorType
+							// 2 wTotalLength
+							// 3 wTotalLength
+							// 4 bNumInterfaces
+							// 5 bConfigurationValue
+							// 6 iConfiguration
+							// 7 bmAttributes
+							// 8 bMaxPower
+							
+							configDescriptor[6] = MAXUSBData[2];
+							configDescriptor[7] = MAXUSBData[3];
+							MAXUSBReadCTL(configDescriptor);
+							
+							// config MAXUSBData[5]
+							// interfaces MAXUSBData[4]
+							// if MAXUSBData[7] & 0x40 - self-powered
+							// else MAXUSBData[8]*2 milliamps
+							
+							// Parse config
+							unsigned int TotalLen;
+							unsigned char len, type;
+							//unsigned char icfg = MAXUSBData[6]; // optional configuration string
+							
+							// Get Interface descriptors
+							TotalLen=last_transfer_size;
+							i=0;
+							inCount = 0;
+							outCount = 0;
+							
+							do {
+								// All descriptors start with
+								// 0 bLength
+								// 1 bDescriptorType
+								len = MAXUSBData[i];		// length of first descriptor (the CONFIG descriptor)
+								type = MAXUSBData[i+1];
+								
+								switch(type) {
+									case 0x04: // Interface descriptor
+										// 2 bInterfaceNumber
+										// 3 bAlternateSetting
+										// 4 bNumEndpoints
+										// 5 bInterfaceClass
+										// 6 bInterfaceSubClass
+										// 7 bInterfaceProtocol
+										// 8 iInterface
+										if(MAXUSBData[i+5] == 0x03 && MAXUSBData[i+6] == 0x01 && MAXUSBData[i+7] == 0x02) { // HID device && HID boot protocol && ID mouse
+											processFunction = device_genericMouse;
+											connectedStatus = 7;
+											inEndpoint[0] = 0x81;	// safe values to use in case endpoints not detected
+											inEndpointSize[0] = 0x3;
+										}
+										break;
+									case 0x05: // Endpoint descriptor
+										// 2 bEndpointAddress
+										// 3 bmAttributes
+										// 4 wMaxPacketSize
+										// 5 wMaxPacketSize
+										// 6 bInterval
+										/*if((MAXUSBData[i+3] & 0x03) == 0x03) { // Interrupt type endpoint
+											if((MAXUSBData[i+2] & 0x80) == 0x80) { // input
+												inEndpoint[inCount] = MAXUSBData[i+2] & 0x7F;
+												inEndpointSize[inCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
+												inCount++;
+											}
+											else {	// output
+												outEndpoint[outCount] = MAXUSBData[i+2] & 0x7F;
+												outEndpointSize[outCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
+												outCount++;
+											}
+										}*/
+									case 0x21: // HID Class Descriptor
+										// 2 bcdHID
+										// 3 bcdHID
+										// 4 bCountryCode
+										// 5 bNumDescriptors
+										// 6 bDescriptorType
+										// 7 wDescriptorLength
+										// 8 wDescriptorLength
+										break;
+								}
+								i += len; // next descriptor
+							} while (i<TotalLen);
+							
+							// parse alternative config
+							/*if(icfg) { // alternative configuration
+								descriptorString[2] = icfg;
+								MAXUSBReadCTL(descriptorString);
+								j=0;
+								for (i=2; i<last_transfer_size;i+=2) {
+									// somebuffer[j++} = MAXUSBData[i];
+								}
+							}*/
+						
+							MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
+							pollCounter = 0;
+						}
+					}
+				}
+				break;
+			case 7: // Connected, device active
+				if(processFunction) { // supported device
+					// poll device
+					if(++pollCounter >= 10) {
+						pollCounter = 0;
+						(*processFunction)();
+						LEDToggle(PLED);
+					}
+				}
+				else {
+					// unsupported device, go to disconnect
+					connectedStatus = 8;
+				}
+				
+				// fallthrough! to check for disconnect
+			case 8: // Check/Wait for disconnect
+				if(MAXUSBReadRegister(rHIRQ) & bmCONDETIRQ) {
+					connectedStatus = 9;
+				}
+				break;
+			case 9: // Device disconnected, clean up
+				LEDOff(PLED);
 				MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST);	// turn off bmSOFKAENAB, go to FS
+				MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
 				connectedStatus = 0;
 				break;
 		}
