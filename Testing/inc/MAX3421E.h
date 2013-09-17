@@ -13,6 +13,15 @@ extern unsigned char maxPacketSize;
 extern unsigned int last_transfer_size;
 
 extern unsigned char MAXUSBData[2000];
+extern unsigned short MAXUSB_VID;
+extern unsigned short MAXUSB_PID;
+extern unsigned char MAXUSB_MFG;
+extern unsigned char MAXUSB_PRO;
+extern unsigned char MAXUSB_SER;
+extern unsigned char MAXUSB_CFG;
+extern unsigned char MAXUSB_MFGStr[128];
+extern unsigned char MAXUSB_PROStr[128];
+extern unsigned char MAXUSB_SERStr[128];
 
 void MAXUSBInit(void);
 void MAXUSBWriteRegister(unsigned char reg, unsigned char val);
