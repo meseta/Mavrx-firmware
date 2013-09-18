@@ -82,6 +82,7 @@ extern struct paramStorage_struct paramStorage[];
 #define Filt_baroK		paramStorage[67].value
 #define YAW_SPL			paramStorage[68].value
 #define ORI				paramStorage[69].value
+#define FLPMOT			paramStorage[70].value
 
 extern unsigned int paramCount;
 extern unsigned int paramSendCount;
@@ -91,7 +92,7 @@ extern unsigned char paramSendSingle;
 // EEPROM STUFF
 #define EEPROM_MAX_PARAMS   100 // this should be greater than or equal to the above number of parameters
 #define EEPROM_OFFSET   0 // EEPROM Offset used for moving the EEPROM values around storage (wear levelling I guess)
-#define EEPROM_VERSION	9 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
+#define EEPROM_VERSION	12 // version of variables in EEPROM, change this value to invalidate EEPROM contents and restore defaults
 
 void eeprom_load_all(void);
 void eeprom_save_all(void);

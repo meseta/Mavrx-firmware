@@ -173,7 +173,7 @@ void read_rx_input(void) {
 			// RC signal lost
 			/*! \todo Perform RC signal loss state setting and stuff like autoland */
 			if(armed) {
-				PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
+				PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, MIDDLE, MIDDLE);
 				ilink_outputs0.channel[0] = THROTTLEOFFSET;
 				ilink_outputs0.channel[1] = THROTTLEOFFSET;
 				ilink_outputs0.channel[2] = THROTTLEOFFSET;
@@ -321,10 +321,10 @@ void convert_ori(volatile signed short * X, volatile signed short * Y, volatile 
             *Y = -data[2];
             *Z = data[1];
 			break;
-        case 4: // R10+ or Navy uside down
-            *X = data[0];
+        case 2: // vtol
+            *X = -data[1];
             *Y = data[2];
-            *Z = -data[1];
+            *Z = -data[0];
             break;
         case 5: // R10
             *X = data[0];

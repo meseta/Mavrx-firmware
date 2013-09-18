@@ -321,8 +321,8 @@ void control_motors(void){
 	oldGyroValueRoll = (float)Gyro.X.value;
    
 	//Assigning the PID results to the correct motors
-	static float motorN=0, motorE=0, motorS=0, motorW=0;
-	static float motorNav=0, motorEav=0, motorSav=0, motorWav=0;
+	static float motorN=0, motorE=0, motorS=0, motorW=0, flapX=0, flapY=0, flapS=0, flapW=0;
+	static float motorNav=0, motorEav=0, flapSav=0, flapWav=0, motorSav=0, motorWav=0, flapXav=0, flapYav=0;
 	
 	/*! \todo fill these in properly */
     switch((unsigned char)ORI) {
@@ -338,12 +338,27 @@ void control_motors(void){
             motorS -= yawcorrection;
             motorW += yawcorrection;
             break;
-		case 4: // NAVY EDITION
-            motorN = -yawcorrection;
-            motorE = -(pitchcorrection + rollcorrection);
-            motorS = pitchcorrection - rollcorrection;
-			// 
-            motorW = -1.6*pitchcorrection;
+		case 2: // Vtol
+            motorN = -rollcorrection;
+            motorE = rollcorrection;
+			flapS = FLPMOT*(-yawcorrection - pitchcorrection);
+            flapW = FLPMOT*(-yawcorrection + pitchcorrection);						
+            flapX = -yawcorrection - pitchcorrection;
+            flapY = -yawcorrection + pitchcorrection;
+			
+			// if (thetaAngle < -0.5) {
+				// decrease = (1.0 + thetaAngle)
+				// if (decrease < 0) decrease = 0;
+			
+				// flapX = (-yawcorrection - pitchcorrection);
+				// flapY = (-yawcorrection + pitchcorrection);
+			// }
+			// if (thetaAngle > 0.5)	{
+				// flapX = -yawcorrection - pitchcorrection;
+				// flapY = -yawcorrection + pitchcorrection;
+			// }
+			
+			
 			
 
             break;
@@ -365,26 +380,31 @@ void control_motors(void){
 	motorNav *= LPF_OUT;
 	motorNav += (1-LPF_OUT) * motorN;		
 	motorEav *= LPF_OUT;
-	motorEav += (1-LPF_OUT) * motorE;		
-	motorSav *= LPF_OUT;
-	motorSav += (1-LPF_OUT) * motorS;		
-	motorWav *= LPF_OUT;
-	motorWav += (1-LPF_OUT) * motorW;
+	motorEav += (1-LPF_OUT) * motorE;
+	flapSav *= LPF_OUT;
+	flapSav += (1-LPF_OUT) * flapS;		
+	flapWav *= LPF_OUT;
+	flapWav += (1-LPF_OUT) * flapW;
+	flapXav *= LPF_OUT;
+	flapXav += (1-LPF_OUT) * flapX;		
+	flapYav *= LPF_OUT;
+	flapYav += (1-LPF_OUT) * flapY;
 
 	// Limit the maximum throttle output to a percentage of the highest throttle available 
 	// to allow additional throttle for manouevering
 	if(throttle > MAXTHROTTLE*MAXTHROTTLEPERCENT) throttle = MAXTHROTTLE*MAXTHROTTLEPERCENT;
 	
 	// Combine attitude stabilisation demands from PID loop with throttle demands
-	float tempN=0, tempE=0, tempS=0, tempW=0, tempM=0, tempX =0;
+	float tempN=0, tempE=0, tempS=0, tempW=0, tempY=0, tempX =0;
 	static float collective = 0;
 	if (throttle > 300) collective = (throttle-300)*0.3;
 	else collective = 0;
-	tempX = (signed short)motorNav + (signed short)throttle + THROTTLEOFFSET;
-	tempE = (signed short)motorEav + MIDDLE + (signed short)collective;
-	tempS = (signed short)motorSav + MIDDLE - (signed short)collective;
-	tempW = (signed short)motorWav + MIDDLE - (signed short)collective;
-	tempM = (signed short)throttle + THROTTLEOFFSET;
+	tempN = (signed short)motorNav + THROTTLEOFFSET + (signed short)throttle;
+	tempE = (signed short)motorEav + THROTTLEOFFSET + (signed short)throttle;
+	tempS = (signed short)flapSav + MIDDLE;
+	tempW = (signed short)flapWav + MIDDLE;
+	tempX = (signed short)flapXav + MIDDLE;
+	tempY = (signed short)flapYav + MIDDLE;
 	
 		
 	/*! \todo Add Auto Land on rxLoss! */
@@ -417,7 +437,7 @@ void control_motors(void){
 		if (rcInput[RX_THRO] - throttletrim  < OFFSTICK) hold_thro_off = 0;
 		
 		// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
-		if(armed) PWMSetNESW(MIDDLE, MIDDLE, MIDDLE, MIDDLE);
+		if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, MIDDLE, MIDDLE);
 		
 		// Output the motor PWM demand on the telemetry link
 		ilink_outputs0.channel[0] = THROTTLEOFFSET;
@@ -425,8 +445,8 @@ void control_motors(void){
 		ilink_outputs0.channel[2] = THROTTLEOFFSET;
 		ilink_outputs0.channel[3] = THROTTLEOFFSET;
 		
-		PWMSetY(THROTTLEOFFSET);
-		PWMSetX(THROTTLEOFFSET);
+		PWMSetY(MIDDLE);
+		PWMSetX(MIDDLE);
 		
 		ilink_thalstat.throttle = 0;
 	}
@@ -437,7 +457,7 @@ void control_motors(void){
 		// Throttle offset offsets the throttle readings (which start at 0) to the PWM values (in ms?) which need to start at around 1000
 		if(tempN > (MAXTHROTTLE + THROTTLEOFFSET)) tempN = (MAXTHROTTLE + THROTTLEOFFSET);
 		else if(tempN < (IDLETHROTTLE + THROTTLEOFFSET)) tempN = (IDLETHROTTLE + THROTTLEOFFSET);
-		PWMSetN(tempE);
+		PWMSetN(tempN);
 		ilink_outputs0.channel[0] = tempN;
 		
 		if(tempE > (MAXTHROTTLE + THROTTLEOFFSET)) tempE = (MAXTHROTTLE + THROTTLEOFFSET);
@@ -455,9 +475,9 @@ void control_motors(void){
 		PWMSetW(tempW);
 		ilink_outputs0.channel[3] = tempW;
 		
-		if(tempM > (MAXTHROTTLE + THROTTLEOFFSET)) tempM = (MAXTHROTTLE + THROTTLEOFFSET);
-		else if(tempM < (IDLETHROTTLE + THROTTLEOFFSET)) tempM = (IDLETHROTTLE + THROTTLEOFFSET);
-		PWMSetY(tempM);
+		if(tempY > (MAXTHROTTLE + THROTTLEOFFSET)) tempY = (MAXTHROTTLE + THROTTLEOFFSET);
+		else if(tempY < (IDLETHROTTLE + THROTTLEOFFSET)) tempY = (IDLETHROTTLE + THROTTLEOFFSET);
+		PWMSetY(tempY);
 		
 		if(tempX > (MAXTHROTTLE + THROTTLEOFFSET)) tempX = (MAXTHROTTLE + THROTTLEOFFSET);
 		else if(tempX < (IDLETHROTTLE + THROTTLEOFFSET)) tempX = (IDLETHROTTLE + THROTTLEOFFSET);
