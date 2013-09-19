@@ -13,6 +13,8 @@ unsigned char maxPacketSize; /*!< Maximum packet size, as per descriptor */
 
 unsigned int last_transfer_size = 0;
 unsigned short maxNak = 300;
+unsigned char usbConnected = 0;
+unsigned char usbActivity = 0;
 
 unsigned char MAXUSBData[2000]; /*!< Data buffer \todo move to USBRAM */
 unsigned short MAXUSB_VID;
@@ -29,20 +31,45 @@ unsigned char inCount, outCount;
 unsigned char inEndpoint[4], outEndpoint[4];
 unsigned short inEndpointSize[4], outEndpointSize[4];
 
-void device_genericMouse(void) { // Generic mouse with the HID Boot protocol - no HID descriptors to mess with, X-Y axis and scroll only, no buttons
+unsigned char segmentPurpose[20];
+unsigned char segmentLength[20];
+
+#define SEGMENT_BLANK   0x0
+#define SEGMENT_BUTTON  0x1
+#define SEGMENT_AXIS_1  0x2
+#define SEGMENT_AXIS_2  0x3
+#define SEGMENT_AXIS_3  0x4
+#define SEGMENT_AXIS_4  0x5
+#define SEGMENT_AXIS_5  0x6
+#define SEGMENT_AXIS_6  0x7
+
+void process_genericMouse(void) { // Generic mouse with the HID Boot protocol - no HID descriptors to mess with, X-Y axis and scroll only, no buttons
 	if(MAXUSBINTransfer(inEndpoint[0], inEndpointSize[0]) == 0) {
-		DebugPin(0);
+		/*DebugPin(0);
+		unsigned int i;
+		for(i=0; i<last_transfer_size; i++) {
+			SSP1WriteByte(MAXUSBData[i]);
+		}
+		SSP1Wait();
+		DebugPin(1);*/
+	
+        
+    
+	}
+}
+
+void setup_genericMouse(void) { // extract information form HID descriptor, certain assumptions are made about this
+        DebugPin(0);
 		unsigned int i;
 		for(i=0; i<last_transfer_size; i++) {
 			SSP1WriteByte(MAXUSBData[i]);
 		}
 		SSP1Wait();
 		DebugPin(1);
-	
-	}
 }
 
 void (*processFunction)(void);
+void (*setupFunction)(void);
 
 void MAXUSBInit(void) {
 	SSP1Init(1000);
@@ -161,6 +188,8 @@ void MAXUSBProcess(void) {
 	static unsigned char deviceDescriptor[8] = {0x80,0x06,0x00,0x01,0x00,0x00,0x00,0x00}; // code fills in length field
 	static unsigned char configDescriptor[8] = {0x80,0x06,0x00,0x02,0x00,0x00,0x00,0x00};
 	static unsigned char descriptorString[8] = {0x80,0x06,0x00,0x03,0x00,0x00,0x40,0x00};
+	static unsigned char getHIDDescriptor[8] = {0x81,0x06,0x00,0x22,0x00,0x00,0x80,0x00};
+    
 	unsigned int i, j;
 	static unsigned char pollCounter, dcCheckCounter;
     
@@ -358,7 +387,8 @@ void MAXUSBProcess(void) {
 										// 7 bInterfaceProtocol
 										// 8 iInterface
 										if(MAXUSBData[i+5] == 0x03 && MAXUSBData[i+6] == 0x01 && MAXUSBData[i+7] == 0x02) { // HID device && HID boot protocol && ID mouse
-											processFunction = device_genericMouse;
+											processFunction = process_genericMouse;
+											setupFunction = setup_genericMouse;
 											connectedStatus = 7;
 											inEndpoint[0] = 0x01;	// safe values to use in case endpoints not detected
 											inEndpointSize[0] = 0x3;
@@ -406,12 +436,21 @@ void MAXUSBProcess(void) {
 							}*/
 						
 						}
+
+                        // if generic found, get HID descriptors
+                        if(setupFunction) {
+                            if(MAXUSBReadCTL(getHIDDescriptor)) connectedStatus = 8; // if error, go to wait for disconnect
+                            else {
+                                (*setupFunction)();
+                            }
+                        }
 					}
                     
                     if(processFunction) {
                         MAXUSBWriteCTL(setConfigto1); // set config to 1
                         MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
                         maxNak = 0;
+                        usbConnected = 1;
                     }
                     
 				}
@@ -422,7 +461,7 @@ void MAXUSBProcess(void) {
 					if(++pollCounter >= 11) {
 						pollCounter = 0;
 						(*processFunction)();
-						LEDToggle(PLED);
+						usbActivity ^= 1;
 					}
 				}
 				else {
@@ -440,7 +479,7 @@ void MAXUSBProcess(void) {
                 }
 				break;
 			case 9: // Device disconnected, clean up
-				LEDOff(PLED);
+				usbConnected = 0;
                 maxNak = 300;
 				MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST);	// turn off bmSOFKAENAB, go to FS
 				MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
