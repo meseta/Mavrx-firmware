@@ -33,6 +33,8 @@ unsigned char MAXUSBReadCTL(unsigned char * pSUD);
 unsigned char MAXUSBWriteCTL(unsigned char * pSUD);
 unsigned char MAXUSBINTransfer(unsigned char endpoint, unsigned int length);
 
+unsigned int getBits(unsigned char * buffer, unsigned char start, unsigned char length);
+
 void MAXUSBProcess(void);
 #endif
 

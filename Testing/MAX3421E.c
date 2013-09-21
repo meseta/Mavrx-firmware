@@ -4,7 +4,7 @@
 
 void DebugPin(unsigned char value) {	Port0Write(PIN15, value); }
 
-unsigned char connectedStatus=0; /*!< Connection state machine */
+unsigned char USBState=0; /*!< Connection state machine */
 unsigned char waitFrames = 0; /*!< Number of frames to delay */
 
 unsigned char deviceDescriptor[8] = {0x80,0x06,0x00,0x01,0x00,0x00,0x00,0x00};
@@ -31,17 +31,14 @@ unsigned char inCount, outCount;
 unsigned char inEndpoint[4], outEndpoint[4];
 unsigned short inEndpointSize[4], outEndpointSize[4];
 
-unsigned char segmentPurpose[20];
-unsigned char segmentLength[20];
+#define MAX_AXIS	6
 
-#define SEGMENT_BLANK   0x0
-#define SEGMENT_BUTTON  0x1
-#define SEGMENT_AXIS_1  0x2
-#define SEGMENT_AXIS_2  0x3
-#define SEGMENT_AXIS_3  0x4
-#define SEGMENT_AXIS_4  0x5
-#define SEGMENT_AXIS_5  0x6
-#define SEGMENT_AXIS_6  0x7
+unsigned int buttons;
+unsigned int axis[MAX_AXIS];
+unsigned char buttonCount = 0;
+unsigned char buttonStart, buttonLength;
+unsigned char axisStart[MAX_AXIS], axisLength[MAX_AXIS];
+
 
 void process_genericMouse(void) { // Generic mouse with the HID Boot protocol - no HID descriptors to mess with, X-Y axis and scroll only, no buttons
 	if(MAXUSBINTransfer(inEndpoint[0], inEndpointSize[0]) == 0) {
@@ -53,19 +50,147 @@ void process_genericMouse(void) { // Generic mouse with the HID Boot protocol - 
 		SSP1Wait();
 		DebugPin(1);*/
 	
-        
-    
+        buttons = getBits(MAXUSBData, buttonStart, buttonLength);
+		axis[0] = getBits(MAXUSBData, axisStart[0], axisLength[0]);	// X-axis
+		axis[1] = getBits(MAXUSBData, axisStart[1], axisLength[1]);	// Y-axis
+		axis[2] = getBits(MAXUSBData, axisStart[2], axisLength[2]);	// wheel
+		axis[3] = getBits(MAXUSBData, axisStart[3], axisLength[3]);	// wheel tilt
+		
+		/*if(axis[3]) {
+			DebugPin(0);
+			SSP1WriteByte(axis[3] & 0xff);
+			SSP1Wait();
+			DebugPin(1);
+		}*/
 	}
 }
 
-void setup_genericMouse(void) { // extract information form HID descriptor, certain assumptions are made about this
-        DebugPin(0);
-		unsigned int i;
-		for(i=0; i<last_transfer_size; i++) {
-			SSP1WriteByte(MAXUSBData[i]);
+void setup_genericMouse(void) { // extract information form HID descriptor, certain assumptions are made about the structure of this descriptor
+	unsigned int bitCount = 0, i, j;
+	unsigned char usageCount=0;
+	unsigned short usageList[5];
+	unsigned char usagePage=0;
+	unsigned char reportCount=1;
+	unsigned char reportSize=0;
+	
+	buttonLength = 0;
+	for(i=0; i< MAX_AXIS; i++) axisLength[i] = 0;
+	buttonCount = 0;
+	
+	DebugPin(0);
+	for(i=0; i< last_transfer_size; i++) 
+		SSP1WriteByte(MAXUSBData[i]);
+	SSP1Wait();
+	DebugPin(1);
+	
+	for(i=0; i< last_transfer_size; ) { // don't increment i, i must be incremented by 1, 2, or 3 based on value
+		switch(MAXUSBData[i]) {
+			case 0x05: // usage page (1 byte)
+				usagePage = MAXUSBData[i+1];
+				break;
+			case 0x09: // usage (1 byte)
+				usageList[usageCount++] = MAXUSBData[i+1];
+				break;
+			case 0x0a: // usage (2 byte)
+				usageList[usageCount++] = MAXUSBData[i+1] | (MAXUSBData[i+2] << 8);
+				break;
+			case 0x95: // report count
+				reportCount = MAXUSBData[i+1];
+				break;
+			case 0x75: // report size
+				reportSize = MAXUSBData[i+1];
+				break;
+			// case 0x25: // Logical maximum
+				// logicalMaximum = MAXUSBData[i+1];
+				// break;
+			// case 0x15: // Logical minimum
+				// logicalMinimum = MAXUSBData[i+1];
+				// break;
+			case 0x81: // Input
+				switch(usagePage) {
+					case 0x09: // buttons
+						buttonStart = bitCount;
+						buttonLength = reportCount * reportSize;
+						buttonCount = buttonLength;
+						bitCount += buttonLength;
+						break;
+					case 0x01: // Generic Desktop
+						if(reportCount < usageCount) usageCount = reportCount;
+					
+						for(j=0; j<usageCount; j++) {
+							switch(usageList[j]) {
+								case 0x30: // X
+									axisStart[0] = bitCount;
+									axisLength[0] = reportSize;
+									break;
+								case 0x31: // Y
+									axisStart[1] = bitCount;
+									axisLength[1] = reportSize;
+									break;
+								case 0x38: // Wheel
+									axisStart[2] = bitCount;
+									axisLength[2] = reportSize;
+									break;
+							}
+							bitCount += reportSize;
+						}
+						
+						break;
+					case 0x0c: // Consumer
+						if(reportCount < usageCount) usageCount = reportCount;
+						for(j=0; j<usageCount; j++) {
+							switch(usageList[j]) {
+								case 0x238: // AC Pan (Wheel tilt)
+									axisStart[3] = bitCount;
+									axisLength[3] = reportSize;
+									break;
+							}
+							bitCount += reportSize;
+						}
+						break;
+					default: // everything else, ignore, but still increment the bit counter
+						bitCount += reportCount * reportSize;
+				}
+				
+				// fallthrough!
+			case 0x91: // output, ignores everything
+				usageCount = 0;
+				break;
 		}
-		SSP1Wait();
-		DebugPin(1);
+		i += (MAXUSBData[i] & 0x3) + 1;
+	}
+	
+	DebugPin(0);
+	SSP1WriteByte(buttonStart);
+	SSP1WriteByte(buttonLength);
+	SSP1WriteByte(axisStart[0]);
+	SSP1WriteByte(axisLength[0]);
+	SSP1WriteByte(axisStart[1]);
+	SSP1WriteByte(axisLength[1]);
+	SSP1WriteByte(axisStart[2]);
+	SSP1WriteByte(axisLength[2]);
+	SSP1WriteByte(axisStart[3]);
+	SSP1WriteByte(axisLength[3]);
+	SSP1Wait();
+	DebugPin(1);
+}
+
+unsigned int getBits(unsigned char * buffer, unsigned char start, unsigned char length) { // get bits from buffer
+	unsigned int result = 0;
+	unsigned int resultMask = 0xffffffff;
+	unsigned char byteNumber = (start >> 3);
+	unsigned char bitNumber = start & 0x7;
+	unsigned char gotBits = 0;
+	
+	while(gotBits < length) {
+		result |= ((buffer[byteNumber] >> bitNumber) & 0xff) << gotBits;
+		gotBits += 8-bitNumber;
+		byteNumber++;
+		bitNumber = 0;
+	}
+	
+	if(length > 32 && length > 1) resultMask = (0x1 << length) - 1;
+	return result & resultMask;
 }
 
 void (*processFunction)(void);
@@ -192,7 +317,7 @@ void MAXUSBProcess(void) {
     
 	unsigned int i, j;
 	static unsigned char pollCounter, dcCheckCounter;
-    
+
 	if(waitFrames > 0) {
 		if(MAXUSBReadRegister(rHIRQ) & bmFRAMEIRQ) { // R25: HRQ, check for the FRAMEIRQ, decrement the waitFrame counter if it is set
 			MAXUSBWriteRegister(rHIRQ, bmFRAMEIRQ); // clear the IRQ
@@ -200,7 +325,7 @@ void MAXUSBProcess(void) {
 		}
 	}
 	else {
-		switch(connectedStatus) {
+		switch(USBState) {
 			default:
 			case 0:	// Nothing connected, poll for things plugged in
                 maxNak = 300;
@@ -219,13 +344,13 @@ void MAXUSBProcess(void) {
                         }
                         
                         waitFrames = 200;			// set to wait for 200 frames
-                        connectedStatus = 1;
+                        USBState = 1;
                     }
                 }
 				break;
 			case 1:	// Device connecting, perform initial reset
 				MAXUSBWriteRegister(rHCTL, bmBUSRST);			// R29: perform bus reset
-				connectedStatus = 2;
+				USBState = 2;
 				// initialise stuff
 				maxPacketSize = 8;
 				deviceDescriptor[6]=8;		// wLengthL
@@ -235,36 +360,36 @@ void MAXUSBProcess(void) {
 				/*! \todo: bus reset timeout */
 				if((MAXUSBReadRegister(rHCTL) & bmBUSRST) == 0) {  // wait for bus reset
 					waitFrames = 200;			// set to wait for 200 frames after bus reset
-					connectedStatus = 3;
+					USBState = 3;
 				}
 				break;
 			case 3: // Get device descriptor
 				MAXUSBWriteRegister(rPERADDR, 0x00); // first packet to address 0
-				if(MAXUSBReadCTL(deviceDescriptor)) connectedStatus = 8; // if error, go to wait for disconnect
+				if(MAXUSBReadCTL(deviceDescriptor)) USBState = 8; // if error, go to wait for disconnect
 				else {
 					maxPacketSize = MAXUSBData[7];
 					MAXUSBWriteRegister(rHCTL, bmBUSRST);			// R29: perform anothrbus reset
-					connectedStatus = 4;
+					USBState = 4;
 				}
 				break;
 			case 4: // Wait for bus to reset another time
 				/*! \todo: bus reset timeout */
 				if((MAXUSBReadRegister(rHCTL) & bmBUSRST) == 0) {  // wait for bus reset
 					waitFrames = 200;			// set to wait for 200 frames after bus reset
-					connectedStatus = 5;
+					USBState = 5;
 				}
 				break;
 			case 5: // Set address to 7
-				if(MAXUSBWriteCTL(setAddressto7)) connectedStatus = 8; // if error, wait for disconnect
+				if(MAXUSBWriteCTL(setAddressto7)) USBState = 8; // if error, wait for disconnect
 				else {
 					waitFrames = 30;
-					connectedStatus = 6;
+					USBState = 6;
 				}
 				break;
 			case 6: // Read device descriptors
 				MAXUSBWriteRegister(rPERADDR, 7); // all transfers to addres 7
 				deviceDescriptor[6] = 0x12; // device descriptor length
-				if(MAXUSBReadCTL(deviceDescriptor)) connectedStatus = 8; // if error, wait for disconnect
+				if(MAXUSBReadCTL(deviceDescriptor)) USBState = 8; // if error, wait for disconnect
 				else {
 					// IDs
 					MAXUSB_VID = MAXUSBData[8] | (MAXUSBData[9] << 8);
@@ -276,6 +401,7 @@ void MAXUSBProcess(void) {
 					
 					// Detect supported devices
 					processFunction = 0;
+					setupFunction = 0;
 					/*switch(MAXUSB_VID) {
 						case VID_MICROSOFT:
 							if(MAXUSB_PID == PID_XBOX360) {
@@ -336,7 +462,7 @@ void MAXUSBProcess(void) {
 						// 9-byte Config descriptor
 						configDescriptor[6] = 9;
 						configDescriptor[7] = 0;
-						if(MAXUSBReadCTL(configDescriptor)) connectedStatus = 8; // if error, wait for disconnect
+						if(MAXUSBReadCTL(configDescriptor)) USBState = 8; // if error, wait for disconnect
 						else {
 							
 							// Full config descriptor
@@ -389,7 +515,7 @@ void MAXUSBProcess(void) {
 										if(MAXUSBData[i+5] == 0x03 && MAXUSBData[i+6] == 0x01 && MAXUSBData[i+7] == 0x02) { // HID device && HID boot protocol && ID mouse
 											processFunction = process_genericMouse;
 											setupFunction = setup_genericMouse;
-											connectedStatus = 7;
+											USBState = 7;
 											inEndpoint[0] = 0x01;	// safe values to use in case endpoints not detected
 											inEndpointSize[0] = 0x3;
 										}
@@ -438,8 +564,8 @@ void MAXUSBProcess(void) {
 						}
 
                         // if generic found, get HID descriptors
-                        if(setupFunction) {
-                            if(MAXUSBReadCTL(getHIDDescriptor)) connectedStatus = 8; // if error, go to wait for disconnect
+						if(setupFunction) {
+                            if(MAXUSBReadCTL(getHIDDescriptor)) USBState = 8; // if error, go to wait for disconnect
                             else {
                                 (*setupFunction)();
                             }
@@ -456,6 +582,7 @@ void MAXUSBProcess(void) {
 				}
 				break;
 			case 7: // Connected, device active
+				LEDOn(PLED);
 				if(processFunction) { // supported device
 					// poll device
 					if(++pollCounter >= 11) {
@@ -466,7 +593,7 @@ void MAXUSBProcess(void) {
 				}
 				else {
 					// unsupported device, go to disconnect
-					connectedStatus = 8;
+					USBState = 8;
 				}
 				
 				// fallthrough! to check for disconnect
@@ -474,16 +601,18 @@ void MAXUSBProcess(void) {
                 if(++dcCheckCounter >= 100) {
                     dcCheckCounter = 0;
                     if(MAXUSBReadRegister(rHIRQ) & bmCONDETIRQ) {
-                        connectedStatus = 9;
+                        USBState = 9;
                     }
                 }
 				break;
 			case 9: // Device disconnected, clean up
+				LEDOff(PLED);
 				usbConnected = 0;
-                maxNak = 300;
-				MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST);	// turn off bmSOFKAENAB, go to FS
-				MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
-				connectedStatus = 0;
+				processFunction = 0;
+				setupFunction = 0;
+        		MAXUSBWriteRegister(rMODE, bmDPPULLDN | bmDMPULLDN | bmHOST); // R27: MODE, enable DP and DM pulldowns and host mode (highspeed mode)
+				MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ); // R25: HIRQ, clear the CONDET pin
+				USBState = 0;
 				break;
 		}
 	}
