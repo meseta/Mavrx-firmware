@@ -116,7 +116,13 @@ void gps_navigate(void) {
             static unsigned char interpolator_mode = 0;
             static unsigned char free_yaw = 1;
             static unsigned char allow_land = 0;
-            static unsigned char target_set = 0;
+			
+			#define TARGET_IDLE 0
+			#define TARGET_HOLD	1
+			#define TARGET_NEW	2
+			#define TARGET_SET	3
+			
+            static unsigned char target_set = TARGET_IDLE;
 
 			// 0:	do nothing
 			// 1:	store home position - Thalamus requests this everytime it arms into MANUAL_GPS or AUTO mode
@@ -142,7 +148,7 @@ void gps_navigate(void) {
                     target_lat = craft_lat;
                     target_lon = craft_lon;
                     target_alt = craft_alt + GPS_SAFE_ALT;
-                    target_set = 1;
+                    target_set = TARGET_NEW;
 
                     free_yaw = 1;
                     MAVSendTextFrom(MAV_SEVERITY_INFO, "Taking off to preset safe altitude", MAV_COMP_ID_MISSIONPLANNER);
@@ -151,7 +157,7 @@ void gps_navigate(void) {
                     break;
                 case 3: // hold/pause - unset target to hold
                     gps_action = 0;
-                    target_set = 0;
+                    target_set = TARGET_HOLD;
 					if(waypointGo == 1) {
 						waypointGo = 0;
 						MAVSendTextFrom(MAV_SEVERITY_INFO, "Waypoint execution paused, position hold", MAV_COMP_ID_MISSIONPLANNER);
@@ -195,7 +201,7 @@ void gps_navigate(void) {
                                         target_yaw = waypoint[waypointCurrent].param4 * 0.01745329251994329577f; // 0.01745329251994329577 is degrees to radian conversion
                                     }
                                     free_yaw = 0;
-                                    target_set = 1;
+                                    target_set = TARGET_NEW;
                                     break;
                                 case MAV_CMD_NAV_RETURN_TO_LAUNCH:
                                     gps_action = 6;
@@ -203,7 +209,7 @@ void gps_navigate(void) {
                                 default:
                                     MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Waypoint command not supported", MAV_COMP_ID_MISSIONPLANNER);
                                     waypointGo = 0;
-                                    target_set = 0;
+                                    target_set = TARGET_IDLE; // go idle now, will go hold in next loop by gps_action = 3
                                     gps_action = 3;
                                     break;
                             }
@@ -211,14 +217,14 @@ void gps_navigate(void) {
                         else {
                             MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Waypoint frame not supported", MAV_COMP_ID_MISSIONPLANNER);
                             waypointGo = 0;
-                            target_set = 0;
+                            target_set = TARGET_IDLE; // go idle now, will go hold in next loop by gps_action = 3
                             gps_action = 3;
                         }
                     }
                     else {
 						MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: No valid waypoints to resume", MAV_COMP_ID_MISSIONPLANNER);
                         waypointGo = 0;
-                        target_set = 0;
+                        target_set = TARGET_IDLE; // go idle now, will go hold in next loop by gps_action = 3
                         gps_action = 3;
                     }
                     break;
@@ -228,7 +234,7 @@ void gps_navigate(void) {
                     target_lat = craft_lat;
                     target_lon = craft_lon;
                     target_alt = craft_alt;
-                    target_set = 1;
+                    target_set = TARGET_NEW;
                     interpolator_mode = INTMODE_DOWN; // three for landing
                     waypointGo = 0;
                     free_yaw = 1;
@@ -251,22 +257,22 @@ void gps_navigate(void) {
                     }
 
                     if(craft_alt > target_alt) target_alt = craft_alt; // if craft is higher than target, don't bother flying to target altitude first since craft is already above it, just fly to position and land.
-                    target_set = 1;
+                    target_set = TARGET_NEW;
                     waypointGo = 0;
                     free_yaw = 1;
                     break;
                 case 7: // go IDLE - velocity kill
                     gps_action = 0;
-					MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Craft going IDLE!", MAV_COMP_ID_MISSIONPLANNER);
-                    target_set = 0;
+					MAVSendTextFrom(MAV_SEVERITY_INFO, "Autopilot going IDLE", MAV_COMP_ID_MISSIONPLANNER);
+                    target_set = TARGET_IDLE;
                     break;
                 case 8: // drop into orbit
                     gps_action = 0;
-                    if(target_set == 0) { // if no target set, craft is orbit target
+                    if(target_set != 2) { // if no target set, craft is orbit target
                         target_lat = craft_lat;
                         target_lon = craft_lon;
                         target_alt = craft_alt;
-                        target_set = 1;
+                        target_set = TARGET_NEW;
                         orbitPhase = 0;
                         orbitDirection = 0;
                         orbitRadius = GPS_ORBRADIUS;
@@ -291,17 +297,24 @@ void gps_navigate(void) {
             float target_speed_east = 0;
             float target_speed_up = 0;
 
-            if(target_set == 0) { // target not set, set target to craft for hold
+            if(target_set == TARGET_IDLE) {
+				target_lat = craft_lat;
+				target_lon = craft_lon;
+				target_alt = craft_alt;
+				interpolator_mode = INTMODE_OFF;
+				free_yaw = 1;
+			}
+			else if(target_set == TARGET_HOLD) { // target not set, set target to craft for hold
                 target_lat = craft_lat;
                 target_lon = craft_lon;
                 target_alt = craft_alt;
                 interpolator_mode = INTMODE_OFF;
                 free_yaw = 1;
-				target_set = 1;
+				target_set = TARGET_NEW;
             }
 			
-            if(target_set == 1) { // newly set target, reset interpolator
-                target_set = 2;
+            if(target_set == TARGET_NEW) { // newly set target, reset interpolator
+                target_set = TARGET_SET;
                 interpolator_lat = craft_lat; // reset interpolator
                 interpolator_lon = craft_lon;
                 interpolator_alt = craft_alt;
@@ -452,7 +465,6 @@ void gps_navigate(void) {
 
                 case INTMODE_SEQUENCE_DOWN:
                 case INTMODE_DOWN:
-
                     target_speed_north = 0;
                     target_speed_east = 0;
                     target_speed_up = 0;
@@ -502,8 +514,8 @@ void gps_navigate(void) {
             }
 
             // *** PID & Output
-            float diff_X = latDiff2Meters(interpolator_lat - craft_lat);
-            float diff_Y = lonDiff2Meters(interpolator_lon - craft_lon, craft_lat);
+            float diff_X = latDiff2Meters((double)interpolator_lat - (double)craft_lat);
+            float diff_Y = lonDiff2Meters((double)interpolator_lon - (double)craft_lon, craft_lat);
             float diff_Z = (float)(interpolator_alt - craft_alt);
 
 			static float diff_X_i = 0;
