@@ -46,7 +46,8 @@ void filter_gps_baro(void){
 		alt.filtered = alt.gps;
 		alt.vel = -ilink_gpsfly.velD;
 	}
-	// New barometer 
+	// New barometer
+	/*! \todo This code for the new barometer doesn't work properly yet */
 	if(FUNCBaro_type == 2) {
 		
 		
@@ -54,7 +55,7 @@ void filter_gps_baro(void){
 		alt.filtered = alt.baro + alt.barobias;
 		alt.barobias += (alt.gps - alt.filtered) * 0.0; //Filt_baroBiasK = 0.0;
 		
-		ilink_debug.debug0 = alt.baro;
+		
 			
 		static float alt_baro_old;
 		static float baro_d;
@@ -64,7 +65,7 @@ void filter_gps_baro(void){
 		baro_d = 10000.0*(float)((float)alt.baro - (float)alt_baro_old);
 		alt_baro_old = alt.baro;
 		
-		ilink_debug.debug1 = baro_d;
+		
 		
 		// Run an LPF filter on the barometer differential data
 		// alt.vel *= (1-LPF_BARD);
@@ -76,7 +77,7 @@ void filter_gps_baro(void){
 		alt.vel = (float)alt.dtotal/((float)ALTDAV_LEN * (100));
 		if(++alt.dcount >= ALTDAV_LEN) alt.dcount = 0;
 		
-		ilink_debug.debug2 = alt.vel;	
+			
 			
 			
 	}

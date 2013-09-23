@@ -92,15 +92,13 @@ void control_throttle(void)	{
 	/*! \todo Set this back when COde finished */
 	float GPS_errD = 0.0 - alt.vel;
 	// Collecting the PID terms
-	gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;
-
-	/*! \todo Diagnose throttle jumps while in GPS hold mode. */
-	// This section of code limits the rate at which the craft is allowed to change the throttle according to GPS and Barometer Demands
-	// if((gpsThrottle - gpsThrottleold) > LIM_THRO) gpsThrottle = gpsThrottleold + LIM_THRO;
-	// if((gpsThrottle - gpsThrottleold) < -LIM_THRO) gpsThrottle = gpsThrottleold - LIM_THRO;
-	// gpsThrottleold = gpsThrottle;
+	gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;	
 	
-	
+	ilink_debug.debug0 = ilink_gpsfly.altitudeDemand;
+	ilink_debug.debug1 = alt.filtered;
+	ilink_debug.debug2 = alt.vel;
+		
+		
 	// If Thalamus is allowed to overwrite throttle
 	if(thal_throt_cont == 1) {
 		//Use largest throttle output, and cross-feed the integrals for step free transition

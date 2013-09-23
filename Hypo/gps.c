@@ -250,7 +250,7 @@ void gps_navigate(void) {
                         interpolator_mode = INTMODE_DOWN;
                     }
 
-                    if(craft_alt > target_alt) target_alt = craft_alt; // if craft is heigher than target, don't bother flying to target altitude first since craft is already above it, just fly to position and land.
+                    if(craft_alt > target_alt) target_alt = craft_alt; // if craft is higher than target, don't bother flying to target altitude first since craft is already above it, just fly to position and land.
                     target_set = 1;
                     waypointGo = 0;
                     free_yaw = 1;
