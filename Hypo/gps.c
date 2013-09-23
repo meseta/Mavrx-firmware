@@ -297,8 +297,10 @@ void gps_navigate(void) {
                 target_alt = craft_alt;
                 interpolator_mode = INTMODE_OFF;
                 free_yaw = 1;
+				target_set = 1;
             }
-            else if(target_set == 1) { // newly set target, reset interpolator
+			
+            if(target_set == 1) { // newly set target, reset interpolator
                 target_set = 2;
                 interpolator_lat = craft_lat; // reset interpolator
                 interpolator_lon = craft_lon;
