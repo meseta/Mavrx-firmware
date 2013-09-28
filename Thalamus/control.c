@@ -198,14 +198,14 @@ void control_motors(void){
 	static float yawold = 0;
 	
 	// This section of code limits the rate at which the craft is allowed to track angle demand changes
-	if((attitude_demand_body.pitch - pitchold) > LIM_PITCH) attitude_demand_body.pitch = pitchold + LIM_PITCH;
-	if((attitude_demand_body.pitch - pitchold) < -LIM_PITCH) attitude_demand_body.pitch = pitchold - LIM_PITCH;
+	if((attitude_demand_body.pitch - pitchold) > LIM_PITCH_set) attitude_demand_body.pitch = pitchold + LIM_PITCH_set;
+	if((attitude_demand_body.pitch - pitchold) < -LIM_PITCH_set) attitude_demand_body.pitch = pitchold - LIM_PITCH_set;
 	pitchold = attitude_demand_body.pitch;
-	if((attitude_demand_body.roll - rollold) > LIM_ROLL) attitude_demand_body.roll = rollold + LIM_ROLL;
-	if((attitude_demand_body.roll - rollold) < -LIM_ROLL) attitude_demand_body.roll = rollold - LIM_ROLL;
+	if((attitude_demand_body.roll - rollold) > LIM_ROLL_set) attitude_demand_body.roll = rollold + LIM_ROLL_set;
+	if((attitude_demand_body.roll - rollold) < -LIM_ROLL_set) attitude_demand_body.roll = rollold - LIM_ROLL_set;
 	rollold = attitude_demand_body.roll;
-	if((attitude_demand_body.yaw - yawold) > LIM_YAW) attitude_demand_body.yaw = yawold + LIM_YAW;
-	if((attitude_demand_body.yaw - yawold) < -LIM_YAW) attitude_demand_body.yaw = yawold - LIM_YAW;
+	if((attitude_demand_body.yaw - yawold) > LIM_YAW_set) attitude_demand_body.yaw = yawold + LIM_YAW_set;
+	if((attitude_demand_body.yaw - yawold) < -LIM_YAW_set) attitude_demand_body.yaw = yawold - LIM_YAW_set;
 	yawold = attitude_demand_body.yaw;
 	
 	// This part of the code makes the yaw demand loop around and not exceed Pi or -Pi bounds

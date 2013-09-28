@@ -70,6 +70,12 @@ void setup(void) {
 		
 	// *** Parameters
 		eeprom_load_all();
+		
+	// *** 
+		LIM_ROLL_set = LIM_ROLL;
+		LIM_PITCH_set = LIM_PITCH;
+		LIM_YAW_set = LIM_YAW;
+		
 	
 	// *** Establish ILink
 		ilink_thalstat.systemStatus = THALSTAT_SYSTEMSTATUS_BOOT; // set ilink status to boot
