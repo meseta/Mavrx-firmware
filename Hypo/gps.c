@@ -117,6 +117,9 @@ void gps_navigate(void) {
             static unsigned char free_yaw = 1;
             static unsigned char allow_land = 0;
             static float known_land_alt = 0; 
+        	
+			static float diff_X_i = 0;
+			static float diff_Y_i = 0;
 			
 			#define TARGET_IDLE 0
 			#define TARGET_HOLD	1
@@ -265,8 +268,10 @@ void gps_navigate(void) {
                     break;
                 case 7: // go IDLE - velocity kill
                     gps_action = 0;
-					MAVSendTextFrom(MAV_SEVERITY_INFO, "Autopilot going IDLE", MAV_COMP_ID_MISSIONPLANNER);
+					MAVSendTextFrom(MAV_SEVERITY_INFO, "Autopilot going idle", MAV_COMP_ID_MISSIONPLANNER);
                     target_set = TARGET_IDLE;
+					diff_X_i = 0;
+					diff_Y_i = 0;
                     break;
                 case 8: // drop into orbit
                     gps_action = 0;
@@ -525,9 +530,6 @@ void gps_navigate(void) {
             float diff_X = latDiff2Meters((double)interpolator_lat - (double)craft_lat);
             float diff_Y = lonDiff2Meters((double)interpolator_lon - (double)craft_lon, craft_lat);
             float diff_Z = (float)(interpolator_alt - craft_alt);
-
-			static float diff_X_i = 0;
-			static float diff_Y_i = 0;
 
             diff_X_i += diff_X;
             diff_Y_i += diff_Y;
