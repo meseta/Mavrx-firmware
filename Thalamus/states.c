@@ -234,7 +234,7 @@ void state_machine()	{
 				GPS_KerrI = throttle;
 				ULT_KerrI = throttle;
 				// and the ultrasound
-				if(alt.ult_conf > 80) {
+				if(alt.ult_conf > 0.8) {
 					targetZ_ult = alt.ultra;
 					oldUltra = alt.ultra;
 					got_setpoint = 1;
