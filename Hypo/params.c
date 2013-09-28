@@ -26,7 +26,9 @@ struct paramStorage_struct paramStorage[] = {
     [ 7] = {"GPS_Kp",        0.03f}, 
     [ 8] = {"GPS_Ki",        0.00f}, 
     [ 9] = {"GPS_Kd",         0.1f}, 
-    [ 10] = {"GPS_ORBRAD",     3.0f},
+    [10] = {"GPS_ORBRAD",     3.0f},
+    [11] = {"GPS_LNDSPD",     0.3f},
+    [12] = {"GPS_LNDTHR",     4.0f},
 };
 
 unsigned char paramSendSingle = 0; /*!< boolean to control whether to send a single param or not */

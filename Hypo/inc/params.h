@@ -30,6 +30,8 @@ extern struct paramStorage_struct paramStorage[];
 #define GPS_Ki			paramStorage[8].value	/*!< GPS navigation I gain */
 #define GPS_Kd			paramStorage[9].value	/*!< GPS navigation D gain */
 #define GPS_ORBRADIUS   paramStorage[10].value	/*!< GPS navigation D gain */
+#define GPS_LAND_SPEED  paramStorage[11].value	/*!< Reduced speed for when near the ground during landing */
+#define GPS_LAND_THRES  paramStorage[12].value	/*!< Threshold above landing for the reduced speed */
 
 extern unsigned int paramCount;
 extern unsigned int paramSendCount;

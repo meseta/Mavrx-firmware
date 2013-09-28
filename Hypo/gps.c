@@ -116,6 +116,7 @@ void gps_navigate(void) {
             static unsigned char interpolator_mode = 0;
             static unsigned char free_yaw = 1;
             static unsigned char allow_land = 0;
+            static float known_land_alt = 0; 
 			
 			#define TARGET_IDLE 0
 			#define TARGET_HOLD	1
@@ -246,6 +247,7 @@ void gps_navigate(void) {
                         target_lat = home_lat;
                         target_lon = home_lon;
                         target_alt = home_alt + GPS_SAFE_ALT;
+                        known_land_alt = home_alt;
                         interpolator_mode = INTMODE_SEQUENCE_UP; // this sets the interpolator onto the RTL sequence: rise to target altitude, fly to home position, then land
 					}
                     else { // no home waypoint set, land here
@@ -471,8 +473,14 @@ void gps_navigate(void) {
                     zdiff = craft_alt - interpolator_alt;
                     // check that we're not maxed out height
                     if(zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
-                        interpolator_alt += -GPS_MAX_SPEED/5.0f;
-                        target_speed_up = -GPS_MAX_SPEED;
+                        if(interpolator_mode == INTMODE_SEQUENCE_DOWN && craft_alt > GPS_LAND_THRES + known_land_alt) {
+                            interpolator_alt += -GPS_MAX_SPEED/5.0f;
+                            target_speed_up = -GPS_MAX_SPEED;
+                        }
+                        else {
+                            interpolator_alt += -GPS_LAND_SPEED/5.0f;
+                            target_speed_up = -GPS_LAND_SPEED;
+                        }
                     }
                     allow_land = 1;
 
