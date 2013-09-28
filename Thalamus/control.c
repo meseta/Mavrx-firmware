@@ -372,6 +372,8 @@ void control_motors(void){
 		
 	/*! \todo Add Auto Land on rxLoss! */
 	if(((rcInput[RX_THRO] - throttletrim) <  OFFSTICK) || (hold_thro_off > 0)) {
+	
+		
 		
 		// Set Airborne = 0
 		airborne = 0;
@@ -397,7 +399,12 @@ void control_motors(void){
 		
 		// Reset the throttle hold variable, this prevents reactivation of the throttle until 
 		// the input is dropped and re-applied
-		if(rcInput[RX_THRO] - throttletrim  < OFFSTICK) hold_thro_off = 0;
+		if(rcInput[RX_THRO] - throttletrim  < OFFSTICK && hold_thro_off > 0) {
+			hold_thro_off = 0;
+			// Set Hypo to idle mode if motors are off
+			ilink_gpsreq.request = 7;
+			ilink_gpsreq.sequence++;
+		}
 		
 		// If the craft is armed, set the PWM channels to the PWM value corresponding to off!
 		if(armed) PWMSetNESW(THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET, THROTTLEOFFSET);
