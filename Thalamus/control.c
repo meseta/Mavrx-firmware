@@ -88,7 +88,7 @@ void control_throttle(void)	{
 	GPS_KerrI += GPS_ALTKi * (1/(float)FAST_RATE) * GPS_errP;
 	// float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel;
 	/*! \todo Set this back when COde finished */
-	float GPS_errD = 0.0 - alt.vel;
+	float GPS_errD = ilink_gpsfly.altitudeDemandVel - alt.vel;
 	// Collecting the PID terms
 	gpsThrottle = GPS_ALTKp * GPS_errP + GPS_KerrI + GPS_ALTKd * GPS_errD;	
 	

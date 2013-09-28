@@ -156,7 +156,7 @@ void gps_navigate(void) {
 
                     free_yaw = 1;
                     MAVSendTextFrom(MAV_SEVERITY_INFO, "Taking off to preset safe altitude", MAV_COMP_ID_MISSIONPLANNER);
-                    interpolator_mode = INTMODE_VERTICAL;
+                    interpolator_mode = INTMODE_UP_AND_GO;
                     waypointGo = 0;
                     break;
                 case 3: // hold/pause - unset target to hold
@@ -193,6 +193,7 @@ void gps_navigate(void) {
                                     target_lat = waypoint[waypointCurrent].x;
                                     target_lon = waypoint[waypointCurrent].y;
                                     target_alt = waypoint[waypointCurrent].z;
+									interpolator_mode = INTMODE_3D;
                                     if(waypoint[waypointCurrent].frame == MAV_FRAME_GLOBAL_RELATIVE_ALT) {
                                         target_alt += home_alt;
                                     }
@@ -479,10 +480,12 @@ void gps_navigate(void) {
                     // check that we're not maxed out height
                     if(zdiff  < GPS_MAX_ALTDIFF && zdiff > -GPS_MAX_ALTDIFF) {
                         if(interpolator_mode == INTMODE_SEQUENCE_DOWN && craft_alt > GPS_LAND_THRES + known_land_alt) {
-                            interpolator_alt += -GPS_MAX_SPEED/5.0f;
+							// fast descent rate when known to be further from ground
+							interpolator_alt += -GPS_MAX_SPEED/5.0f;
                             target_speed_up = -GPS_MAX_SPEED;
                         }
                         else {
+							// default slow descent rate when ground position not known
                             interpolator_alt += -GPS_LAND_SPEED/5.0f;
                             target_speed_up = -GPS_LAND_SPEED;
                         }

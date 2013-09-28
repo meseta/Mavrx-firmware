@@ -63,12 +63,14 @@ void state_machine()	{
 				// if left stick bottom middle, right stick top left, switch = 0 and GPS is active then switch to manual mode with GPS active
 /*[ . ][`  ]*/	if(rcInput[RX_THRO] - throttletrim <  OFFSTICK && rcInput[RX_RUDD] < MAXTHRESH && rcInput[RX_RUDD] > MINTHRESH && rcInput[RX_ELEV] > MAXTHRESH && rcInput[RX_AILE] > MAXTHRESH && auxState == 0 && gps_valid == 1) {
 					if(ORI == detect_ori()) {                    
-						arm();
-						// Offset Barometer
-						alt.barobias = (alt.gps - alt.baro);
 						// Request that Hypo stores Return to Arm location
 						ilink_gpsreq.request = 1;
 						ilink_gpsreq.sequence++;
+						Delay(200);
+						arm();
+						// Offset Barometer
+						alt.barobias = (alt.gps - alt.baro);
+						
 						// Set the New State
 						state = STATE_MANUAL_GPS;
 						// We hold the throttle off in case someone knocks it up after arming, the motors won't start until they have reduced the stick to zero and put it up again	
@@ -85,13 +87,14 @@ void state_machine()	{
 						ilink_thalctrl_rx.isNew = 0;
 						auxStateIgnore = 1;
 					}
-					if(ORI == detect_ori()) {                   
+					if(ORI == detect_ori()) {
+						// Request that Hypo stores Return to Arm location
+						ilink_gpsreq.request = 1;
+						ilink_gpsreq.sequence++;         
+						Delay(200);
 						arm();
 						// Offset Barometer
 						alt.barobias = (alt.gps - alt.baro);
-						// Request that Hypo stores Return to Arm location
-						ilink_gpsreq.request = 1;
-						ilink_gpsreq.sequence++;
 						// Set the New State
 						state = STATE_AUTO;
 						// We hold the throttle off in case someone knocks it up after arming, the motors won't start until they have reduced the stick to zero and put it up again	
