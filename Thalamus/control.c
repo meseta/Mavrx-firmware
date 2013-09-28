@@ -45,10 +45,9 @@ void control_throttle(void)	{
 	static float ultTouchdownHyst = 0;
 	if(alt.ult_conf > (0.90 - ultTouchdownHyst)) {
 		
-		ultTouchdownHyst = 10;
+		ultTouchdownHyst = 0.1;
 
 		// When we enter the confidence range, we store the ultrasound altitude and attempt to hold it.
-		/*! \todo Work out what happens if move out of the ultrasound confidence zone again. */
 		if(got_setpoint == 0) {
 			targetZ_ult = alt.ultra;
 			got_setpoint = 1;
@@ -74,7 +73,6 @@ void control_throttle(void)	{
 			
 
 	} 
-	
 	else {
 		got_setpoint = 0;
 		ultraThrottle = 0;
