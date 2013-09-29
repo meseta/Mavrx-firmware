@@ -54,9 +54,25 @@ void process_xbox360(void) {
 	}
 }
 
+unsigned char setup_cheapFingerMouse(void) {
+	buttonStart = 0x08;
+	buttonLength = 0x03;
+	axisStart[0] = 0x10;
+	axisLength[0] = 0x08;
+	axisStart[1] = 0x18;
+	axisLength[1] = 0x08;
+	axisStart[2] = 0x20;
+	axisLength[2] = 0x08;
+	axisStart[3] = 0x28;
+	axisLength[3] = 0x08;
+
+	inEndpoint[0] = 0x02;
+	inEndpointSize[0] = 0x6;
+	inCount = 1;
+	return 1;
+}
+
 unsigned char setup_xbox360(void) {
-    unsigned char setConfigto1[8]     = {0x00,0x09,0x01,0x00,0x00,0x00,0x00,0x00}; 
-	
 	LEDOn(VLED);
 	
 	inEndpoint[0] = 0x01;
@@ -66,7 +82,6 @@ unsigned char setup_xbox360(void) {
 	outEndpointSize[0] = 32;
 	outCount = 1;
 	
-	MAXUSBWriteCTL(setConfigto1); // set config to 1
 	return 1;
 }
 
@@ -92,12 +107,12 @@ unsigned char setup_genericMouse(void) { // extract information form HID descrip
 	unsigned char reportCount=1;
 	unsigned char reportSize=0;
 	
-	LEDOn(VLED);
 	
-    unsigned char setConfigto1[8]     = {0x00,0x09,0x01,0x00,0x00,0x00,0x00,0x00}; 
-	unsigned char getHIDDescriptor[8] = {0x81,0x06,0x00,0x22,0x00,0x00,0x80,0x00};
+	unsigned char getHIDDescriptor[8] = {0x81,0x06,0x00,0x22,0x00,0x00,0x90,0x00};
 					
 	if(MAXUSBReadCTL(getHIDDescriptor)) return 0;
+	
+	LEDOn(VLED);
 	
 	buttonLength = 0;
 	for(i=0; i< MAX_AXIS; i++) axisLength[i] = 0;
@@ -181,21 +196,6 @@ unsigned char setup_genericMouse(void) { // extract information form HID descrip
 		i += (MAXUSBData[i] & 0x3) + 1;
 	}
 	
-		DebugPin(0);
-SSP1WriteByte(buttonStart);
-SSP1WriteByte(buttonLength);
-SSP1WriteByte(axisStart[0]);
-SSP1WriteByte(axisLength[0]);
-SSP1WriteByte(axisStart[1]);
-SSP1WriteByte(axisLength[1]);
-SSP1WriteByte(axisStart[2]);
-SSP1WriteByte(axisLength[2]);
-SSP1WriteByte(axisStart[3]);
-SSP1WriteByte(axisLength[3]);
-SSP1Wait();
-DebugPin(1);
-	
-	MAXUSBWriteCTL(setConfigto1); // set config to 1
 	return 1;
 }
 
@@ -340,14 +340,14 @@ void MAXUSBProcess(void) {
 	unsigned int i, j;
 	static unsigned char pollCounter, dcCheckCounter;
 
-	static unsigned char lastState;
+	/*static unsigned char lastState;
 	if(USBState != lastState) {
 			DebugPin(0);
 			SSP1WriteByte(USBState);
 			SSP1Wait();
 			DebugPin(1);
 			lastState = USBState;
-	}
+	}*/
 	
 	if(waitFrames > 0) {
 		if(MAXUSBReadRegister(rHIRQ) & bmFRAMEIRQ) { // R25: HRQ, check for the FRAMEIRQ, decrement the waitFrame counter if it is set
@@ -486,6 +486,12 @@ void MAXUSBProcess(void) {
 								setupFunction = setup_xbox360;
 							}
 							break;
+						case VID_CHEAPFINGERMOUSE:
+							if(MAXUSB_PID == PID_CHEAPFINGERMOUSE) {
+								processFunction = process_genericMouse;
+								setupFunction = setup_cheapFingerMouse;
+							}
+							break;
 					}
 					
 					
@@ -512,11 +518,6 @@ void MAXUSBProcess(void) {
 							configDescriptor[7] = MAXUSBData[3];
 							MAXUSBReadCTL(configDescriptor);
 							
-							// config MAXUSBData[5]
-							// interfaces MAXUSBData[4]
-							// if MAXUSBData[7] & 0x40 - self-powered
-							// else MAXUSBData[8]*2 milliamps
-							
 							// Parse config
 							unsigned int TotalLen;
 							unsigned char len, type;
@@ -535,6 +536,8 @@ void MAXUSBProcess(void) {
 								len = MAXUSBData[i];		// length of first descriptor (the CONFIG descriptor)
 								type = MAXUSBData[i+1];
 								
+								unsigned char useEndpoint = 1;
+								
 								switch(type) {
 									case 0x04: // Interface descriptor
 										// 2 bInterfaceNumber
@@ -547,8 +550,10 @@ void MAXUSBProcess(void) {
 										if(MAXUSBData[i+5] == 0x03 && MAXUSBData[i+6] == 0x01 && MAXUSBData[i+7] == 0x02) { // HID device && HID boot protocol && ID mouse
 											processFunction = process_genericMouse;
 											setupFunction = setup_genericMouse;
-											inEndpoint[0] = 0x01;	// safe values to use in case endpoints not detected
-											inEndpointSize[0] = 0x3;
+											useEndpoint = 1;
+										}
+										else {
+											useEndpoint = 0;
 										}
 										break;
 									case 0x05: // Endpoint descriptor
@@ -557,16 +562,18 @@ void MAXUSBProcess(void) {
 										// 4 wMaxPacketSize
 										// 5 wMaxPacketSize
 										// 6 bInterval
-										if((MAXUSBData[i+3] & 0x03) == 0x03) { // Interrupt type endpoint
-											if((MAXUSBData[i+2] & 0x80) == 0x80) { // input
-												inEndpoint[inCount] = MAXUSBData[i+2] & 0xF;
-												inEndpointSize[inCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
-												inCount++;
-											}
-											else {	// output
-												outEndpoint[outCount] = MAXUSBData[i+2] & 0xF;
-												outEndpointSize[outCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
-												outCount++;
+										if(useEndpoint == 1) {
+											if((MAXUSBData[i+3] & 0x03) == 0x03) { // Interrupt type endpoint
+												if((MAXUSBData[i+2] & 0x80) == 0x80) { // input
+													inEndpoint[inCount] = MAXUSBData[i+2] & 0xF;
+													inEndpointSize[inCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
+													inCount++;
+												}
+												else {	// output
+													outEndpoint[outCount] = MAXUSBData[i+2] & 0xF;
+													outEndpointSize[outCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
+													outCount++;
+												}
 											}
 										}
 									case 0x21: // HID Class Descriptor
@@ -599,6 +606,8 @@ void MAXUSBProcess(void) {
 					
 					MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
 					if(setupFunction) {
+						unsigned char setConfigto1[8]     = {0x00,0x09,0x01,0x00,0x00,0x00,0x00,0x00}; 
+						MAXUSBWriteCTL(setConfigto1); // set config to 1
 						if((*setupFunction)()) {
 							usbConnected = 1;
 							USBState = 7;

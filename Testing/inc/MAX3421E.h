@@ -37,9 +37,11 @@ unsigned int getBits(unsigned char * buffer, unsigned char start, unsigned char 
 
 void MAXUSBProcess(void);
 
-#define VID_MICROSOFT	0x045e
-#define PID_XBOX360		0x028e
+#define VID_MICROSOFT	0x045e	// Microsoft
+#define PID_XBOX360		0x028e	// Xbox360 controller
 
+#define VID_CHEAPFINGERMOUSE	0x0a91 // Globlink Technology Inc
+#define PID_CHEAPFINGERMOUSE	0x3801 // Targus PAKP003 mouse
 #endif
 
 
