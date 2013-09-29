@@ -20,9 +20,7 @@ void setup(void) {
 	
 	ResetPin(1);
 	DebugPin(1);
-	
-	SSP0Init(1000); // debug
-	
+
 	MAXUSBInit();
 	
 }

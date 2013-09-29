@@ -36,9 +36,26 @@ unsigned int axis[MAX_AXIS];
 unsigned char buttonCount = 0;
 unsigned char buttonStart, buttonLength;
 unsigned char axisStart[MAX_AXIS], axisLength[MAX_AXIS];
+unsigned char bInterval=10;
+
+unsigned char xbox360_LEDstatus = 0;
+unsigned char xbox360_rumbleTime = 0;
+unsigned char xbox360_rumbleBig = 0;
+unsigned char xbox360_rumbleSmall = 0;
+
+void xbox360_setLED(unsigned char value) {
+	xbox360_LEDstatus = value;
+}
+
+void xbox360_setRumble(unsigned char value, unsigned char time) {
+	
+	xbox360_rumbleTime = time / bInterval;
+	if(xbox360_rumbleTime == 0) xbox360_rumbleTime = 1;
+}
 
 void process_xbox360(void) {
 	if(MAXUSBINTransfer(inEndpoint[0], inEndpointSize[0]) == 0) {
+		LEDToggle(VLED);
 		if(MAXUSBData[0] == 0 && MAXUSBData[1] == 0x14) {
 			buttons = MAXUSBData[2] | (MAXUSBData[3] << 8);
 			axis[0] = MAXUSBData[6] | (MAXUSBData[7] << 8);
@@ -50,6 +67,53 @@ void process_xbox360(void) {
 			
 			if(buttons) LEDOn(PLED);
 			else LEDOff(PLED);
+		}
+	}
+	
+	static unsigned char LEDstatus = 0;
+	if(LEDstatus != xbox360_LEDstatus) {
+		MAXUSBData[0] = 0x01;
+		MAXUSBData[1] = 0x03;
+		MAXUSBData[2] = xbox360_LEDstatus;
+		
+			// MAXUSBWriteCTL
+		
+		LEDstatus = xbox360_LEDstatus;
+	}
+	
+	static unsigned char rumbleStatus = 0;
+	if(xbox360_rumbleTime > 0) {
+		if(rumbleStatus == 0) { // if rumble was off, set it on
+			rumbleStatus = 1;
+			MAXUSBData[0] = 0x00;
+			MAXUSBData[1] = 0x08;
+			MAXUSBData[2] = 0x00;
+			MAXUSBData[3] = xbox360_rumbleBig;
+			MAXUSBData[4] = xbox360_rumbleSmall;
+			MAXUSBData[5] = 0x00;
+			MAXUSBData[6] = 0x00;
+			MAXUSBData[7] = 0x00;
+			
+			// MAXUSBWriteCTL
+		}
+	
+		xbox360_rumbleTime--;
+	}
+	else {
+		if(rumbleStatus == 1) { // if rumble was on, set it off
+			rumbleStatus = 0;
+			
+			MAXUSBData[0] = 0x00;
+			MAXUSBData[1] = 0x08;
+			MAXUSBData[2] = 0x00;
+			MAXUSBData[3] = 0x00;
+			MAXUSBData[4] = 0x00;
+			MAXUSBData[5] = 0x00;
+			MAXUSBData[6] = 0x00;
+			MAXUSBData[7] = 0x00;
+			
+			
+			// MAXUSBWriteCTL
 		}
 	}
 }
@@ -69,6 +133,7 @@ unsigned char setup_cheapFingerMouse(void) {
 	inEndpoint[0] = 0x02;
 	inEndpointSize[0] = 0x6;
 	inCount = 1;
+	bInterval = 10;
 	return 1;
 }
 
@@ -76,12 +141,12 @@ unsigned char setup_xbox360(void) {
 	LEDOn(VLED);
 	
 	inEndpoint[0] = 0x01;
-	inEndpointSize[0] = 32;
+	inEndpointSize[0] = 0x14;
 	inCount = 1;
 	outEndpoint[0] = 0x02;
 	outEndpointSize[0] = 32;
 	outCount = 1;
-	
+	bInterval = 2;
 	return 1;
 }
 
@@ -303,6 +368,8 @@ unsigned char MAXUSBWriteCTL(unsigned char *pSUD) {
 	retval = MAXUSBSendPacket(tokSETUP,0);  // send FIFO to EP0
 	if(retval) return retval;				// return if error
 
+	
+	
 	retval = MAXUSBSendPacket(tokINHS, 0);  // This function takes care of NAK retries.
 	if(retval) return retval;  				// return if error
   
@@ -568,6 +635,7 @@ void MAXUSBProcess(void) {
 													inEndpoint[inCount] = MAXUSBData[i+2] & 0xF;
 													inEndpointSize[inCount] = MAXUSBData[i+4] | MAXUSBData[i+5] << 8;
 													inCount++;
+													bInterval = MAXUSBData[i+6];
 												}
 												else {	// output
 													outEndpoint[outCount] = MAXUSBData[i+2] & 0xF;
@@ -624,7 +692,8 @@ void MAXUSBProcess(void) {
 			case 7: // Connected, device active
 				if(processFunction) { // supported device
 					// poll device
-					if(++pollCounter >= 11) {
+					// TODO: replace with proper per-Endpoint processing maybe?
+					if(++pollCounter >= bInterval) {
 						pollCounter = 0;
 						maxNak = 0;
 						(*processFunction)();
