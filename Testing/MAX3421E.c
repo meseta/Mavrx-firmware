@@ -7,8 +7,6 @@ void DebugPin(unsigned char value) {	Port0Write(PIN15, value); }
 unsigned char USBState=0; /*!< Connection state machine */
 unsigned char waitFrames = 0; /*!< Number of frames to delay */
 
-unsigned char deviceDescriptor[8] = {0x80,0x06,0x00,0x01,0x00,0x00,0x00,0x00};
-unsigned char configDescriptor[8] = {0x80,0x06,0x00,0x02,0x00,0x00,0x00,0x00};
 unsigned char maxPacketSize; /*!< Maximum packet size, as per descriptor */
 
 unsigned int last_transfer_size = 0;
@@ -39,33 +37,54 @@ unsigned char buttonCount = 0;
 unsigned char buttonStart, buttonLength;
 unsigned char axisStart[MAX_AXIS], axisLength[MAX_AXIS];
 
+void process_xbox360(void) {
+	if(MAXUSBINTransfer(inEndpoint[0], inEndpointSize[0]) == 0) {
+		if(MAXUSBData[0] == 0 && MAXUSBData[1] == 0x14) {
+			buttons = MAXUSBData[2] | (MAXUSBData[3] << 8);
+			axis[0] = MAXUSBData[6] | (MAXUSBData[7] << 8);
+			axis[1] = MAXUSBData[8] | (MAXUSBData[9] << 8);
+			axis[2] = MAXUSBData[10] | (MAXUSBData[11] << 8);
+			axis[3] = MAXUSBData[12] | (MAXUSBData[13] << 8);
+			axis[4] = MAXUSBData[4];
+			axis[5] = MAXUSBData[5];
+			
+			if(buttons) LEDOn(PLED);
+			else LEDOff(PLED);
+		}
+	}
+}
+
+unsigned char setup_xbox360(void) {
+    unsigned char setConfigto1[8]     = {0x00,0x09,0x01,0x00,0x00,0x00,0x00,0x00}; 
+	
+	LEDOn(VLED);
+	
+	inEndpoint[0] = 0x01;
+	inEndpointSize[0] = 32;
+	inCount = 1;
+	outEndpoint[0] = 0x02;
+	outEndpointSize[0] = 32;
+	outCount = 1;
+	
+	MAXUSBWriteCTL(setConfigto1); // set config to 1
+	return 1;
+}
 
 void process_genericMouse(void) { // Generic mouse with the HID Boot protocol - no HID descriptors to mess with, X-Y axis and scroll only, no buttons
 	if(MAXUSBINTransfer(inEndpoint[0], inEndpointSize[0]) == 0) {
-		/*DebugPin(0);
-		unsigned int i;
-		for(i=0; i<last_transfer_size; i++) {
-			SSP1WriteByte(MAXUSBData[i]);
-		}
-		SSP1Wait();
-		DebugPin(1);*/
-	
+		LEDToggle(VLED);
         buttons = getBits(MAXUSBData, buttonStart, buttonLength);
 		axis[0] = getBits(MAXUSBData, axisStart[0], axisLength[0]);	// X-axis
 		axis[1] = getBits(MAXUSBData, axisStart[1], axisLength[1]);	// Y-axis
 		axis[2] = getBits(MAXUSBData, axisStart[2], axisLength[2]);	// wheel
 		axis[3] = getBits(MAXUSBData, axisStart[3], axisLength[3]);	// wheel tilt
 		
-		/*if(axis[3]) {
-			DebugPin(0);
-			SSP1WriteByte(axis[3] & 0xff);
-			SSP1Wait();
-			DebugPin(1);
-		}*/
+		if(buttons) LEDOn(PLED);
+		else LEDOff(PLED);
 	}
 }
 
-void setup_genericMouse(void) { // extract information form HID descriptor, certain assumptions are made about the structure of this descriptor
+unsigned char setup_genericMouse(void) { // extract information form HID descriptor, certain assumptions are made about the structure of this descriptor
 	unsigned int bitCount = 0, i, j;
 	unsigned char usageCount=0;
 	unsigned short usageList[5];
@@ -73,15 +92,16 @@ void setup_genericMouse(void) { // extract information form HID descriptor, cert
 	unsigned char reportCount=1;
 	unsigned char reportSize=0;
 	
+	LEDOn(VLED);
+	
+    unsigned char setConfigto1[8]     = {0x00,0x09,0x01,0x00,0x00,0x00,0x00,0x00}; 
+	unsigned char getHIDDescriptor[8] = {0x81,0x06,0x00,0x22,0x00,0x00,0x80,0x00};
+					
+	if(MAXUSBReadCTL(getHIDDescriptor)) return 0;
+	
 	buttonLength = 0;
 	for(i=0; i< MAX_AXIS; i++) axisLength[i] = 0;
 	buttonCount = 0;
-	
-	DebugPin(0);
-	for(i=0; i< last_transfer_size; i++) 
-		SSP1WriteByte(MAXUSBData[i]);
-	SSP1Wait();
-	DebugPin(1);
 	
 	for(i=0; i< last_transfer_size; ) { // don't increment i, i must be incremented by 1, 2, or 3 based on value
 		switch(MAXUSBData[i]) {
@@ -151,7 +171,8 @@ void setup_genericMouse(void) { // extract information form HID descriptor, cert
 					default: // everything else, ignore, but still increment the bit counter
 						bitCount += reportCount * reportSize;
 				}
-				
+				usagePage = 0;
+				usageCount = 0;
 				// fallthrough!
 			case 0x91: // output, ignores everything
 				usageCount = 0;
@@ -160,19 +181,22 @@ void setup_genericMouse(void) { // extract information form HID descriptor, cert
 		i += (MAXUSBData[i] & 0x3) + 1;
 	}
 	
-	DebugPin(0);
-	SSP1WriteByte(buttonStart);
-	SSP1WriteByte(buttonLength);
-	SSP1WriteByte(axisStart[0]);
-	SSP1WriteByte(axisLength[0]);
-	SSP1WriteByte(axisStart[1]);
-	SSP1WriteByte(axisLength[1]);
-	SSP1WriteByte(axisStart[2]);
-	SSP1WriteByte(axisLength[2]);
-	SSP1WriteByte(axisStart[3]);
-	SSP1WriteByte(axisLength[3]);
-	SSP1Wait();
-	DebugPin(1);
+		DebugPin(0);
+SSP1WriteByte(buttonStart);
+SSP1WriteByte(buttonLength);
+SSP1WriteByte(axisStart[0]);
+SSP1WriteByte(axisLength[0]);
+SSP1WriteByte(axisStart[1]);
+SSP1WriteByte(axisLength[1]);
+SSP1WriteByte(axisStart[2]);
+SSP1WriteByte(axisLength[2]);
+SSP1WriteByte(axisStart[3]);
+SSP1WriteByte(axisLength[3]);
+SSP1Wait();
+DebugPin(1);
+	
+	MAXUSBWriteCTL(setConfigto1); // set config to 1
+	return 1;
 }
 
 unsigned int getBits(unsigned char * buffer, unsigned char start, unsigned char length) { // get bits from buffer
@@ -194,7 +218,7 @@ unsigned int getBits(unsigned char * buffer, unsigned char start, unsigned char 
 }
 
 void (*processFunction)(void);
-void (*setupFunction)(void);
+unsigned char (*setupFunction)(void);
 
 void MAXUSBInit(void) {
 	SSP1Init(1000);
@@ -309,15 +333,22 @@ unsigned char MAXUSBINTransfer(unsigned char endpoint, unsigned int length) {
 
 void MAXUSBProcess(void) {
 	static unsigned char setAddressto7[8]    = {0x00,0x05,0x07,0x00,0x00,0x00,0x00,0x00};
-    static unsigned char setConfigto1[8]     = {0x00,0x09,0x01,0x00,0x00,0x00,0x00,0x00}; 
 	static unsigned char deviceDescriptor[8] = {0x80,0x06,0x00,0x01,0x00,0x00,0x00,0x00}; // code fills in length field
 	static unsigned char configDescriptor[8] = {0x80,0x06,0x00,0x02,0x00,0x00,0x00,0x00};
 	static unsigned char descriptorString[8] = {0x80,0x06,0x00,0x03,0x00,0x00,0x40,0x00};
-	static unsigned char getHIDDescriptor[8] = {0x81,0x06,0x00,0x22,0x00,0x00,0x80,0x00};
     
 	unsigned int i, j;
 	static unsigned char pollCounter, dcCheckCounter;
 
+	static unsigned char lastState;
+	if(USBState != lastState) {
+			DebugPin(0);
+			SSP1WriteByte(USBState);
+			SSP1Wait();
+			DebugPin(1);
+			lastState = USBState;
+	}
+	
 	if(waitFrames > 0) {
 		if(MAXUSBReadRegister(rHIRQ) & bmFRAMEIRQ) { // R25: HRQ, check for the FRAMEIRQ, decrement the waitFrame counter if it is set
 			MAXUSBWriteRegister(rHIRQ, bmFRAMEIRQ); // clear the IRQ
@@ -382,7 +413,7 @@ void MAXUSBProcess(void) {
 			case 5: // Set address to 7
 				if(MAXUSBWriteCTL(setAddressto7)) USBState = 8; // if error, wait for disconnect
 				else {
-					waitFrames = 30;
+					waitFrames = 200; // was 20, increase to 300
 					USBState = 6;
 				}
 				break;
@@ -398,19 +429,7 @@ void MAXUSBProcess(void) {
 					MAXUSB_PRO = MAXUSBData[15];
 					MAXUSB_SER = MAXUSBData[16];
 					MAXUSB_CFG = MAXUSBData[17];
-					
-					// Detect supported devices
-					processFunction = 0;
-					setupFunction = 0;
-					/*switch(MAXUSB_VID) {
-						case VID_MICROSOFT:
-							if(MAXUSB_PID == PID_XBOX360) {
-								processFunction = device_xbox360;
-								connetedStatus = 7;
-							}
-					
-					}*/
-					
+
 					// Lang
 					descriptorString[2]=0;	// index 0 is language ID string
 					descriptorString[4]=0;	// lang ID is 0
@@ -455,6 +474,19 @@ void MAXUSBProcess(void) {
 						}
 					}
 					else MAXUSB_SERStr[0] = 0;*/
+					
+										
+					// Detect supported devices
+					processFunction = 0;
+					setupFunction = 0;
+					switch(MAXUSB_VID) {
+						case VID_MICROSOFT:
+							if(MAXUSB_PID == PID_XBOX360) {
+								processFunction = process_xbox360;
+								setupFunction = setup_xbox360;
+							}
+							break;
+					}
 					
 					
 					// If no supported devices found, try to find generic
@@ -515,7 +547,6 @@ void MAXUSBProcess(void) {
 										if(MAXUSBData[i+5] == 0x03 && MAXUSBData[i+6] == 0x01 && MAXUSBData[i+7] == 0x02) { // HID device && HID boot protocol && ID mouse
 											processFunction = process_genericMouse;
 											setupFunction = setup_genericMouse;
-											USBState = 7;
 											inEndpoint[0] = 0x01;	// safe values to use in case endpoints not detected
 											inEndpointSize[0] = 0x3;
 										}
@@ -562,32 +593,33 @@ void MAXUSBProcess(void) {
 							}*/
 						
 						}
-
-                        // if generic found, get HID descriptors
-						if(setupFunction) {
-                            if(MAXUSBReadCTL(getHIDDescriptor)) USBState = 8; // if error, go to wait for disconnect
-                            else {
-                                (*setupFunction)();
-                            }
-                        }
 					}
                     
-                    if(processFunction) {
-                        MAXUSBWriteCTL(setConfigto1); // set config to 1
-                        MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
-                        maxNak = 0;
-                        usbConnected = 1;
-                    }
-                    
+					// if generic found, get HID descriptors
+					
+					MAXUSBWriteRegister(rHIRQ, bmCONDETIRQ);	// clear disconnect status
+					if(setupFunction) {
+						if((*setupFunction)()) {
+							usbConnected = 1;
+							USBState = 7;
+						}
+						else {
+							USBState = 8; // if error, go to wait for disconnect
+						}
+					}
+					else {
+						USBState = 8;
+					}
 				}
 				break;
 			case 7: // Connected, device active
-				LEDOn(PLED);
 				if(processFunction) { // supported device
 					// poll device
 					if(++pollCounter >= 11) {
 						pollCounter = 0;
+						maxNak = 0;
 						(*processFunction)();
+						maxNak = 300;
 						usbActivity ^= 1;
 					}
 				}
@@ -606,7 +638,7 @@ void MAXUSBProcess(void) {
                 }
 				break;
 			case 9: // Device disconnected, clean up
-				LEDOff(PLED);
+				LEDOff(PLED | VLED);
 				usbConnected = 0;
 				processFunction = 0;
 				setupFunction = 0;

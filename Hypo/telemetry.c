@@ -415,7 +415,7 @@ void mavlink_messages(void) {
 			case THALCTRL_RXLOST:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Radio transmitter signal lost!", MAV_COMP_ID_IMU);	break;
 			case THALCTRL_RXFOUND:	MAVSendTextFrom(MAV_SEVERITY_INFO, "Radio transmitter signal found", MAV_COMP_ID_IMU);	break;
 			case THALCTRL_BATTLOW:	MAVSendTextFrom(MAV_SEVERITY_WARNING, "WARNING: Battery low!", MAV_COMP_ID_SYSTEM_CONTROL);	break;
-			case THALCTRL_BATTCRITICAL:	MAVSendTextFrom(MAV_SEVERITY_CRITICAL, "CRITICAL: Batter critical!", MAV_COMP_ID_SYSTEM_CONTROL);	break;
+			case THALCTRL_BATTCRITICAL:	MAVSendTextFrom(MAV_SEVERITY_CRITICAL, "CRITICAL: Battery critical!", MAV_COMP_ID_SYSTEM_CONTROL);	break;
 		}
 	}
 }

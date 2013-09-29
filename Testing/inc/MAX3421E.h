@@ -36,6 +36,10 @@ unsigned char MAXUSBINTransfer(unsigned char endpoint, unsigned int length);
 unsigned int getBits(unsigned char * buffer, unsigned char start, unsigned char length);
 
 void MAXUSBProcess(void);
+
+#define VID_MICROSOFT	0x045e
+#define PID_XBOX360		0x028e
+
 #endif
 
 
