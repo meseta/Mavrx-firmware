@@ -368,7 +368,7 @@ unsigned char MAXUSBWriteCTL(unsigned char *pSUD) {
 	retval = MAXUSBSendPacket(tokSETUP,0);  // send FIFO to EP0
 	if(retval) return retval;				// return if error
 
-	
+	// insert out transfer data stage here?
 	
 	retval = MAXUSBSendPacket(tokINHS, 0);  // This function takes care of NAK retries.
 	if(retval) return retval;  				// return if error

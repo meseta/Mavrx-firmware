@@ -98,7 +98,7 @@ float fcos(float x);
 
 // *** Random number functions
 #if RAND_MERSENNE
-    extern volatile unsigned int FUNCMersenne[MERSENNE_N] SRAM1;
+    extern volatile unsigned int FUNCMersenne[MERSENNE_N];
     extern volatile unsigned int FUNCMersenneIndex SRAM1;
     extern volatile unsigned int FUNCMersenneMag[2] SRAM1;
     void RandomSeed(unsigned int seed);

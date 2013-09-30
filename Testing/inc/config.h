@@ -24,7 +24,7 @@
 
 #define IAP_EN              1           // Set to 1 to enable the IAP functions like Reprogram() (set to 0 to disable and save some RAM)
 
-#define RAND_MERSENNE       0           // Set to 1 to use Mersenne Twister as pseudorandom number generator, otherwise use Linear Congruential    
+#define RAND_MERSENNE       1           // Set to 1 to use Mersenne Twister as pseudorandom number generator, otherwise use Linear Congruential    
 
 #define MERSENNE_N          624         // Size of the vector for Mersenne Twister random number generator
 #define MERSENNE_M          397         // Coefficient for the Mersenne Twister random number generator
@@ -124,7 +124,7 @@
 // ****************************************************************************
 #define I2C_EN              1           // Set to 1 to enable I2C (set to 0 to disable and save some RAM)
 #define I2C_SLAVE_EN        0           // Set to 1 to enable slave mode (set to 0 to save some RAM)
-#define I2C_DATA_SIZE       68          // Size of I2C Slave buffer
+#define I2C_DATA_SIZE       64          // Size of I2C Slave buffer
 #define I2C_TIMEOUT         0xff     // Timeout for I2C
 
 #define I2C_FASTMODE_PLUS   0           // Set to 1 for > 400kHz operation
@@ -187,8 +187,8 @@
 // ****************************************************************************
 #define ILINK_EN            1              // Enable the Interlink functions (0=off, 1=on)
 #define ILINK_TXBUFFER_SIZE 128
-#define ILINK_RXBUFFER_SIZE 256          // ILink buffer size
-#define ILINK_MAX_FETCH     200          // Maximum characters to fetch at once
+#define ILINK_RXBUFFER_SIZE 128          // ILink buffer size
+#define ILINK_MAX_FETCH     128          // Maximum characters to fetch at once
 
 #if WHO_AM_I == I_AM_THALAMUS
 
@@ -284,7 +284,7 @@
     #define GPS_TRIES_MAX       15          // When polling, how many tries to read data from the stream before giving up?
     #define GPS_TRIES_DELAY     100         // When polling, millisecond delay between trying to read data from the stream
     
-    #define GPS_BUFFER_SIZE     128          // Size of the GPS buffer, determines the largest packet that can be stored
+    #define GPS_BUFFER_SIZE     64          // Size of the GPS buffer, determines the largest packet that can be stored
 
     // ****************************************************************************
     // *** Flash Functions (Hypo only)
@@ -298,7 +298,7 @@
     #define XBEE_EN             1           // Set to 1 to enable the XBee code
 
     #define XBEE_POWER_LEVEL    0           // Set transmit power: 4=18dBm/63mW, 3=16dBm/40mW, 2=14dBm/25mW, 1=12dBm/16mW, 0=0dBm/1mW
-    #define XBEE_BUFFER_SIZE    256         // XBee buffer size
+    #define XBEE_BUFFER_SIZE    128         // XBee buffer size
     #define XBEE_JOINPERIOD     30          // Number of seconds to allow bind
 #endif
 
