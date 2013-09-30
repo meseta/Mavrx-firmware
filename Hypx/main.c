@@ -136,6 +136,9 @@ void setup () {
 	Delay(500);
     CDCInit(VIRTUAL);
 	
+	LEDInit(VLED);
+	LEDOn(VLED);
+	
 	Delay(200);
     XBeeInit();
 	
@@ -146,7 +149,6 @@ void setup () {
     }
     
     LEDOff(PLED);
-    LEDInit(VLED);
     LEDWrite(VLED, XBeeBypassMode);
     PRGBlankTimer = 100;
     PRGPushTime = 0;

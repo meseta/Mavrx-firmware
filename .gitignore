@@ -12,3 +12,6 @@
 *.hex
 *.bin
 *.elf
+
+# Compressed files
+*.zip
