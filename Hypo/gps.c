@@ -556,16 +556,20 @@ void gps_navigate(void) {
             if(waypointGo == 1 && waypointValid == 1 && waypointReached == 0 && waypointCurrent < waypointCount && waypoint[waypointCurrent].command != MAV_CMD_NAV_RETURN_TO_LAUNCH) {
                 float radius = waypoint[waypointCurrent].param2; // param2 is radius in QGroumdcontrol 1.0.1
                 if(radius < GPS_MIN_RADIUS) radius = GPS_MIN_RADIUS; // minimum radis
-
+				
+				float diff_Xnew = latDiff2Meters((double)target_lat - (double)craft_lat);
+				float diff_Ynew = lonDiff2Meters((double)target_lon - (double)craft_lon, craft_lat);
+				float diff_Znew = (float)(interpolator_alt - craft_alt);
+			
                 //float diff_X2 = diff_X; // for orbit phase calculation
                 //float diff_Y2 = diff_Y;
 
                 // assume cube of sides 2*radius rather than a sphere for target detection
-                if(diff_X < 0) diff_X = -diff_X;
-                if(diff_Y < 0) diff_Y = -diff_Y;
-                if(diff_Z < 0) diff_Z = -diff_Z;
+                if(diff_Xnew < 0) diff_Xnew = -diff_Xnew;
+                if(diff_Ynew < 0) diff_Ynew = -diff_Ynew;
+                if(diff_Znew < 0) diff_Znew = -diff_Znew;
 
-                if(waypointReached == 0 && diff_X < radius && diff_Y < radius && diff_Z < radius) { // target reached
+                if(waypointReached == 0 && diff_Xnew < radius && diff_Ynew < radius && diff_Znew < radius) { // target reached
                     waypointReached = 1;
                     waypointLoiterTimer = 0;
 
