@@ -532,7 +532,7 @@ void gps_navigate(void) {
             // *** PID & Output
             float diff_X = latDiff2Meters((double)interpolator_lat - (double)craft_lat);
             float diff_Y = lonDiff2Meters((double)interpolator_lon - (double)craft_lon, craft_lat);
-            float diff_Z = (float)(interpolator_alt - craft_alt);
+            //float diff_Z = (float)(interpolator_alt - craft_alt); // not used
 
             diff_X_i += diff_X;
             diff_Y_i += diff_Y;
