@@ -269,8 +269,10 @@ void gps_navigate(void) {
                     break;
                 case 7: // go IDLE - velocity kill
                     gps_action = 0;
-					MAVSendTextFrom(MAV_SEVERITY_INFO, "Autopilot going idle", MAV_COMP_ID_MISSIONPLANNER);
-                    target_set = TARGET_IDLE;
+					if(target_set != TARGET_IDLE) { // don't repeat thyself
+						MAVSendTextFrom(MAV_SEVERITY_INFO, "Autopilot going idle", MAV_COMP_ID_MISSIONPLANNER);
+						target_set = TARGET_IDLE;
+					}
 					diff_X_i = 0;
 					diff_Y_i = 0;
                     break;
